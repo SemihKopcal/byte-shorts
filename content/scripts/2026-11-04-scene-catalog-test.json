@@ -1,0 +1,88 @@
+{
+ "id": "2026-11-04-scene-catalog-test",
+ "series": "G",
+ "lang": "en",
+ "title": "Nine ways to show one number",
+ "summary": "Katalog testi: dokuz sahne tipinin hepsi tek videoda.",
+ "tags": ["test"],
+ "sources": [
+  "Internal render test, 2026-11-04",
+  "worker/scenes.py CATALOG"
+ ],
+ "beats": [
+  {"id": "b1", "scene": "contrast",
+   "say": "One second of A I video costs eight times more than one minute of this.",
+   "cap": "1 second of AI video = 8× this whole video",
+   "data": {"left": {"label": "this video", "value": "$0.00"},
+            "right": {"label": "one second of Veo", "value": "$0.40", "tone": "bad"},
+            "verdict": "Same screen. Same minute."}},
+
+  {"id": "b2", "scene": "title",
+   "say": "Here is where that number comes from.",
+   "cap": "Where that number comes from",
+   "data": {"kicker": "the mechanism", "lines": ["Generated pixels", "are billed by the second"], "accent": "mid"}},
+
+  {"id": "b3",
+   "say": "Rendering code is billed by the minute of a rented processor.",
+   "cap": "Drawn pixels are billed by the minute"},
+
+  {"id": "b4", "scene": "table",
+   "say": "So I measured the cheapest models per second.",
+   "cap": "Cheapest models, per second",
+   "data": {"unit": "usd per second",
+            "rows": [
+             {"name": "Veo Lite", "value": "$0.05", "ratio": 1.0, "tone": "good"},
+             {"name": "Luma Ray", "value": "$0.06", "ratio": 1.2, "tone": "good"},
+             {"name": "Kling", "value": "$0.084", "ratio": 1.68, "tone": "mid"},
+             {"name": "Runway", "value": "$0.12", "ratio": 2.4, "tone": "mid"},
+             {"name": "Veo Standard", "value": "$0.40", "ratio": 8.0, "tone": "bad"}]}},
+
+  {"id": "b5",
+   "say": "The spread between the cheapest and the dearest is eight fold.",
+   "cap": "8× spread, cheapest to dearest"},
+
+  {"id": "b6", "scene": "bars",
+   "say": "At sixty seconds a day, that becomes a monthly bill.",
+   "cap": "60 seconds a day, for a month",
+   "data": {"rows": [
+             {"name": "drawn in code", "v": 0.0, "label": "$0", "tone": "good"},
+             {"name": "Veo Lite", "v": 90, "label": "$90", "tone": "mid"},
+             {"name": "Veo Standard", "v": 720, "label": "$720", "tone": "bad"}]}},
+
+  {"id": "b7", "scene": "counter",
+   "say": "Seven hundred and twenty dollars, for sixty videos.",
+   "cap": "$720 for 60 videos",
+   "data": {"prefix": "$", "from": 0, "to": 720, "dp": 0,
+            "threshold": 500, "tone": "mid", "tone_over": "bad",
+            "note": "per month, at 2 videos a day"}},
+
+  {"id": "b8", "scene": "split",
+   "say": "But the cost is not the strange part.",
+   "cap": "The cost is not the strange part",
+   "data": {"a": {"label": "$720", "sub": "generated", "tone": "bad"},
+            "b": {"label": "$0", "sub": "drawn", "tone": "good"}}},
+
+  {"id": "b9", "scene": "timeline",
+   "say": "Per second pricing has fallen fast, and keeps falling.",
+   "cap": "Per-second pricing keeps falling",
+   "data": {"steps": [
+             {"at": "2024", "label": "$0.50"},
+             {"at": "2025", "label": "$0.20", "tone": "mid"},
+             {"at": "2026", "label": "$0.05", "tone": "good"}]}},
+
+  {"id": "b10",
+   "say": "Ten times cheaper in two years.",
+   "cap": "10× cheaper in 2 years"},
+
+  {"id": "b11", "scene": "byte_says",
+   "say": "Drawn pixels stayed at zero the whole time.",
+   "cap": "Drawn pixels stayed at zero",
+   "data": {"line": "Zero is hard to beat.", "pose": "point_up", "cursor": "mint"}},
+
+  {"id": "b12", "scene": "close",
+   "say": "The cheapest pixel is the one you never generated.",
+   "cap": "The cheapest pixel is the one you never generated",
+   "data": {"lines": ["The cheapest pixel", "is the one you never generated."],
+            "accent": "good", "handle": "@byteproof"}}
+ ]
+}

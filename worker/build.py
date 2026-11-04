@@ -28,8 +28,15 @@ ROOT = Path(__file__).resolve().parent.parent
 VOICE = Path(os.environ.get("PIPER_VOICE", ROOT / "voices/en-us-ryan-high.onnx"))
 
 
-def _stages(series_mod, S, duration):
-    """('b1','b2',fn) -> (t0, t1, fn). Son sahnenin bitisi videonun sonu."""
+def _stages(series_mod, S, duration, spec):
+    """Sahne penceresi listesi.
+
+    Iki bicim destekleniyor:
+      * series_g gibi SENARYODAN okuyanlar -> stages(spec, S, duration)
+      * series_a/b gibi elle yazilmis olanlar -> STAGES = [('b1','b2',fn)]
+    """
+    if hasattr(series_mod, "stages"):
+        return series_mod.stages(spec, S, duration)
     out = []
     for a, b, fn in series_mod.STAGES:
         t0 = S[a][0]
@@ -44,8 +51,9 @@ def render(spec, tl, series_mod, out_path: Path, parallel: bool = False) -> None
     S = {b["id"]: (b["start"], b["end"]) for b in beats}
     chunks = D.build_captions(beats)
     badge_font = D.F_SEMI(26)
-    stages = _stages(series_mod, S, duration)
-    close_t0 = S[series_mod.STAGES[-1][0]][0]
+    stages = _stages(series_mod, S, duration, spec)
+    # kapanista baslik zaten ekranda metin; altyazi onun uzerine binmesin
+    close_t0 = stages[-1][0] if stages else duration
 
     bg = D.build_bg()
     grain = D.build_grain()

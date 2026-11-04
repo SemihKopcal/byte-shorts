@@ -4,6 +4,7 @@ __pycache__/
 *.pyc
 .venv/
 .DS_Store
+# anahtar hicbir zaman repoda durmaz
 .env
 *.secret
 client_secret*.json

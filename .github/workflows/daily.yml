@@ -22,6 +22,8 @@ jobs:
   build:
     runs-on: ubuntu-latest
     timeout-minutes: 40
+    permissions:
+      contents: write          # uretilen senaryoyu repoya geri yazmak icin
     steps:
       - uses: actions/checkout@v4
 
@@ -52,22 +54,43 @@ jobs:
         if: steps.voice.outputs.cache-hit != 'true'
         run: bash tools/fetch_voice.sh en-us-ryan-high
 
-      - name: script sec
+      - name: sirada senaryo var mi
         id: pick
         run: python tools/pick_script.py "${{ inputs.script }}" >> "$GITHUB_OUTPUT"
 
-      - name: uret
-        if: steps.pick.outputs.path != ''
-        run: python -m worker.build "${{ steps.pick.outputs.path }}"
-
-      - name: sira bos
+      # Sira bossa Gemini yeni bir senaryo yaziyor. Urettigi JSON once
+      # dogrulamadan geciyor (sahne adlari, kaynak, sure, tekrar); gecemezse
+      # dosya yazilmiyor ve kosu burada duruyor.
+      - name: konu uret
         if: steps.pick.outputs.path == ''
-        run: echo "::warning::Uretilecek script kalmadi -- content/scripts'e ekle."
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        run: python tools/write_script.py
+
+      - name: yeni senaryoyu sec
+        id: pick2
+        if: steps.pick.outputs.path == ''
+        run: python tools/pick_script.py >> "$GITHUB_OUTPUT"
+
+      # Uretilen senaryo repoya giriyor: kara kutu olmasin, git gecmisinden
+      # "o gun ne yazdi" gorunsun ve bir daha ayni konu secilmesin.
+      - name: senaryoyu isle
+        if: steps.pick.outputs.path == ''
+        run: |
+          git config user.name  "byte-bot"
+          git config user.email "byte-bot@users.noreply.github.com"
+          git add content/scripts
+          git diff --cached --quiet || git commit -m "senaryo: ${{ steps.pick2.outputs.path }}"
+          git push
+
+      - name: uret
+        env:
+          SCRIPT: ${{ steps.pick.outputs.path || steps.pick2.outputs.path }}
+        run: python -m worker.build "$SCRIPT"
 
       # retention-days: ucretsiz hesapta artifact kotasi 500 MB. Video ~39 MB,
       # gunde 2 tane. 2 gun tutmak ~160 MB demek, rahat.
       - name: artifact
-        if: steps.pick.outputs.path != ''
         uses: actions/upload-artifact@v4
         with:
           name: video-${{ github.run_number }}

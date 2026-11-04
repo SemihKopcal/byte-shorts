@@ -103,6 +103,19 @@ def check(video: Path, tl: dict, spec: dict, published: Path) -> list[str]:
         if bad.lower() in title.lower():
             p.append(f"baslikta clickbait isareti: {bad!r}")
 
+    # sahne adlari katalogda var mi (Gemini uydurmus olabilir)
+    from .scenes import CATALOG
+    seen = []
+    for b in spec.get("beats", []):
+        s = b.get("scene")
+        if s and s not in CATALOG and spec.get("series") == "G":
+            p.append(f"bilinmeyen sahne {s!r} (beat {b.get('id')})")
+        if s:
+            seen.append(s)
+    # tek sahneyle cekilmis video = slideshow; politika tarafinda riskli
+    if spec.get("series") == "G" and len(set(seen)) < 3:
+        p.append(f"sadece {len(set(seen))} farkli sahne tipi -- en az 3 olmali")
+
     if not spec.get("sources"):
         p.append("kaynak listesi bos -- ekranda sayi varsa kaynak zorunlu")
 

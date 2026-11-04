@@ -29,9 +29,17 @@ VIOLET = (139, 139, 255)
 POSES = ("idle", "point_r", "point_l", "point_up", "shrug", "alert")
 
 
-def _limb(d, p0, p1, w, fill):
+def _limb(d, p0, p1, w, fill, rim=None):
     """Uzuv = yuvarlak uclu kalin cizgi. Capsule'u elle hesaplamak yerine
-    bunu kullaniyoruz: her acida dogru baglaniyor, omuzda bosluk birakmiyor."""
+    bunu kullaniyoruz: her acida dogru baglaniyor, omuzda bosluk birakmiyor.
+
+    rim: govde rengi arka plana cok yakin oldugu icin buyuk olceklerde siluet
+    kayboluyordu. Once biraz kalin bir rim cizip uzerine govdeyi koyuyoruz."""
+    if rim:
+        d.line([p0, p1], fill=rim, width=int(max(3, w + 6)), joint="curve")
+        r2 = (w + 6) / 2
+        for (x, y) in (p0, p1):
+            d.ellipse((x - r2, y - r2, x + r2, y + r2), fill=rim)
     d.line([p0, p1], fill=fill, width=int(max(2, w)), joint="curve")
     r = w / 2
     for (x, y) in (p0, p1):
@@ -58,20 +66,23 @@ def draw_byte(d: ImageDraw.ImageDraw, cx: float, cy: float, scale: float = 1.0,
     def P(x, y):
         return (cx + x * s, cy + y * s)
 
+    rim = BODY_HI
+
     # ── bacaklar ──
     for x0, x1 in ((-48, -16), (16, 48)):
-        _limb(d, P((x0 + x1) / 2, 100), P((x0 + x1) / 2, 158), 32 * s, BODY)
+        _limb(d, P((x0 + x1) / 2, 100), P((x0 + x1) / 2, 158), 32 * s, BODY, rim)
 
     # ── kollar (govdenin ALTINA cizilir ki omuz temiz dursun) ──
     lh, rh = _HANDS[pose]
     for (hx, hy), sx in ((lh, -66), (rh, 66)):
-        _limb(d, P(sx, 6), P(hx, hy), 28 * s, BODY)
+        _limb(d, P(sx, 6), P(hx, hy), 28 * s, BODY, rim)
         p = P(hx, hy)
         r = 21 * s
         d.ellipse((p[0] - r, p[1] - r, p[0] + r, p[1] + r), fill=BODY_HI)
 
     # ── govde ──
-    d.rounded_rectangle((*P(-74, -16), *P(74, 104)), radius=34 * s, fill=BODY)
+    d.rounded_rectangle((*P(-74, -16), *P(74, 104)), radius=34 * s, fill=BODY,
+                        outline=rim, width=int(max(2, 4 * s)))
 
     # ── boyun ──
     d.rounded_rectangle((*P(-19, -44), *P(19, -10)), radius=9 * s, fill=BODY)
