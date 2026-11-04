@@ -1,0 +1,9 @@
+out/
+voices/
+__pycache__/
+*.pyc
+.venv/
+.DS_Store
+.env
+*.secret
+client_secret*.json
