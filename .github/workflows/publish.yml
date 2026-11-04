@@ -1,0 +1,86 @@
+name: publish
+
+# Onay kapisi. Sadece ELLE tetikleniyor -- hicbir video senin bakmadigin
+# bir anda yayina cikmiyor. daily.yml videoyu uretir, sen izlersin, burayi
+# calistirirsin.
+on:
+  workflow_dispatch:
+    inputs:
+      script:
+        description: "content/scripts altindaki dosya adi"
+        required: true
+      public:
+        description: "public olarak yukle (bos birakirsan private)"
+        type: boolean
+        default: false
+
+concurrency:
+  group: publish
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    permissions:
+      contents: write          # published.json'u geri yazmak icin
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: sistem paketleri
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends \
+            ffmpeg fonts-inter fontconfig
+          fc-cache -f
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - run: pip install -r requirements.txt
+
+      - name: ses modeli cache
+        id: voice
+        uses: actions/cache@v4
+        with:
+          path: voices
+          key: piper-en-us-ryan-high-v1
+
+      - if: steps.voice.outputs.cache-hit != 'true'
+        run: bash tools/fetch_voice.sh en-us-ryan-high
+
+      # Artifact'tan indirmek yerine yeniden uretiyoruz: cizim deterministik,
+      # ayni script ayni videoyu veriyor. Boylece artifact suresi dolsa da
+      # yayinlayabiliyoruz ve QC bir kez daha calisiyor.
+      - name: yeniden uret + QC
+        run: python -m worker.build "content/scripts/${{ inputs.script }}"
+
+      - name: id oku
+        id: m
+        run: |
+          python - <<'PY' >> "$GITHUB_OUTPUT"
+import json, pathlib, os
+s = json.loads(pathlib.Path("content/scripts/" + os.environ["S"]).read_text())
+print(f"dir=out/{s['id']}")
+PY
+        env:
+          S: ${{ inputs.script }}
+
+      - name: YouTube
+        env:
+          YOUTUBE_CLIENT_ID: ${{ secrets.YOUTUBE_CLIENT_ID }}
+          YOUTUBE_CLIENT_SECRET: ${{ secrets.YOUTUBE_CLIENT_SECRET }}
+          YOUTUBE_REFRESH_TOKEN: ${{ secrets.YOUTUBE_REFRESH_TOKEN }}
+        run: |
+          python publish/youtube.py "${{ steps.m.outputs.dir }}/manifest.json" \
+            ${{ inputs.public && '--publish' || '' }}
+
+      - name: kaydi isle
+        run: |
+          git config user.name  "byte-bot"
+          git config user.email "byte-bot@users.noreply.github.com"
+          git add content/published.json
+          git diff --cached --quiet || git commit -m "publish: ${{ inputs.script }}"
+          git push
