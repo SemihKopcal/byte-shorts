@@ -1,0 +1,151 @@
+{
+ "id": "byte-cost-of-alphabets",
+ "series": "B",
+ "series_name": "Did You Know",
+ "lang": "en",
+ "title": "The same sentence costs 3x more in Hindi",
+ "sources": [
+  "Universal Declaration of Human Rights, Article 1 (parallel text)",
+  "Measured: UTF-8 byte length, 2026-10-27"
+ ],
+ "beats": [
+  {
+   "id": "b1",
+   "scene": "hook",
+   "say": "This sentence costs three times more in Hindi than in English.",
+   "cap": "This sentence costs 3× more in Hindi"
+  },
+  {
+   "id": "b2",
+   "scene": "hook2",
+   "say": "Same sentence. Same meaning.",
+   "cap": "Same sentence. Same meaning."
+  },
+  {
+   "id": "b3",
+   "scene": "mech",
+   "say": "Language models do not read letters. They read bytes.",
+   "cap": "Models don't read letters — they read bytes"
+  },
+  {
+   "id": "b4",
+   "scene": "mech2",
+   "say": "In U T F eight, a Latin letter is one byte. An accented one is two. A Japanese character is three.",
+   "cap": "UTF-8: Latin is 1 byte, accented 2, Japanese 3"
+  },
+  {
+   "id": "b5",
+   "scene": "data",
+   "say": "So I measured the same paragraph in eight languages.",
+   "cap": "Same paragraph, measured in 8 languages"
+  },
+  {
+   "id": "b6",
+   "scene": "row0",
+   "say": "English, one hundred seventy bytes.",
+   "cap": "English — 170 bytes"
+  },
+  {
+   "id": "b7",
+   "scene": "row1",
+   "say": "Turkish, one hundred seventy one. Basically free.",
+   "cap": "Turkish — 171 bytes. Basically free."
+  },
+  {
+   "id": "b8",
+   "scene": "row2",
+   "say": "Arabic, two hundred seventeen.",
+   "cap": "Arabic — 217 bytes"
+  },
+  {
+   "id": "b9",
+   "scene": "row3",
+   "say": "Hindi, four hundred ninety seven.",
+   "cap": "Hindi — 497 bytes"
+  },
+  {
+   "id": "b10",
+   "scene": "turn",
+   "say": "But Japanese is the strange one.",
+   "cap": "But Japanese is the strange one"
+  },
+  {
+   "id": "b11",
+   "scene": "turn2",
+   "say": "Three bytes per character. The highest of all of them.",
+   "cap": "3.00 bytes per character — the highest"
+  },
+  {
+   "id": "b12",
+   "scene": "fix",
+   "say": "It still lands at one point five times English.",
+   "cap": "Still only 1.5× English"
+  },
+  {
+   "id": "b13",
+   "scene": "fix2",
+   "say": "Because it says the same thing in half the characters.",
+   "cap": "It says the same thing in half the characters"
+  },
+  {
+   "id": "b14",
+   "scene": "close",
+   "say": "It is not the language that costs more. It is the alphabet.",
+   "cap": "It's not the language. It's the alphabet."
+  }
+ ],
+ "rows": [
+  {
+   "name": "ENGLISH",
+   "bytes": 170,
+   "ratio": 1.0,
+   "tone": "base",
+   "beat": "b6"
+  },
+  {
+   "name": "TURKISH",
+   "bytes": 171,
+   "ratio": 1.01,
+   "tone": "good",
+   "beat": "b7"
+  },
+  {
+   "name": "ARABIC",
+   "bytes": 217,
+   "ratio": 1.28,
+   "tone": "mid",
+   "beat": "b8"
+  },
+  {
+   "name": "JAPANESE",
+   "bytes": 255,
+   "ratio": 1.5,
+   "tone": "mid",
+   "beat": "b10"
+  },
+  {
+   "name": "HINDI",
+   "bytes": 497,
+   "ratio": 2.92,
+   "tone": "bad",
+   "beat": "b9"
+  }
+ ],
+ "glyphs": [
+  {
+   "ch": "a",
+   "bytes": 1,
+   "note": "Latin"
+  },
+  {
+   "ch": "ü",
+   "bytes": 2,
+   "note": "accented"
+  },
+  {
+   "ch": "あ",
+   "bytes": 3,
+   "note": "Japanese"
+  }
+ ]
+}

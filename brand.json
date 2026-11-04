@@ -1,0 +1,27 @@
+{
+ "name": "BYTE",
+ "handle": "@byteproof",
+ "tagline": "AI tools, measured.",
+ "_handle_note": "00. bolumde uc platformda da bos oldugunu dogruladiktan SONRA burayi guncelle. Kodda baska yerde handle yazmiyor.",
+
+ "description_footer": "BYTE measures things about AI tools so you don't have to.\nEvery number on screen comes from a source listed above, measured on the date shown.\nNo affiliate links. No sponsorships.\n\n@byteproof on YouTube, Instagram and TikTok.",
+
+ "tags_base": ["ai tools", "ai", "tech", "shorts"],
+
+ "hashtags": {
+  "_note": "YouTube aciklamasinin SONUNA en fazla 3-5 tane. 15'ten fazla hashtag koyarsan YouTube hepsini birden yok sayiyor. Instagram/TikTok'ta ilk yoruma degil, aciklamaya yaz.",
+  "core": ["#ai", "#aitools", "#tech"],
+  "per_series": {
+   "A": ["#pricing"],
+   "B": ["#didyouknow"],
+   "C": ["#comparison"],
+   "D": ["#howitworks"]
+  }
+ },
+
+ "title_rules": {
+  "max_chars": 60,
+  "_note": "Mobilde ~40 karakterden sonrasi kirpiliyor; carpici kismi basa koy. Buyuk harfle BAGIRMA, clickbait isaretleyicisi.",
+  "ban": ["SHOCKING", "YOU WON'T BELIEVE", "INSANE", "!!!"]
+ }
+}

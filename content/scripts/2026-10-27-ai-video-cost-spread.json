@@ -1,0 +1,129 @@
+{
+ "id": "ai-video-cost-spread",
+ "series": "A",
+ "series_name": "The Number",
+ "lang": "en",
+ "title": "One minute of AI video: $3 or $24?",
+ "sources": [
+  "https://www.teamday.ai/blog/best-ai-video-models-2026",
+  "https://developers.google.com/youtube/v3/docs/videos/insert"
+ ],
+ "beats": [
+  {
+   "id": "b1",
+   "scene": "hook",
+   "say": "One minute of A.I. video costs three dollars. Or twenty four.",
+   "cap": "One minute of AI video costs $3. Or $24."
+  },
+  {
+   "id": "b2",
+   "scene": "hook2",
+   "say": "Same minute. Same length.",
+   "cap": "Same minute. Same length."
+  },
+  {
+   "id": "b3",
+   "scene": "table",
+   "say": "Here are the real A.P.I. prices, September twenty twenty six.",
+   "cap": "Real API prices, September 2026"
+  },
+  {
+   "id": "b4",
+   "scene": "row0",
+   "say": "Vay oh three point one Lite. Five cents a second, audio included.",
+   "cap": "Veo 3.1 Lite — $0.05/s, audio included"
+  },
+  {
+   "id": "b5",
+   "scene": "row1",
+   "say": "Kling three point zero. Eight point four cents, silent.",
+   "cap": "Kling 3.0 — $0.084/s, silent"
+  },
+  {
+   "id": "b6",
+   "scene": "row2",
+   "say": "Runway Gen four point five. Twelve cents, and no audio option at all.",
+   "cap": "Runway Gen-4.5 — $0.12/s, no audio"
+  },
+  {
+   "id": "b7",
+   "scene": "row3",
+   "say": "Vay oh three point one Standard. Forty cents a second.",
+   "cap": "Veo 3.1 Standard — $0.40/s"
+  },
+  {
+   "id": "b8",
+   "scene": "rowsum",
+   "say": "That is twenty four dollars for the same sixty seconds.",
+   "cap": "That's $24 for the same 60 seconds"
+  },
+  {
+   "id": "b9",
+   "scene": "contrast",
+   "say": "Eight times the price for the exact same length.",
+   "cap": "8× the price for the same length"
+  },
+  {
+   "id": "b10",
+   "scene": "turn",
+   "say": "So here is what most people get wrong.",
+   "cap": "Here's what most people get wrong"
+  },
+  {
+   "id": "b11",
+   "scene": "turn2",
+   "say": "Do not generate the whole minute.",
+   "cap": "Don't generate the whole minute"
+  },
+  {
+   "id": "b12",
+   "scene": "fix1",
+   "say": "Generate three seconds for the hook. Fifteen cents.",
+   "cap": "Generate 3 seconds for the hook. $0.15"
+  },
+  {
+   "id": "b13",
+   "scene": "fix2",
+   "say": "Then build the rest from stills and motion.",
+   "cap": "Build the rest from stills and motion"
+  },
+  {
+   "id": "b14",
+   "scene": "payoff",
+   "say": "Same runtime. Ninety percent cheaper.",
+   "cap": "Same runtime. 90% cheaper."
+  },
+  {
+   "id": "b15",
+   "scene": "close",
+   "say": "Price per second is the only number that matters.",
+   "cap": "Price per second is the only number that matters"
+  }
+ ],
+ "rows": [
+  {
+   "name": "VEO 3.1 LITE",
+   "sub": "audio included",
+   "ps": 0.05,
+   "tone": "good"
+  },
+  {
+   "name": "KLING 3.0",
+   "sub": "silent",
+   "ps": 0.084,
+   "tone": "mid"
+  },
+  {
+   "name": "RUNWAY GEN-4.5",
+   "sub": "no audio",
+   "ps": 0.12,
+   "tone": "mid"
+  },
+  {
+   "name": "VEO 3.1 STANDARD",
+   "sub": "audio always on",
+   "ps": 0.4,
+   "tone": "bad"
+  }
+ ]
+}
