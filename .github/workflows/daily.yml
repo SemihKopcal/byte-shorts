@@ -10,7 +10,7 @@ on:
   workflow_dispatch:
     inputs:
       script:
-        description: "content/scripts altindaki dosya (bos = siradaki)"
+        description: "content/scripts altindaki dosya adi (bos = siradaki)"
         required: false
         default: ""
 
@@ -30,8 +30,7 @@ jobs:
       - name: sistem paketleri
         run: |
           sudo apt-get update -qq
-          sudo apt-get install -y --no-install-recommends \
-            ffmpeg fonts-inter fontconfig
+          sudo apt-get install -y --no-install-recommends ffmpeg fonts-inter fontconfig
           fc-cache -f
 
       - uses: actions/setup-python@v5
@@ -49,30 +48,13 @@ jobs:
           path: voices
           key: piper-en-us-ryan-high-v1
 
-      - if: steps.voice.outputs.cache-hit != 'true'
+      - name: ses modeli indir
+        if: steps.voice.outputs.cache-hit != 'true'
         run: bash tools/fetch_voice.sh en-us-ryan-high
 
       - name: script sec
         id: pick
-        run: |
-          if [ -n "${{ inputs.script }}" ]; then
-            echo "path=content/scripts/${{ inputs.script }}" >> "$GITHUB_OUTPUT"
-          else
-            # published.json'da olmayan en eski script
-            python - <<'PY' >> "$GITHUB_OUTPUT"
-import json, pathlib
-done = set()
-p = pathlib.Path("content/published.json")
-if p.exists():
-    done = {x["id"] for x in json.loads(p.read_text())}
-for f in sorted(pathlib.Path("content/scripts").glob("*.json")):
-    if json.loads(f.read_text())["id"] not in done:
-        print(f"path={f}")
-        break
-else:
-    print("path=")
-PY
-          fi
+        run: python tools/pick_script.py "${{ inputs.script }}" >> "$GITHUB_OUTPUT"
 
       - name: uret
         if: steps.pick.outputs.path != ''
@@ -80,13 +62,13 @@ PY
 
       - name: sira bos
         if: steps.pick.outputs.path == ''
-        run: |
-          echo "::warning::Uretilecek script kalmadi -- content/scripts'e ekle."
+        run: echo "::warning::Uretilecek script kalmadi -- content/scripts'e ekle."
 
       # retention-days: ucretsiz hesapta artifact kotasi 500 MB. Video ~39 MB,
       # gunde 2 tane. 2 gun tutmak ~160 MB demek, rahat.
-      - uses: actions/upload-artifact@v4
+      - name: artifact
         if: steps.pick.outputs.path != ''
+        uses: actions/upload-artifact@v4
         with:
           name: video-${{ github.run_number }}
           path: |
