@@ -30,8 +30,7 @@ jobs:
       - name: sistem paketleri
         run: |
           sudo apt-get update -qq
-          sudo apt-get install -y --no-install-recommends \
-            ffmpeg fonts-inter fontconfig
+          sudo apt-get install -y --no-install-recommends ffmpeg fonts-inter fontconfig
           fc-cache -f
 
       - uses: actions/setup-python@v5
@@ -48,34 +47,32 @@ jobs:
           path: voices
           key: piper-en-us-ryan-high-v1
 
-      - if: steps.voice.outputs.cache-hit != 'true'
+      - name: ses modeli indir
+        if: steps.voice.outputs.cache-hit != 'true'
         run: bash tools/fetch_voice.sh en-us-ryan-high
 
       # Artifact'tan indirmek yerine yeniden uretiyoruz: cizim deterministik,
-      # ayni script ayni videoyu veriyor. Boylece artifact suresi dolsa da
-      # yayinlayabiliyoruz ve QC bir kez daha calisiyor.
+      # ayni script ayni videoyu veriyor. Boylece artifact suresi (2 gun)
+      # dolsa da yayinlayabiliyoruz ve QC bir kez daha calisiyor.
       - name: yeniden uret + QC
         run: python -m worker.build "content/scripts/${{ inputs.script }}"
 
-      - name: id oku
+      - name: cikti dizini
         id: m
-        run: |
-          python - <<'PY' >> "$GITHUB_OUTPUT"
-import json, pathlib, os
-s = json.loads(pathlib.Path("content/scripts/" + os.environ["S"]).read_text())
-print(f"dir=out/{s['id']}")
-PY
-        env:
-          S: ${{ inputs.script }}
+        run: python tools/pick_script.py --dir "${{ inputs.script }}" >> "$GITHUB_OUTPUT"
 
       - name: YouTube
         env:
           YOUTUBE_CLIENT_ID: ${{ secrets.YOUTUBE_CLIENT_ID }}
           YOUTUBE_CLIENT_SECRET: ${{ secrets.YOUTUBE_CLIENT_SECRET }}
           YOUTUBE_REFRESH_TOKEN: ${{ secrets.YOUTUBE_REFRESH_TOKEN }}
+          PUBLIC: ${{ inputs.public }}
         run: |
-          python publish/youtube.py "${{ steps.m.outputs.dir }}/manifest.json" \
-            ${{ inputs.public && '--publish' || '' }}
+          if [ "$PUBLIC" = "true" ]; then
+            python publish/youtube.py "${{ steps.m.outputs.dir }}/manifest.json" --publish
+          else
+            python publish/youtube.py "${{ steps.m.outputs.dir }}/manifest.json"
+          fi
 
       - name: kaydi isle
         run: |
