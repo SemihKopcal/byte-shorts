@@ -23,6 +23,8 @@ import urllib.request
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import trends                                          # noqa: E402
 from worker.scenes import CATALOG                      # noqa: E402
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -106,6 +108,18 @@ TITLE
 
 Topic area: AI tools — their price, their speed, their limits, how they
 actually work, what they cost compared with each other.
+
+WHAT IS BEING TALKED ABOUT RIGHT NOW
+Pick your topic from this live list when one of them can be turned into a
+measurement. Being current is worth a lot; being current AND measured is the
+whole point of this channel. Everyone else explains the announcement; nobody
+computes the bill.
+
+{live}
+
+If you use one of these, its URL goes in "sources" — the viewer must be able
+to check where the topic came from. If none of them can be measured honestly,
+ignore the list and pick an evergreen measurable topic instead.
 
 Do NOT reuse or paraphrase any of these recent titles:
 {recent}
@@ -223,8 +237,11 @@ def main() -> None:
         sys.exit("GEMINI_API_KEY yok")
 
     recent = _recent()
+    print("canli sinyal toplaniyor...")
+    live = trends.as_prompt(trends.collect())
     prompt = PROMPT.format(
         scenes=SCENE_DOC,
+        live=live,
         recent="\n".join(f"- {t}" for t in recent) or "- (none yet)",
         max_words=int(MAX_SECONDS * WORDS_PER_SEC * 0.92),
     )

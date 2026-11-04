@@ -35,8 +35,49 @@ def _run(cmd, **kw):
                    stderr=subprocess.DEVNULL, **kw)
 
 
-def _piper(text: str, path: Path, voice: Path) -> float:
-    _run(["piper", "-m", str(voice), "-c", str(voice) + ".json", "-f", str(path)],
+# ── ritim ────────────────────────────────────────────────────────────────────
+# Robotluk hissinin yarisi sesin kendisinden degil, DURAKLARDAN geliyordu:
+# her cumleden sonra ayni 0.18 sn. Insan noktadan sonra uzun, virgulden sonra
+# kisa duruyor. Asagidaki tablo o farki geri koyuyor.
+GAP_END = 0.30        # nokta
+GAP_ASK = 0.34        # soru/unlem -- cevap beklenen bosluk
+GAP_MID = 0.13        # virgul ya da noktalama yok: cumle devam ediyor
+GAP_SCENE = 0.12      # sahne degisiyorsa ustune eklenen pay
+
+# Piper varsayilanlari her cumleyi ayni kalipta okuyor. length-scale biraz
+# yavaslatiyor (gencler icin degil, ANLASILIRLIK icin: ekranda ayni anda
+# rakam var), noise-w fonem sureleri arasinda varyasyon birakiyor.
+LENGTH_SCALE = 1.06
+NOISE_SCALE = 0.68
+NOISE_W = 0.90
+# Ardisik cumleler birebir ayni tempoda olmasin diye beat sirasina gore
+# minik bir sapma. RASTGELE DEGIL -- publish adimi videoyu yeniden uretiyor,
+# iki render birebir ayni cikmali.
+JITTER = (0.0, 0.03, -0.02, 0.015, -0.03, 0.02)
+
+
+def _gap_after(beat: dict, nxt: dict | None) -> float:
+    if nxt is None:
+        return 0.0
+    s = (beat.get("say") or "").rstrip()
+    if s.endswith(("?", "!")):
+        g = GAP_ASK
+    elif s.endswith((".", ":", "—")):
+        g = GAP_END
+    else:
+        g = GAP_MID
+    if nxt.get("scene") and nxt.get("scene") != beat.get("scene"):
+        g += GAP_SCENE
+    return round(g, 3)
+
+
+def _piper(text: str, path: Path, voice: Path, i: int = 0) -> float:
+    ls = LENGTH_SCALE + JITTER[i % len(JITTER)]
+    _run(["piper", "-m", str(voice), "-c", str(voice) + ".json",
+          "--length-scale", f"{ls:.3f}",
+          "--noise-scale", str(NOISE_SCALE),
+          "--noise-w-scale", str(NOISE_W),
+          "-f", str(path)],
          input=text.encode())
     with wave.open(str(path)) as w:
         return w.getnframes() / w.getframerate()
@@ -47,11 +88,15 @@ def synthesize(spec: dict, out_dir: Path, voice: Path) -> dict:
     seg = out_dir / "seg"
     seg.mkdir(parents=True, exist_ok=True)
 
+    beats = spec["beats"]
+    gaps = [_gap_after(b, beats[i + 1] if i + 1 < len(beats) else None)
+            for i, b in enumerate(beats)]
+
     t = 0.0
     timeline, parts = [], []
-    for i, beat in enumerate(spec["beats"]):
+    for i, beat in enumerate(beats):
         p = seg / f"{i:02d}.wav"
-        dur = _piper(beat["say"], p, voice)
+        dur = _piper(beat["say"], p, voice, i)
         parts.append(p)
 
         words = beat.get("cap", beat["say"]).split()
@@ -67,19 +112,23 @@ def synthesize(spec: dict, out_dir: Path, voice: Path) -> dict:
         timeline.append({"id": beat["id"], "scene": beat.get("scene", ""),
                          "say": beat["say"], "start": round(t, 3),
                          "end": round(t + dur, 3), "words": wt})
-        t += dur + GAP
+        t += dur + gaps[i]
 
-    # tek parca ses
-    sil = out_dir / "sil.wav"
-    _run(["ffmpeg", "-y", "-f", "lavfi", "-i", f"anullsrc=r={SR}:cl=mono",
-          "-t", str(GAP), "-c:a", "pcm_s16le", str(sil)])
+    # Her farkli bosluk uzunlugu icin bir sessizlik dosyasi. Tek bir sabit
+    # dosya yerine bunlar, cunku duraklar artik noktalamaya gore degisiyor.
+    sils = {}
+    for g in sorted(set(x for x in gaps if x > 0)):
+        f = out_dir / f"sil_{int(g * 1000)}.wav"
+        _run(["ffmpeg", "-y", "-f", "lavfi", "-i", f"anullsrc=r={SR}:cl=mono",
+              "-t", str(g), "-c:a", "pcm_s16le", str(f)])
+        sils[g] = f
     # concat listesinde MUTLAK yol: ffmpeg goreli yollari liste dosyasinin
     # bulundugu dizine gore cozuyor, cwd'ye gore degil.
     lines = []
     for i, p in enumerate(parts):
         lines.append(f"file '{p.resolve()}'")
-        if i < len(parts) - 1:
-            lines.append(f"file '{sil.resolve()}'")
+        if i < len(parts) - 1 and gaps[i] > 0:
+            lines.append(f"file '{sils[gaps[i]].resolve()}'")
     concat = out_dir / "concat.txt"
     concat.write_text("\n".join(lines))
     _run(["ffmpeg", "-y", "-f", "concat", "-safe", "0", "-i", str(concat),
