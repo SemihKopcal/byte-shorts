@@ -45,7 +45,25 @@ def _stages(series_mod, S, duration, spec):
     return out
 
 
+def _recent_themes(n=3):
+    log = ROOT / "content/published.json"
+    if not log.exists():
+        return []
+    try:
+        return [x.get("theme", "") for x in json.loads(log.read_text())][-n:]
+    except Exception:
+        return []
+
+
 def render(spec, tl, series_mod, out_path: Path, parallel: bool = False) -> None:
+    # Tema EN BASTA secilir: D.INK, D.TONE gibi degerler buradan sonra
+    # okunuyor, sonra degistirmek yarisi eski yarisi yeni renkte bir video
+    # verirdi.
+    from . import themes as T
+    theme = D.use_theme(T.pick(spec, _recent_themes()))
+    spec["_theme"] = theme
+    print(f"  tema: {theme}")
+
     beats = tl["beats"]
     duration = tl["duration"]
     S = {b["id"]: (b["start"], b["end"]) for b in beats}
@@ -122,6 +140,7 @@ def manifest(spec, tl, video: Path) -> dict:
         "tags": tags[:15],
         "duration": tl["duration"],
         "video": str(video.name),
+        "theme": spec.get("_theme", ""),
         "privacy": "private",
     }
 

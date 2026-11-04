@@ -108,6 +108,59 @@ def draw_byte_head(d: ImageDraw.ImageDraw, cx: float, cy: float, scale: float = 
         d.rounded_rectangle((*P(-w, -28), *P(w, 28)), radius=6 * s, fill=cursor)
 
 
+def draw_byte_pointing(d: ImageDraw.ImageDraw, cx: float, cy: float,
+                       target: tuple, scale: float = 1.0, cursor=MINT,
+                       blink: bool = True, reach: float = 1.0) -> None:
+    """BYTE elinde bir cubukla ekrandaki bir noktayi gosteriyor.
+
+    Yuz cizmedigimiz icin "suraya bak" diyebilmenin tek yolu bu. Yuz
+    cizmemek bilincli: her karede tutarlilik + YouTube'un "uzman gibi
+    konusan yapay kisilik" maddesinden uzak durmak.
+
+    target: cubugun ucunun isaret edecegi mutlak (x, y). reach 0..1 ile
+    cubuk hedefe dogru aciliyor (beat basinda uzaniyor).
+    """
+    import math
+    s = scale
+
+    def P(x, y):
+        return (cx + x * s, cy + y * s)
+
+    rim = BODY_HI
+    # bacaklar
+    for x0, x1 in ((-48, -16), (16, 48)):
+        _limb(d, P((x0 + x1) / 2, 100), P((x0 + x1) / 2, 158), 32 * s, BODY, rim)
+
+    # bos el
+    _limb(d, P(-66, 6), P(-112, 78), 28 * s, BODY, rim)
+    p = P(-112, 78)
+    r = 21 * s
+    d.ellipse((p[0] - r, p[1] - r, p[0] + r, p[1] + r), fill=BODY_HI)
+
+    # gosteren kol: omuzdan hedefe dogru, sabit uzunlukta
+    sh = P(66, 6)
+    dx, dy = target[0] - sh[0], target[1] - sh[1]
+    L = math.hypot(dx, dy) or 1.0
+    ux, uy = dx / L, dy / L
+    arm = 96 * s
+    hand = (sh[0] + ux * arm, sh[1] + uy * arm)
+    _limb(d, sh, hand, 28 * s, BODY, rim)
+    d.ellipse((hand[0] - r, hand[1] - r, hand[0] + r, hand[1] + r), fill=BODY_HI)
+
+    # cubuk: elden hedefe. Ucu imlec rengiyle -- goz once oraya gidiyor.
+    tipx = hand[0] + ux * (L - arm) * reach
+    tipy = hand[1] + uy * (L - arm) * reach
+    d.line([hand, (tipx, tipy)], fill=BODY_HI, width=int(max(3, 9 * s)))
+    tr = max(5, 11 * s)
+    d.ellipse((tipx - tr, tipy - tr, tipx + tr, tipy + tr), fill=cursor)
+
+    # govde + boyun + kafa
+    d.rounded_rectangle((*P(-74, -16), *P(74, 104)), radius=34 * s, fill=BODY,
+                        outline=rim, width=int(max(2, 4 * s)))
+    d.rounded_rectangle((*P(-19, -44), *P(19, -10)), radius=9 * s, fill=BODY)
+    draw_byte_head(d, cx, cy - 130 * s, s, cursor, blink)
+
+
 def draw_byte_badge(d: ImageDraw.ImageDraw, x: float, y: float, font,
                     scale: float = 0.17, cursor=MINT) -> None:
     """Kose imzasi: kucuk BYTE + wordmark. Her videoda ayni yerde."""

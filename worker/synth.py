@@ -13,6 +13,7 @@ import json
 import re
 import subprocess
 import wave
+from functools import lru_cache
 from pathlib import Path
 
 GAP = 0.18           # beat'ler arasi nefes payi (sn)
@@ -71,14 +72,39 @@ def _gap_after(beat: dict, nxt: dict | None) -> float:
     return round(g, 3)
 
 
+@lru_cache(maxsize=1)
+def _piper_flags() -> tuple:
+    """Piper surumleri bayrak adlarini degistiriyor: 1.2'de --noise_w,
+    sonrakilerde --noise-w-scale. Sabit yazmak yerine --help'e soruyoruz,
+    yoksa surum degisince hat sessizce degil ama gurultulu sekilde oluyor."""
+    try:
+        h = subprocess.run(["piper", "--help"], capture_output=True,
+                           text=True, timeout=20).stdout
+    except Exception:
+        return ()
+    out = []
+    # her ayar icin kabul edilen yazimlar, tercih sirasiyla
+    for spellings in (("--length-scale", "--length_scale"),
+                      ("--noise-scale", "--noise_scale"),
+                      ("--noise-w-scale", "--noise_w_scale", "--noise-w",
+                       "--noise_w")):
+        for name in spellings:
+            if name in h:
+                out.append(name)
+                break
+    return tuple(out)
+
+
 def _piper(text: str, path: Path, voice: Path, i: int = 0) -> float:
+    cmd = ["piper", "-m", str(voice), "-c", str(voice) + ".json"]
     ls = LENGTH_SCALE + JITTER[i % len(JITTER)]
-    _run(["piper", "-m", str(voice), "-c", str(voice) + ".json",
-          "--length-scale", f"{ls:.3f}",
-          "--noise-scale", str(NOISE_SCALE),
-          "--noise-w-scale", str(NOISE_W),
-          "-f", str(path)],
-         input=text.encode())
+    for f in _piper_flags():
+        k = f.lstrip("-").replace("_", "-")
+        v = f"{ls:.3f}" if k.startswith("length") else \
+            str(NOISE_W) if "w" in k.split("-") else str(NOISE_SCALE)
+        cmd += [f, v]
+    cmd += ["-f", str(path)]
+    _run(cmd, input=text.encode())
     with wave.open(str(path)) as w:
         return w.getnframes() / w.getframerate()
 

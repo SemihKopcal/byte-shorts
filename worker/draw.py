@@ -17,14 +17,36 @@ from .byte import draw_byte_badge, MINT as B_MINT
 W, H, FPS = 1080, 1920, 30
 FONT_DIR = Path("/usr/share/fonts/opentype/inter")
 
+# ── aktif tema ───────────────────────────────────────────────────────────────
+# Bu degerler use_theme() ile DEGISIYOR. Sahneler ve seriler onlari cagri
+# aninda okudugu icin (D.INK, D.TONE...) tema degisince hepsi birden
+# degisiyor; her sahneye tema gecirmek gerekmiyor.
 BG0, BG1 = (7, 7, 12), (15, 15, 26)
+GLOW = (139, 139, 255)
 INK = (244, 244, 248)
 MUTE = (124, 124, 148)
-MINT = (74, 222, 128)
-AMBER = (255, 176, 32)
-VIOLET = (139, 139, 255)
+MINT = (74, 222, 128)          # "good"
+AMBER = (255, 176, 32)         # "bad"
+VIOLET = (139, 139, 255)       # "mid" + ilerleme cubugu
 LINE = (34, 34, 52)
 TONE = {"base": INK, "good": MINT, "mid": VIOLET, "bad": AMBER}
+TEXTURE = "none"
+THEME = "midnight"
+
+
+def use_theme(name: str) -> str:
+    """Paleti degistirir. build.render en basta bir kez cagiriyor."""
+    from .themes import THEMES
+    global BG0, BG1, GLOW, INK, MUTE, MINT, AMBER, VIOLET, LINE, TONE
+    global TEXTURE, THEME
+    t = THEMES.get(name) or THEMES["midnight"]
+    THEME = name if name in THEMES else "midnight"
+    BG0, BG1, GLOW = t["bg0"], t["bg1"], t["glow"]
+    INK, MUTE, LINE = t["ink"], t["mute"], t["line"]
+    MINT, VIOLET, AMBER = t["good"], t["mid"], t["bad"]
+    TONE = {"base": INK, "good": MINT, "mid": VIOLET, "bad": AMBER}
+    TEXTURE = t["tex"]
+    return THEME
 
 # Shorts guvenli alanlari: alt ~290px arayuz (baslik, aksiyon sutunu) ile
 # ortulu. Altyazi 1555'te bitiyor, BYTE 1420'nin ustunde kaliyor.
@@ -155,16 +177,41 @@ def blink_on(t, period=3.0, off=0.14):
 
 
 # ───────────────────────── arka plan ─────────────────────────
+def _texture(yy, xx, kind):
+    """Doku maskesi (0..1). Hepsi kodla -- stok gorsel yok.
+    Cok hafif tutuluyor: amac 'burada bir yuzey var' hissi, desen degil."""
+    if kind == "grid":
+        g = ((xx % 96 < 1.4) | (yy % 96 < 1.4)).astype(np.float32)
+    elif kind == "dots":
+        g = (((xx % 64 - 32) ** 2 + (yy % 64 - 32) ** 2) < 5).astype(np.float32)
+    elif kind == "scan":
+        g = (yy % 5 < 1.2).astype(np.float32) * 0.6
+    elif kind == "contour":
+        # yuksek frekans + dar esik: genis lekeler yerine ince egri cizgiler
+        g = (np.abs(np.sin((xx * 0.021) + np.sin(yy * 0.009) * 3.0)) > 0.9985) \
+            .astype(np.float32)
+    else:
+        return None
+    # ust tarafta belirgin, altta kayboluyor: metin alanini kirletmiyor
+    return g * np.clip(1 - yy / (H * 0.9), 0, 1)[:, :]
+
+
 def build_bg():
     y = np.linspace(0, 1, H, dtype=np.float32)[:, None]
     base = np.zeros((H, W, 3), dtype=np.float32)
     for i in range(3):
         base[:, :, i] = BG0[i] + (BG1[i] - BG0[i]) * (y ** 0.75)
     yy, xx = np.mgrid[0:H, 0:W].astype(np.float32)
+
+    tex = _texture(yy, xx, TEXTURE)
+    if tex is not None:
+        for i in range(3):
+            base[:, :, i] += tex * (GLOW[i] * 0.085)
+
     dist = np.sqrt(((xx - W / 2) / (W * 0.85)) ** 2 + ((yy - H * 0.26) / (H * 0.40)) ** 2)
     glow = np.clip(1 - dist, 0, 1) ** 2.2
     for i in range(3):
-        base[:, :, i] += glow * (VIOLET[i] * 0.16)
+        base[:, :, i] += glow * (GLOW[i] * 0.16)
     vig = np.clip((yy - H * 0.62) / (H * 0.38), 0, 1) ** 2
     base *= (1 - vig[:, :, None] * 0.35)
     return Image.fromarray(np.clip(base, 0, 255).astype(np.uint8))
