@@ -161,15 +161,24 @@ def _call(prompt: str, key: str) -> str:
     req = urllib.request.Request(
         f"{URL}?key={key}", data=body,
         headers={"Content-Type": "application/json"})
+    # Hata durumunda cikmiyoruz, None donuyoruz: cagiran taraf yedek konuya
+    # dusebilsin. Tek bir API kesintisi "bugun video yok" demek olmamali.
     try:
         with urllib.request.urlopen(req, timeout=120) as r:
             out = json.loads(r.read())
     except urllib.error.HTTPError as e:
-        sys.exit(f"Gemini HTTP {e.code}: {e.read().decode()[:400]}")
+        print(f"  Gemini HTTP {e.code}: {e.read().decode()[:300]}",
+              file=sys.stderr)
+        return None
+    except (urllib.error.URLError, TimeoutError) as e:
+        print(f"  Gemini'ye ulasilamadi: {e}", file=sys.stderr)
+        return None
     try:
         return out["candidates"][0]["content"]["parts"][0]["text"]
     except (KeyError, IndexError):
-        sys.exit("Gemini bos yanit verdi:\n" + json.dumps(out)[:600])
+        print("  Gemini bos yanit verdi: " + json.dumps(out)[:300],
+              file=sys.stderr)
+        return None
 
 
 def _slug(title: str) -> str:
@@ -246,11 +255,67 @@ def main() -> None:
         max_words=int(MAX_SECONDS * WORDS_PER_SEC * 0.92),
     )
 
-    # Uc deneme: dogrulama hatalarini geri besleyerek. Dorduncude pes ediyoruz
-    # -- bozuk bir senaryoyu zorla duzeltmeye calismak daha kotu metin uretiyor.
+    spec = _generate(prompt, key)
+    if spec is None:
+        # Canli sinyalden bir sey cikmadi. Hatti durdurmak yerine yedek
+        # havuzdan olculebilir bir konu verip bir kez daha deniyoruz --
+        # "bugun video yok" en kotu sonuc.
+        topic = _backlog_topic(recent)
+        if topic is None:
+            sys.exit("Gemini senaryo uretemedi ve yedek havuz da bos.")
+        print(f"yedek konuya dusuldu: {topic['angle'][:60]}...")
+        spec = _generate(
+            prompt + "\n\nIGNORE the live list. Write about exactly this, "
+            "and nothing else:\n"
+            f"  angle   : {topic['angle']}\n"
+            f"  measure : {topic['measure']}\n"
+            f"  sources : {', '.join(topic['sources'])}", key)
+        if spec is None:
+            sys.exit("Yedek konuda da gecerli senaryo cikmadi.")
+
+    today = dt.date.today().isoformat()
+    spec = {
+        **spec,
+        "id": f"{today}-{_slug(spec['title'])}",
+        "series": "G",
+        "lang": "en",
+        "generated_by": MODEL,
+        "generated_at": today,
+    }
+    SCRIPTS.mkdir(parents=True, exist_ok=True)
+    out = SCRIPTS / f"{spec['id']}.json"
+    out.write_text(json.dumps(spec, indent=1, ensure_ascii=False))
+    print(f"yazildi: {out.relative_to(ROOT)}")
+    print(f"  baslik: {spec['title']}")
+    scenes = dict.fromkeys(b.get("scene", "") for b in spec["beats"] if b.get("scene"))
+    print(f"  sahneler: {', '.join(scenes)}")
+
+
+def _backlog_topic(recent_titles: list[str]) -> dict | None:
+    """Yedek havuzdan, basliklarda gecmeyen bir konu."""
+    f = ROOT / "content/backlog.json"
+    if not f.exists():
+        return None
+    try:
+        topics = json.loads(f.read_text()).get("topics", [])
+    except json.JSONDecodeError:
+        return None
+    seen = " ".join(recent_titles).lower()
+    fresh = [t for t in topics
+             if not any(w in seen
+                        for w in re.findall(r"[a-z]{7,}", t["angle"].lower()))]
+    pool = fresh or topics
+    return pool[dt.date.today().toordinal() % len(pool)] if pool else None
+
+
+def _generate(prompt: str, key: str) -> dict | None:
+    """Uc deneme: dogrulama hatalarini geri besleyerek. Dorduncude pes
+    ediyoruz -- bozuk bir senaryoyu zorla duzeltmek daha kotu metin veriyor."""
     attempt, problems = prompt, []
     for n in range(1, 4):
         raw = _call(attempt, key)
+        if raw is None:
+            return None
         try:
             spec = json.loads(raw)
         except json.JSONDecodeError as e:
@@ -265,25 +330,10 @@ def main() -> None:
                    "reasons. Fix them all:\n" +
                    "\n".join(f"- {x}" for x in problems))
     else:
-        sys.exit("3 denemede gecerli senaryo cikmadi:\n  " +
-                 "\n  ".join(problems))
-
-    today = dt.date.today().isoformat()
-    # ** once: id/series bizim, Gemini bunlari ezemesin
-    spec = {
-        **spec,
-        "id": f"{today}-{_slug(spec['title'])}",
-        "series": "G",
-        "lang": "en",
-        "generated_by": MODEL,
-        "generated_at": today,
-    }
-    SCRIPTS.mkdir(parents=True, exist_ok=True)
-    out = SCRIPTS / f"{spec['id']}.json"
-    out.write_text(json.dumps(spec, indent=1, ensure_ascii=False))
-    print(f"yazildi: {out.relative_to(ROOT)}")
-    print(f"  baslik: {spec['title']}")
-    print(f"  sahneler: {', '.join(dict.fromkeys(b.get('scene','') for b in spec['beats'] if b.get('scene')))}")
+        print("3 denemede gecerli senaryo cikmadi:\n  " +
+              "\n  ".join(problems), file=sys.stderr)
+        return None
+    return spec
 
 
 if __name__ == "__main__":

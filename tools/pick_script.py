@@ -6,10 +6,18 @@ Ayri bir dosya, cunku workflow icine gomulu Python YAML girintisiyle kavga
 ediyor: `run: |` blogunda sifir sutundan baslayan bir satir blogu bitiriyor
 ve dosyayi gecersiz kiliyor.
 
+IKI defter tutuluyor:
+  content/built.json      uretilmis olanlar  (daily yaziyor)
+  content/published.json  yayinlanmis olanlar (publish yaziyor)
+
+Ikisi de atlaniyor. Sadece published'a bakmak bir hataydi: yayinlamayi
+bekledigin surece daily her gece AYNI videoyu uretiyordu.
+
 Kullanim:
-    python tools/pick_script.py            -> path=content/scripts/xxx.json
-    python tools/pick_script.py xxx.json   -> o dosyayi secer
-    python tools/pick_script.py --dir xxx.json -> dir=out/<id>
+    python tools/pick_script.py                 -> path=content/scripts/xxx.json
+    python tools/pick_script.py xxx.json        -> o dosyayi secer
+    python tools/pick_script.py --dir xxx.json  -> dir=out/<id>
+    python tools/pick_script.py --mark xxx.json -> built.json'a isler
 """
 import argparse
 import json
@@ -19,6 +27,21 @@ import sys
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 SCRIPTS = ROOT / "content/scripts"
 PUBLISHED = ROOT / "content/published.json"
+BUILT = ROOT / "content/built.json"
+
+
+def _ids(p: pathlib.Path) -> set:
+    if not p.exists():
+        return set()
+    try:
+        d = json.loads(p.read_text())
+    except json.JSONDecodeError:
+        return set()
+    return {x["id"] if isinstance(x, dict) else x for x in d}
+
+
+def _spec_id(f: pathlib.Path) -> str:
+    return json.loads(f.read_text())["id"]
 
 
 def main() -> None:
@@ -26,6 +49,8 @@ def main() -> None:
     ap.add_argument("name", nargs="?", default="")
     ap.add_argument("--dir", action="store_true",
                     help="path= yerine dir=out/<id> yazar")
+    ap.add_argument("--mark", action="store_true",
+                    help="verilen senaryoyu built.json'a isler")
     a = ap.parse_args()
 
     if a.name:
@@ -33,20 +58,24 @@ def main() -> None:
         if not f.exists():
             sys.exit(f"script bulunamadi: {f}")
     else:
-        done = set()
-        if PUBLISHED.exists():
-            done = {x["id"] for x in json.loads(PUBLISHED.read_text())}
-        f = None
-        for cand in sorted(SCRIPTS.glob("*.json")):
-            if json.loads(cand.read_text())["id"] not in done:
-                f = cand
-                break
+        done = _ids(PUBLISHED) | _ids(BUILT)
+        f = next((c for c in sorted(SCRIPTS.glob("*.json"))
+                  if _spec_id(c) not in done), None)
         if f is None:
             print("path=")
             return
 
+    if a.mark:
+        prev = json.loads(BUILT.read_text()) if BUILT.exists() else []
+        sid = _spec_id(f)
+        if sid not in prev:
+            prev.append(sid)
+            BUILT.write_text(json.dumps(prev, indent=1, ensure_ascii=False))
+        print(f"islendi: {sid}", file=sys.stderr)
+        return
+
     if a.dir:
-        print(f"dir=out/{json.loads(f.read_text())['id']}")
+        print(f"dir=out/{_spec_id(f)}")
     else:
         print(f"path={f.relative_to(ROOT)}")
 

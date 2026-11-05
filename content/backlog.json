@@ -1,0 +1,65 @@
+{
+ "_note": "Gemini bir senaryo uretemezse (API kesintisi, kota, uc kez dogrulamayi gecememe) hat durmasin diye yedek konu havuzu. Hepsi OLCULEBILIR: ya aritmetik ya da herkese acik bir belgeden dogrulanabilir. write_script.py bunlardan birini secip tam senaryoya cevirmeyi dener; o da olmazsa kosu temiz bir uyariyla biter.",
+ "topics": [
+  {
+   "angle": "A 60-second Short rendered in code costs $0. The same 60 seconds from the cheapest video model costs about $3.",
+   "measure": "published per-second price x 60",
+   "sources": ["model provider public pricing pages"]
+  },
+  {
+   "angle": "UTF-8 makes the same sentence cost different amounts in different alphabets. Latin 1 byte, accented 2, Japanese 3.",
+   "measure": "UTF-8 byte length of a parallel text",
+   "sources": ["Universal Declaration of Human Rights, Article 1, parallel text"]
+  },
+  {
+   "angle": "A model's context window is advertised in tokens, but what you can actually fit depends on the alphabet you write in.",
+   "measure": "characters per token across scripts",
+   "sources": ["tokenizer documentation", "measured sample"]
+  },
+  {
+   "angle": "Output tokens usually cost several times more than input tokens, so a short answer to a long question is the cheap case.",
+   "measure": "input vs output price ratio across providers",
+   "sources": ["provider pricing pages"]
+  },
+  {
+   "angle": "Running a model locally is free per request but not free per hour: electricity plus hardware amortisation gives a real per-token cost.",
+   "measure": "GPU watts x local electricity price / tokens per second",
+   "sources": ["GPU TDP spec", "national average electricity price"]
+  },
+  {
+   "angle": "Image generation is priced per image, video per second. At one frame per second the two prices stop matching.",
+   "measure": "price per image x 30 vs price per second of video",
+   "sources": ["provider pricing pages"]
+  },
+  {
+   "angle": "A speech model that runs on a laptop CPU is slower than real time; one that runs on a phone is not. The gap is smaller than the price gap.",
+   "measure": "real-time factor on CPU vs hosted price per minute",
+   "sources": ["measured render", "provider pricing"]
+  },
+  {
+   "angle": "Free API tiers differ by three orders of magnitude in requests per day. The generous ones are not the ones with the famous names.",
+   "measure": "published free-tier request limits",
+   "sources": ["provider documentation"]
+  },
+  {
+   "angle": "Caching a prompt costs money to write and saves money to read. Below a certain reuse count it loses.",
+   "measure": "cache write price vs read saving, break-even reuse count",
+   "sources": ["provider pricing pages"]
+  },
+  {
+   "angle": "A thinking model that reasons for ten seconds bills those seconds as output tokens you never see.",
+   "measure": "reasoning token price x typical reasoning length",
+   "sources": ["provider pricing and documentation"]
+  },
+  {
+   "angle": "Embedding a million documents is cheaper than one hour of video generation, by a wide margin.",
+   "measure": "embedding price per million tokens vs video price per second",
+   "sources": ["provider pricing pages"]
+  },
+  {
+   "angle": "Open-weight models are free to download but the download itself is the smallest cost in using them.",
+   "measure": "model file size vs VRAM requirement vs rental price per hour",
+   "sources": ["model card", "GPU rental pricing"]
+  }
+ ]
+}
