@@ -51,6 +51,8 @@ def main() -> None:
                     help="path= yerine dir=out/<id> yazar")
     ap.add_argument("--mark", action="store_true",
                     help="verilen senaryoyu built.json'a isler")
+    ap.add_argument("--needs-cjk", action="store_true",
+                    help="CJK fontu gerekiyorsa 'yes' yazar")
     a = ap.parse_args()
 
     if a.name:
@@ -64,6 +66,21 @@ def main() -> None:
         if f is None:
             print("path=")
             return
+
+    if a.needs_cjk:
+        # SADECE gercek CJK/Kana/Hangul araliklari. "ASCII disi" diye bakmak
+        # fazla genis: × ve — gibi isaretler Inter'de zaten var, onlar icin
+        # 60 MB'lik font paketi indirmenin anlami yok.
+        txt = f.read_text()
+        cjk = any(
+            "぀" <= ch <= "ヿ" or      # kana
+            "㐀" <= ch <= "䶿" or      # CJK ext A
+            "一" <= ch <= "鿿" or      # CJK
+            "가" <= ch <= "힯" or      # hangul
+            "豈" <= ch <= "﫿"         # uyumluluk
+            for ch in txt)
+        print("yes" if cjk else "no")
+        return
 
     if a.mark:
         prev = json.loads(BUILT.read_text()) if BUILT.exists() else []
