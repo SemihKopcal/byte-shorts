@@ -1,0 +1,195 @@
+{
+ "brief": {
+  "format": "explain",
+  "angle": "An AI model cannot spell check 'strawberry' because it never reads single letters.",
+  "measure": "How text tokenizers split words into numbers before an AI sees them.",
+  "calc": "Word 'strawberry' -> tokenized into two integer IDs ('straw' + 'berry') -> zero individual letter representations sent to model layers.",
+  "sources": [
+   "OpenAI tiktoken repository and documentation",
+   "Hugging Face Tokenizers library documentation"
+  ],
+  "signal_url": null,
+  "why_now": "Explains the fundamental mechanical flaw behind everyday AI counting errors.",
+  "scores": {
+   "timeliness": 6,
+   "verifiability": 10,
+   "curiosity": 9,
+   "audience_fit": 10,
+   "safety": 10
+  },
+  "_total": 56
+ },
+ "stage": "editor",
+ "problems": [
+  "10 statements need a web check, but web search is unavailable right now, so nothing can be verified. Use only numbers you derive by arithmetic, or leave the statements out"
+ ],
+ "spec": {
+  "format": "explain",
+  "title": "An AI cannot spell check strawberry because it reads tokens",
+  "summary": "AI models cannot reliably count letters in words like strawberry because tokenization converts text into subword integer IDs before model processing.",
+  "tags": [
+   "ai",
+   "tokenization",
+   "llm",
+   "tech"
+  ],
+  "sources": [
+   "OpenAI Tiktoken documentation",
+   "Hugging Face Tokenizers documentation"
+  ],
+  "beats": [
+   {
+    "id": "b1",
+    "role": "hook",
+    "scene": "contrast",
+    "say": "An A I model cannot spell check the word strawberry.",
+    "cap": "An AI cannot spell check strawberry.",
+    "data": {
+     "left": {
+      "label": "Word",
+      "value": "strawberry"
+     },
+     "right": {
+      "label": "Letters seen",
+      "value": "0",
+      "tone": "bad"
+     },
+     "verdict": "Invisible letters"
+    }
+   },
+   {
+    "id": "b2",
+    "role": "why",
+    "scene": "split",
+    "say": "It does not see letters when reading your text.",
+    "cap": "It does not see letters when reading text.",
+    "data": {
+     "a": {
+      "label": "Human Sees",
+      "sub": "s-t-r-a-w-b-e-r-r-y"
+     },
+     "b": {
+      "label": "AI Sees",
+      "sub": "Token IDs",
+      "tone": "mid"
+     }
+    }
+   },
+   {
+    "id": "b3",
+    "role": "why",
+    "say": "A tokenizer cuts text into chunk numbers first.",
+    "cap": "A tokenizer cuts text into chunk numbers first."
+   },
+   {
+    "id": "b4",
+    "role": "why",
+    "say": "The main A I model only receives integer I D s.",
+    "cap": "The main AI model only receives integer IDs."
+   },
+   {
+    "id": "b5",
+    "role": "data",
+    "scene": "timeline",
+    "say": "A tokenizer splits strawberry into two parts.",
+    "cap": "A tokenizer splits strawberry into 2 parts.",
+    "data": {
+     "steps": [
+      {
+       "at": "Step 1",
+       "label": "strawberry"
+      },
+      {
+       "at": "Step 2",
+       "label": "straw + berry"
+      },
+      {
+       "at": "Step 3",
+       "label": "Token 1 + Token 2"
+      }
+     ]
+    }
+   },
+   {
+    "id": "b6",
+    "role": "data",
+    "say": "The segment straw becomes one token number.",
+    "cap": "straw = Token 1"
+   },
+   {
+    "id": "b7",
+    "role": "data",
+    "say": "The segment berry becomes a second token number.",
+    "cap": "berry = Token 2"
+   },
+   {
+    "id": "b8",
+    "role": "data",
+    "scene": "table",
+    "say": "The model receives two numbers instead of ten letters.",
+    "cap": "Model gets 2 numbers instead of 10 letters.",
+    "data": {
+     "unit": "count",
+     "rows": [
+      {
+       "name": "Letters in word",
+       "value": "10",
+       "ratio": 1.0
+      },
+      {
+       "name": "Tokens sent to AI",
+       "value": "2",
+       "ratio": 0.2,
+       "tone": "good"
+      }
+     ]
+    }
+   },
+   {
+    "id": "b9",
+    "role": "data",
+    "scene": "byte_says",
+    "say": "Counting R letters is like guessing pages in a closed book.",
+    "cap": "Counting R letters is like guessing pages in a closed book.",
+    "data": {
+     "line": "It guesses letters by memory.",
+     "pose": "shrug",
+     "cursor": "amber"
+    }
+   },
+   {
+    "id": "b10",
+    "role": "turn",
+    "say": "So the model guesses spelling from memory pattern frequency.",
+    "cap": "The model guesses spelling from pattern frequency."
+   },
+   {
+    "id": "b11",
+    "role": "resolve",
+    "scene": "close",
+    "say": "It fails on spelling homework because individual letters never entered its code.",
+    "cap": "Individual letters never entered its code.",
+    "data": {
+     "lines": [
+      "AI sees tokens, not letters.",
+      "Spelling is pure guessing."
+     ],
+     "accent": "amber"
+    }
+   },
+   {
+    "id": "b12",
+    "role": "resolve",
+    "say": "Processing two tokens instead of ten letters shortens the sequence length by eighty percent.",
+    "cap": "Shortens sequence length by 80%."
+   }
+  ]
+ },
+ "scores": {
+  "hook": 8,
+  "story": 8,
+  "clarity": 8,
+  "audience": 8,
+  "voice": 8
+ }
+}
