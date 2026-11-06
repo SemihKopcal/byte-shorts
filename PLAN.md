@@ -29,8 +29,10 @@ tutmayan biçimin ağırlığı `rank` içindeki bonustan ayarlanır.
    bağlanmadı.
 2. Animasyonlu arka plan (madde 2): mesh/ızgara/halka animasyonları için bir
    taslak yazıldı ama henüz repoda değil; önce BYTE anlatıcı bitecek.
-3. Instagram + TikTok: şimdilik release'ten elle; API otomasyonu 5-7 video
-   sonra (bkz. "BYTE Instagram ve TikTok" artifact'ı).
+3. Instagram + TikTok: **kod yazıldı ve test edildi** (6 Kasım): Instagram
+   Reels tam otomatik, TikTok gelen kutusu taslağı (açıklamayı kullanıcı
+   uygulamada yapıştırır). Hesap kurulumu, token'lar ve `GH_PAT` kullanıcıda
+   (README "Instagram ve TikTok"). Gerçek bir yüklemeyle henüz denenmedi.
 4. Editör geri bildirim döngüsü: YouTube Analytics (`yt-analytics.readonly`)
    verisini yapımcıya vermek; hangi konu/kanca tuttu.
 
@@ -180,10 +182,17 @@ Bu en sona kalıyor — hat çalışmadan panel yapmak boş iş.
 
 ## 7. Diğer platformlar  ·  ⬜
 
-- [ ] TikTok: hesap + handle (kurulum artifact'ında 09. bölüm)
-- [ ] TikTok Content Posting API denetim başvurusu
-- [ ] Instagram Reels: `instagram_content_publish` inceleme başvurusu
-- [ ] Onay gelene kadar ikisine de elle yükleme (aynı dosya, 1080×1920)
+- [x] Kod: `publish/instagram.py`, `publish/tiktok.py`, `tools/host_video.sh`,
+      `tools/tiktok_login.py`, `tokens.yml`, `media-init.yml`, defter
+      `content/social.json`, 28 test
+- [x] Handle: YouTube `@byte-knowledge`; Instagram/TikTok `@byte_knowledge`
+      (alt çizgi; hesap açılınca farklıysa `brand.json` > `handles`)
+- [ ] Instagram: Professional hesap, Meta uygulaması, token, `media-init`, Pages
+- [ ] TikTok: geliştirici uygulaması, `tiktok_login.py`, secret'lar
+- [ ] İlk gerçek yükleme ikisinde de (mod `public` iken)
+- [ ] TikTok Content Posting API **denetim başvurusu** (dolunca doğrudan
+      yayın + açıklama API'den gider; o zamana kadar taslak)
+- [ ] Facebook Reels: aynı Meta uygulamasıyla eklenebilir
 
 ---
 

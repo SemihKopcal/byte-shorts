@@ -1,0 +1,19 @@
+name: media-init
+
+# Bir kere calistir: Instagram'in videoyu cekecegi bos `media` dalini kurar.
+# Sonra Settings > Pages > Source: "Deploy from a branch" > media / (root).
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  init:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - run: bash tools/host_video.sh --init
+        env:
+          GH_TOKEN: ${{ github.token }}

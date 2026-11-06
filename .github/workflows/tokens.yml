@@ -1,0 +1,45 @@
+name: tokens
+
+# Instagram token'i 60 gun yasiyor; haftada bir yenileyip secret'a geri yazar.
+# Secret yazmak icin GH_PAT gerekir (GitHub'in kendi token'i secret yazamaz):
+#   Settings > Developer settings > Fine-grained tokens > bu depo, izin:
+#   "Secrets: Read and write"  ->  depoya GH_PAT adiyla secret olarak ekle.
+# GH_PAT yoksa yenileme yine denenir ama sonuc kaydedilemez ve uyari yazilir.
+on:
+  schedule:
+    - cron: "17 6 * * 1"
+  workflow_dispatch:
+
+concurrency:
+  group: tokens
+  cancel-in-progress: false
+
+jobs:
+  instagram:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      HAS_IG: ${{ secrets.INSTAGRAM_TOKEN != '' }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: instagram token yenile
+        if: env.HAS_IG == 'true'
+        env:
+          INSTAGRAM_TOKEN: ${{ secrets.INSTAGRAM_TOKEN }}
+          GH_PAT: ${{ secrets.GH_PAT }}
+        run: |
+          python publish/instagram.py --check
+          if python publish/instagram.py --refresh --out "$RUNNER_TEMP/ig-token"; then
+            if [ -n "$GH_PAT" ]; then
+              GH_TOKEN="$GH_PAT" gh secret set INSTAGRAM_TOKEN \
+                --repo "$GITHUB_REPOSITORY" < "$RUNNER_TEMP/ig-token"
+              echo "INSTAGRAM_TOKEN guncellendi"
+            else
+              echo "::warning::GH_PAT yok: yenilenen token kaydedilemedi, eski token 60 gunluk omruyle bitecek"
+            fi
+          else
+            echo "::warning::token yenilenemedi (24 saatten yeni olabilir); eskisi hala gecerliyse sorun yok"
+          fi

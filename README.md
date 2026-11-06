@@ -1,7 +1,8 @@
 # byte-shorts
 
 BYTE kanalinin uretim hatti. Gunde 2 video, hepsi kodla ciziliyor, konuyu
-Gemini seciyor, YouTube'a kendiliginden yukleniyor.
+Gemini seciyor, YouTube'a kendiliginden yukleniyor; Instagram Reels'e
+kendiliginden, TikTok'a taslak olarak gidiyor.
 
 ```
         ┌───────────────────────────── editorial/ (Gemini) ─────────────────────────────┐
@@ -14,6 +15,7 @@ sinyal ─┤   5 konu    senaryo   yargi + sayi/olay        revize    tema     
         worker/  synth (Piper) → sahneler → Pillow → ffmpeg → qc
                                            ▼ out/<id>/<id>.mp4 + manifest.json + captions.md
         publish/youtube.py  AUTO_PRIVACY ile yukle     tools/release.sh  Release'e koy
+        publish/instagram.py  Reels (video GitHub Pages'ten)   publish/tiktok.py  gelen kutusu taslagi
 ```
 
 ## Gunluk akis (`daily.yml`, 04:15 ve 13:15 UTC)
@@ -28,6 +30,10 @@ sinyal ─┤   5 konu    senaryo   yargi + sayi/olay        revize    tema     
 5. `content/built.json` ve `published.json` repoya geri yazilir.
 6. Video + Instagram/TikTok metinleri bir GitHub Release'e konur
    (telefondan indirilebilir).
+7. Yayin modu `public` ve ilgili secret'lar varsa: video `media` dalina
+   konur (GitHub Pages), Instagram Reels olarak yayinlanir, TikTok'a
+   gelen kutusu taslagi olarak yuklenir. Bu iki adim **uyari olarak** kirmizi
+   biter: patlarlarsa YouTube yuklemesini ve kosuyu bozmazlar.
 
 ## Konu bicimleri: bilgi + ilgi
 
@@ -107,8 +113,10 @@ editorial/   Gemini: llm.py (istemci) roles.py (istemler) rules.py (kurallar)
              pipeline.py (akis) signals.py (HN/GitHub/YouTube canli sinyal)
 worker/      cizim: synth, draw, scenes, themes, byte, series_*, qc, build
 publish/     youtube.py (yukleme) manifest.py (platform metinleri)
+             instagram.py tiktok.py net.py ledger.py (content/social.json)
 tools/       setup_runner.sh, fetch_voice.sh, pick_script.py, release.sh,
-             check_token.py, get_refresh_token.py, gemini_check.py
+             check_token.py, get_refresh_token.py, gemini_check.py,
+             host_video.sh (mp4'u media dalina koyar), tiktok_login.py
 tests/       agsiz testler (sahte Gemini)
 content/     scripts/ rejected/ backlog.json built.json published.json
 ci/          .github/workflows'un kopyasi (asagiya bak)
@@ -145,10 +153,60 @@ GEMINI_API_KEY=... python -m editorial --dry-run
 | `MIN_SCORE` | **variable** | editor esigi, 5-9, varsayilan 7 (kalite kadrani) |
 | `GEMINI_MODEL` | **variable** | bos = otomatik en yeni kararli flash; yeni modeller 503/429 veriyorsa `gemini-2.5-flash` gibi sabitle (basarisiz olursa yine otomatik listeye duser) |
 | `ALLOW_UNVERIFIED` | **variable** | aramayla dogrulanamayan en fazla kac iddia kabul, 0-5, varsayilan 1 |
+| `INSTAGRAM_USER_ID` | secret | Instagram Reels yukleme (hesap numarasi) |
+| `INSTAGRAM_TOKEN` | secret | uzun omurlu Instagram token'i (60 gun; haftalik otomatik yenilenir) |
+| `TIKTOK_CLIENT_KEY` | secret | TikTok uygulamasi |
+| `TIKTOK_CLIENT_SECRET` | secret | TikTok uygulamasi |
+| `TIKTOK_REFRESH_TOKEN` | secret | `python tools/tiktok_login.py` verir (365 gun; her kullanimda yenilenir) |
+| `GH_PAT` | secret | **istege bagli ama uzun vadede gerekli**: yenilenen token'lari secret'a geri yazar (asagiya bak) |
+| `AUTO_INSTAGRAM` | **variable** | `off` = Instagram adimini atla |
+| `AUTO_TIKTOK` | **variable** | `off` = TikTok adimini atla |
 
 **OAuth onay ekrani "In production" olmali.** "Testing" modunda Google
 refresh token'i 7 gunde iptal ediyor: ilk hafta calisir, sekizinci gun
 yuklemeler durur.
+
+## Instagram ve TikTok
+
+Ikisi de **yalniz `AUTO_PRIVACY=public`** iken ve secret'lari varsa calisir;
+`private` denemelerde bir sey gondermezler. Ayni video ayni platforma iki
+kez gitmez (`content/social.json`).
+
+**Instagram** (resmi "Instagram API with Instagram Login", kendi hesabin
+icin uygulama incelemesi gerekmiyor). Hesap *Professional* (Creator) olmali.
+Instagram videoyu kendi cekiyor, bu yuzden mp4 herkese acik bir adreste
+durmali: `tools/host_video.sh` videoyu `media` dalina koyar (tek commit,
+son 8 video kalir), GitHub Pages adresi `https://<kullanici>.github.io/byte-shorts/<id>.mp4`
+olur, dosya gercekten inene kadar bekler. Sonra konteyner olusur, Meta isleyene
+kadar durum sorgulanir, `media_publish` ile yayinlanir.
+
+Kurulum (bir kerelik): 1) hesabi Professional'a cevir, 2) developers.facebook.com'da
+uygulama > Instagram urunu > hesabini ekle > uzun omurlu token uret,
+3) `INSTAGRAM_USER_ID` ve `INSTAGRAM_TOKEN` secret'lari, 4) Actions >
+**media-init** calistir (bos `media` dalini kurar), 5) Settings > Pages >
+Source: `media` dali, kok klasor. Kontrol: `python -m publish.instagram --check`.
+
+**TikTok** (resmi Content Posting API, *inbox upload*). Denetimsiz uygulamalar
+dogrudan yayinlayamiyor; video hesabinin **gelen kutusuna taslak** olarak
+yuklenir, sen TikTok uygulamasinda acip aciklamayi yapistirip "Paylas"a
+basarsin (API aciklama koymaya izin vermiyor; metin Release'teki
+`captions.md` icinde). Kurulum: developers.tiktok.com'da uygulama (platform
+Desktop, redirect URI tam olarak `http://127.0.0.1:8765/callback/`, Login
+Kit + Content Posting API, `video.upload` izni), sonra bilgisayarinda
+`python tools/tiktok_login.py` (key/secret terminalde sorulur, sohbete
+yazilmaz), cikan token'i `pbcopy < ~/.byte-tiktok-refresh-token` ile panoya
+alip GitHub'da `TIKTOK_REFRESH_TOKEN` secret'ina yapistir. Uygulama
+"sandbox/test" durumundaysa kendi hesabini test kullanicisi olarak eklemen
+gerekebilir; TikTok bunu portalda gosterir.
+
+**Token omru ve `GH_PAT`.** `GITHUB_TOKEN` secret yazamaz. Instagram token'i
+60 gunde, TikTok access token'i 24 saatte biter; TikTok her yenilemede yeni
+refresh token verebilir. Bunlari secret'a geri yazmak icin fine-grained bir
+token gerekir: GitHub > Settings > Developer settings > Fine-grained tokens,
+yalniz bu repo, izin **Secrets: Read and write**; secret adi `GH_PAT`.
+`GH_PAT` yoksa kosu bozulmaz ama yenilenen token kaybolur: Instagram 60.
+gunde, TikTok refresh token'i degistiyse ilk bozulmada durur. `tokens.yml`
+her pazartesi Instagram token'ini yeniler.
 
 ## Workflow dosyalari neden iki yerde
 
@@ -166,7 +224,11 @@ yaparken ikisini de guncelle ya da `cp ci/*.yml .github/workflows/`.
 | Actions "startup failure" | GitHub faturalandirma kilidi | Settings > Billing > odeme yontemi ekle |
 | Gemini 404 | model adi emekli | kendiliginden siradakine gecer; `GEMINI_MODEL` ile zorlayabilirsin |
 | "konu uret" uzun suruyor | Gemini modelleri 503 (asiri yuklu) ya da zaman asimi veriyor | saglikli kosu 2-4 dk. Bozuk model: hic cevap vermemis modele ilk istek 45 sn, zaman asiminda hemen sonrakine; 503'te 2 tekrar; 5 dk dinlenir (sonraki roller ona gitmez); tum Gemini asamasi 10 dk (`GEMINI_DEADLINE`), adim 12 dk. Dolunca "BUGUN VIDEO YOK" ile kirmizi biter. Hizli cozum: `GEMINI_MODEL=gemini-2.5-flash` |
-| Gemini 429 | kota/hiz siniri | log nedenini yazar: "bu anahtarda kotasi yok" ve "gunluk kota" modeli hemen eler, "hiz siniri" Google'in istedigi sure kadar bekler (en fazla 65 sn, toplam `GEMINI_WAIT_BUDGET` = 480 sn). Hicbir model cevap vermezse log sonunda her modelin nedeni tek satirda |
+| Gemini 429 | kota/hiz siniri | log nedenini yazar: "bu anahtarda kotasi yok" ve "gunluk kota" modeli hemen eler, "hiz siniri" Google'in istedigi sure kadar bekler (en fazla 65 sn, toplam `GEMINI_WAIT_BUDGET` = 240 sn). Hicbir model cevap vermezse log sonunda her modelin nedeni tek satirda |
+| Instagram adimi uyari verdi, "hazir olmadi / ERROR" | Meta videoyu isleyemedi ya da Pages adresi henuz acik degil | `media-init` calisti mi, Pages `media` dalinda mi; video 1080x1920 H.264 mp4. Elle: `python -m publish.instagram out/<id>/manifest.json --video-url <adres>` |
+| Instagram "Invalid OAuth / token" | token suresi doldu ya da yenilenemedi | Meta panelinden yeni uzun omurlu token uret, `INSTAGRAM_TOKEN` guncelle; `GH_PAT` kur ki bir daha olmasin |
+| TikTok "scope_not_authorized" | uygulamada `video.upload` yok | portalda Content Posting API'yi ekle, `tiktok_login.py`'yi tekrar calistir |
+| TikTok "invalid_grant" | refresh token iptal / degismis | `tiktok_login.py`'yi tekrar calistir, secret'i guncelle |
 | "dogrulanamayan ... web search is unavailable" | arama destegi (grounding) bu anahtarda/modelde yok | yalniz formullu konular gecer; hikaye icin AI Studio'da anahtarin arama kotasini kontrol et |
 
 ## brand.json

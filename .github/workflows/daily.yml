@@ -14,6 +14,8 @@ name: daily
 # Bir sey ters giderse tek yapacagin: AUTO_PRIVACY=off. Kod degismiyor.
 # KALITE KADRANI: depo degiskeni MIN_SCORE (5-9, varsayilan 7). Editorun her
 # puaninin gecmesi gereken esik; yukseltirsen daha az ama daha iyi video.
+# AUTO_INSTAGRAM / AUTO_TIKTOK: `off` yaparsan o platforma gonderilmez
+# (secret'lar da yoksa zaten gonderilmez). Yalnizca mod `public` iken calisirlar.
 # GEMINI_MODEL: yeni modeller asiri yukluyse tek degiskenle sabitle
 # (ornek: gemini-2.5-flash). Bos = otomatik en yeni kararli flash.
 # ALLOW_UNVERIFIED (0-5, varsayilan 1): aramayla dogrulanamayan en fazla kac
@@ -51,6 +53,9 @@ jobs:
     env:
       SCRIPT_INPUT: ${{ inputs.script }}
       TOPIC_INPUT: ${{ inputs.topic }}
+      # secret'lar if: icinde okunamiyor; var mi yok mu diye burada bakiyoruz
+      HAS_IG: ${{ secrets.INSTAGRAM_TOKEN != '' && secrets.INSTAGRAM_USER_ID != '' }}
+      HAS_TT: ${{ secrets.TIKTOK_REFRESH_TOKEN != '' && secrets.TIKTOK_CLIENT_KEY != '' && secrets.TIKTOK_CLIENT_SECRET != '' }}
     steps:
       - uses: actions/checkout@v4
 
@@ -170,7 +175,61 @@ jobs:
           dir="$(python tools/pick_script.py --dir "$(basename "$SCRIPT")" | sed -n 's/^dir=//p')"
           python publish/youtube.py "$dir/manifest.json" --privacy "$MODE"
 
-      # Instagram/TikTok icin: video + metinler kalici bir adreste. Basarisiz
+      # ── Instagram / TikTok ────────────────────────────────────────────
+      # Sadece mod PUBLIC iken (private/unlisted test kosusu Instagram'a gitmez).
+      # Her biri depo degiskeniyle kapatilir: AUTO_INSTAGRAM=off, AUTO_TIKTOK=off.
+      # Secret'lar yoksa adim hic calismaz (hata degil). Basarisizlik kosuyu
+      # kirmizi yapmaz, uyari yazar: asil is YouTube.
+      - name: instagram'a yukle
+        id: instagram
+        if: >-
+          steps.render.outcome == 'success' &&
+          steps.mode.outputs.value == 'public' &&
+          vars.AUTO_INSTAGRAM != 'off' && env.HAS_IG == 'true'
+        continue-on-error: true
+        timeout-minutes: 20
+        env:
+          GH_TOKEN: ${{ github.token }}
+          INSTAGRAM_USER_ID: ${{ secrets.INSTAGRAM_USER_ID }}
+          INSTAGRAM_TOKEN: ${{ secrets.INSTAGRAM_TOKEN }}
+          SCRIPT: ${{ steps.pick2.outputs.path || steps.pick.outputs.path }}
+        run: |
+          dir="$(python tools/pick_script.py --dir "$(basename "$SCRIPT")" | sed -n 's/^dir=//p')"
+          url="$(bash tools/host_video.sh "$dir")"
+          python publish/instagram.py "$dir/manifest.json" --video-url "$url"
+
+      - name: tiktok taslagi
+        id: tiktok
+        if: >-
+          steps.render.outcome == 'success' &&
+          steps.mode.outputs.value == 'public' &&
+          vars.AUTO_TIKTOK != 'off' && env.HAS_TT == 'true'
+        continue-on-error: true
+        timeout-minutes: 15
+        env:
+          TIKTOK_CLIENT_KEY: ${{ secrets.TIKTOK_CLIENT_KEY }}
+          TIKTOK_CLIENT_SECRET: ${{ secrets.TIKTOK_CLIENT_SECRET }}
+          TIKTOK_REFRESH_TOKEN: ${{ secrets.TIKTOK_REFRESH_TOKEN }}
+          TIKTOK_NEW_REFRESH_FILE: ${{ runner.temp }}/tiktok-new-refresh
+          GH_PAT: ${{ secrets.GH_PAT }}
+          SCRIPT: ${{ steps.pick2.outputs.path || steps.pick.outputs.path }}
+        run: |
+          dir="$(python tools/pick_script.py --dir "$(basename "$SCRIPT")" | sed -n 's/^dir=//p')"
+          rc=0
+          python publish/tiktok.py "$dir/manifest.json" || rc=$?
+          # TikTok yeni refresh token dondurduysa secret'i guncelle (GH_PAT gerekir)
+          if [ -s "$TIKTOK_NEW_REFRESH_FILE" ]; then
+            if [ -n "$GH_PAT" ]; then
+              GH_TOKEN="$GH_PAT" gh secret set TIKTOK_REFRESH_TOKEN \
+                --repo "$GITHUB_REPOSITORY" < "$TIKTOK_NEW_REFRESH_FILE"
+              echo "TIKTOK_REFRESH_TOKEN guncellendi"
+            else
+              echo "::warning::TikTok yeni refresh token verdi ama GH_PAT yok, kaydedilemedi; yarin yukleme calismayabilir (rehbere bak: GH_PAT)"
+            fi
+          fi
+          exit $rc
+
+      # Instagram/TikTok'u elle yuklemek icin: video + metinler kalici bir adreste. Basarisiz
       # olursa kosuyu kirmizi yapmiyor; asil is YouTube.
       - name: release
         id: release
@@ -227,6 +286,8 @@ jobs:
           UPLOAD: ${{ steps.upload.outcome }}
           YTCHECK: ${{ steps.ytcheck.outcome }}
           RELEASE: ${{ steps.release.outcome }}
+          INSTAGRAM: ${{ steps.instagram.outcome }}
+          TIKTOK: ${{ steps.tiktok.outcome }}
         run: |
           fail=0
           if [ "$RENDER" != "success" ]; then
@@ -237,6 +298,12 @@ jobs:
           fi
           if [ "$UPLOAD" = "failure" ]; then
             echo "::error::YouTube yuklemesi basarisiz"; fail=1
+          fi
+          if [ "$INSTAGRAM" = "failure" ]; then
+            echo "::warning::Instagram'a yuklenemedi (instagram adimina bak); video Release'te, elle yukleyebilirsin"
+          fi
+          if [ "$TIKTOK" = "failure" ]; then
+            echo "::warning::TikTok taslagi olusturulamadi (tiktok adimina bak); video Release'te"
           fi
           if [ "$RELEASE" = "failure" ]; then
             echo "::warning::release olusturulamadi (Instagram/TikTok icin kalici adres yok)"

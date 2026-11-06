@@ -25,7 +25,7 @@ jobs:
         run: python -m compileall -q worker editorial publish tools tests
 
       - name: shell scriptleri
-        run: bash -n tools/setup_runner.sh tools/fetch_voice.sh tools/release.sh
+        run: bash -n tools/setup_runner.sh tools/fetch_voice.sh tools/release.sh tools/host_video.sh
 
       # Workflow'a gomulu bir satir sifir sutundan baslarsa YAML sessizce
       # bozuluyor ve Actions "Invalid workflow file" diyor; bunu burada yakala.
