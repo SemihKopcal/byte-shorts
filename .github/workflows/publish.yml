@@ -26,12 +26,21 @@ jobs:
       contents: write          # published.json'u geri yazmak icin
     steps:
       - uses: actions/checkout@v4
+      # apt DEGIL: runner'in Ubuntu aynasi 50 KB/s'ye dusup kosuyu 40 dakikalik
+      # zaman asimina soktu. Ayni ikililer GitHub release'inden 15 saniyede
+      # geliyor, ustelik cache'lenince hic inmiyor.
+      - name: arac cache
+        id: tools
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.local/bin
+            ~/.local/share/fonts/inter
+            ~/.local/share/fonts/cjk
+          key: runner-tools-ffmpeg-inter4-notojp-v2
 
-      - name: sistem paketleri
-        run: |
-          sudo apt-get update -qq
-          sudo apt-get install -y --no-install-recommends ffmpeg fonts-inter fontconfig
-          fc-cache -f
+      - name: ffmpeg + fontlar
+        run: bash tools/setup_runner.sh
 
       - uses: actions/setup-python@v5
         with:
@@ -50,10 +59,6 @@ jobs:
       - name: ses modeli indir
         if: steps.voice.outputs.cache-hit != 'true'
         run: bash tools/fetch_voice.sh en-us-ryan-high
-
-      # Artifact'tan indirmek yerine yeniden uretiyoruz: cizim deterministik,
-      # ayni script ayni videoyu veriyor. Boylece artifact suresi (2 gun)
-      # dolsa da yayinlayabiliyoruz ve QC bir kez daha calisiyor.
       - name: yeniden uret + QC
         run: python -m worker.build "content/scripts/${{ inputs.script }}"
 

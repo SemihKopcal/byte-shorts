@@ -22,16 +22,25 @@ jobs:
   build:
     runs-on: ubuntu-latest
     timeout-minutes: 40
+    permissions:
+      contents: write          # uretilen senaryoyu repoya geri yazmak icin
     steps:
       - uses: actions/checkout@v4
+      # apt DEGIL: runner'in Ubuntu aynasi 50 KB/s'ye dusup kosuyu 40 dakikalik
+      # zaman asimina soktu. Ayni ikililer GitHub release'inden 15 saniyede
+      # geliyor, ustelik cache'lenince hic inmiyor.
+      - name: arac cache
+        id: tools
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.local/bin
+            ~/.local/share/fonts/inter
+            ~/.local/share/fonts/cjk
+          key: runner-tools-ffmpeg-inter4-notojp-v2
 
-      # Inter fontu sart: yoksa Pillow sessizce baska fonta duser ve video
-      # bambaska gorunur. draw.py bulamazsa hata firlatiyor, burasi onu besler.
-      - name: sistem paketleri
-        run: |
-          sudo apt-get update -qq
-          sudo apt-get install -y --no-install-recommends ffmpeg fonts-inter fontconfig
-          fc-cache -f
+      - name: ffmpeg + fontlar
+        run: bash tools/setup_runner.sh
 
       - uses: actions/setup-python@v5
         with:
@@ -52,22 +61,46 @@ jobs:
         if: steps.voice.outputs.cache-hit != 'true'
         run: bash tools/fetch_voice.sh en-us-ryan-high
 
-      - name: script sec
+      - name: sirada senaryo var mi
         id: pick
         run: python tools/pick_script.py "${{ inputs.script }}" >> "$GITHUB_OUTPUT"
 
-      - name: uret
-        if: steps.pick.outputs.path != ''
-        run: python -m worker.build "${{ steps.pick.outputs.path }}"
-
-      - name: sira bos
+      # Sira bossa Gemini yeni bir senaryo yaziyor. Urettigi JSON once
+      # dogrulamadan geciyor (sahne adlari, kaynak, sure, tekrar); gecemezse
+      # dosya yazilmiyor ve kosu burada duruyor.
+      - name: konu uret
         if: steps.pick.outputs.path == ''
-        run: echo "::warning::Uretilecek script kalmadi -- content/scripts'e ekle."
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        run: python tools/write_script.py
+
+      - name: yeni senaryoyu sec
+        id: pick2
+        if: steps.pick.outputs.path == ''
+        run: python tools/pick_script.py >> "$GITHUB_OUTPUT"
+      - name: uret
+        env:
+          SCRIPT: ${{ steps.pick.outputs.path || steps.pick2.outputs.path }}
+        run: python -m worker.build "$SCRIPT"
+
+      # Uretileni defterе isle ve geri commit et. Bu olmadan kuyruk
+      # ILERLEMIYOR: published.json sadece yayinlayinca doluyor, dolayisiyla
+      # yayinlamadigin surece daily her gece AYNI videoyu uretiyordu.
+      - name: defteri isle
+        env:
+          SCRIPT: ${{ steps.pick.outputs.path || steps.pick2.outputs.path }}
+        run: |
+          python tools/pick_script.py --mark "$(basename "$SCRIPT")"
+          git config user.name  "byte-bot"
+          git config user.email "byte-bot@users.noreply.github.com"
+          git add content/built.json content/scripts
+          git diff --cached --quiet || git commit -m "uretildi: $(basename "$SCRIPT")"
+          git pull --rebase --autostash
+          git push
 
       # retention-days: ucretsiz hesapta artifact kotasi 500 MB. Video ~39 MB,
       # gunde 2 tane. 2 gun tutmak ~160 MB demek, rahat.
       - name: artifact
-        if: steps.pick.outputs.path != ''
         uses: actions/upload-artifact@v4
         with:
           name: video-${{ github.run_number }}
