@@ -23,6 +23,16 @@ aramayla doğrulanır; **arama kapalıysa hiçbir şey doğrulanmış sayılmaz*
 haftada YouTube Analytics'te biçim başına izlenme/tutma karşılaştırılacak;
 tutmayan biçimin ağırlığı `rank` içindeki bonustan ayarlanır.
 
+**Gemini anahtarı (6 Kasım, gemini-check #1):** ücretsiz katmanda Google
+Search grounding yok (resmi fiyat sayfası). Sonuç: `story`/`trend` biçimleri
+bu anahtarla çalışamaz; kod aramayı kendisi bırakıp yalnız `measured` ve
+`explain` yazar. Çalışan modeller: 3.6-flash, 3.5-flash, 3.5-flash-lite,
+3.1-flash-lite, 3-flash-preview; 3.8/3.7 aşırı yüklü (503); 2.5 ve 2.0 yeni
+hesaplarda 404. Hikaye/gündem için seçenekler: (a) AI Studio'da faturalandırma
+(ayda 5.000 arama bedava, sonrası 1.000'de 14 USD), (b) arama yerine kodun
+çektiği birincil kaynak metniyle doğrulama (Wikipedia/HN/GitHub) yazmak.
+Karar bekliyor.
+
 **Sırada (öncelik sırasıyla):**
 
 1. BYTE anlatıcı (aşağıda madde 1): `draw_byte_pointing` yazıldı, sahnelere

@@ -17,7 +17,7 @@ name: daily
 # AUTO_INSTAGRAM / AUTO_TIKTOK: `off` yaparsan o platforma gonderilmez
 # (secret'lar da yoksa zaten gonderilmez). Yalnizca mod `public` iken calisirlar.
 # GEMINI_MODEL: yeni modeller asiri yukluyse tek degiskenle sabitle
-# (ornek: gemini-2.5-flash). Bos = otomatik en yeni kararli flash.
+# (ornek: gemini-3.6-flash; gemini-check hangisi saglikli gosterir). Bos = otomatik en yeni kararli flash.
 # ALLOW_UNVERIFIED (0-5, varsayilan 1): aramayla dogrulanamayan en fazla kac
 # iddia kabul. Arama kapaliysa hicbir sey dogrulanmis sayilmaz.
 on:

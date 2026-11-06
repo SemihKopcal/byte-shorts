@@ -285,6 +285,16 @@ def run(llm, *, root: Path = ROOT, today: str | None = None,
         if not cands:
             log("-> yedek havuza dusuluyor")
             cands = pool
+    if not topic and not getattr(llm, "search_ok", lambda: True)():
+        # Arama araci yok (ucretsiz anahtar): hikaye/gundem olay iddialarini
+        # kimse dogrulayamaz, editor kapisindan gecemez. Onlara yazar+editor
+        # turlari harcamak yerine bastan ele; yalniz rakami formulle kanitlanan
+        # konular kalir.
+        keep = [c for c in cands if c.get("format") not in rules.NEEDS_FACTS]
+        if len(keep) < len(cands):
+            log(f"arama yok: dogrulanamayan {len(cands) - len(keep)} "
+                "hikaye/gundem adayi elendi")
+        cands = keep or [c for c in pool if c.get("format") not in rules.NEEDS_FACTS]
     if not cands:
         raise Failure("konu adayi yok: yapimci bos dondu, yedek havuz da bos")
 

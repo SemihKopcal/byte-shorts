@@ -47,6 +47,8 @@ LAST_RESORT = ("gemini-flash-latest", "gemini-2.5-flash", "gemini-2.0-flash")
 
 _FLASH = re.compile(
     r"^gemini-(\d+)(?:\.(\d+))?-flash(-lite)?(-preview[\w.-]*)?$")
+# metin disi varyantlar: "...-flash-preview-tts" regex'e uyuyor ama ses uretir
+_NOT_TEXT = re.compile(r"tts|image|audio|live|native|dialog|embed|robot", re.I)
 
 
 def default_transport(method, url, key, body=None, timeout=120):
@@ -129,8 +131,7 @@ def rank_models(models: list[dict]) -> list[str]:
     """ListModels cevabindan, denenecek siraya dizilmis model adlari.
 
     Sira: kararli > preview, lite olmayan > lite, sonra en yeni surum.
-    Gorsel/ses/canli varyantlar (-image, -tts, -live...) regex'e uymadigi
-    icin kendiliginden elenir.
+    Gorsel/ses/canli varyantlar (-image, -tts, -live...) elenir.
     """
     scored = []
     for m in models:
@@ -138,7 +139,7 @@ def rank_models(models: list[dict]) -> list[str]:
         if "generateContent" not in m.get("supportedGenerationMethods", []):
             continue
         mt = _FLASH.match(name)
-        if not mt:
+        if not mt or _NOT_TEXT.search(name):
             continue
         major, minor = int(mt[1]), int(mt[2] or 0)
         scored.append(((not mt[4], not mt[3], major, minor), name))
@@ -186,6 +187,7 @@ class Gemini:
         self.deadline = float(os.environ.get("GEMINI_DEADLINE") or 600)
         self.timeout = float(os.environ.get("GEMINI_TIMEOUT") or 60)
         self._proven: set[str] = set()      # bu kosuda en az bir kez cevap vermis
+        self._no_search: set[str] = set()   # aramasiz cevap verip aramada takilanlar
         self._t0 = clock()
         self._cool: dict[str, float] = {}   # model -> dinlenme bitis zamani
         self.waited = 0.0             # 429/5xx icin toplam beklenen saniye
@@ -256,6 +258,11 @@ class Gemini:
                      f"{self.reasons[model][:160]}")
         return None
 
+    def search_ok(self) -> bool:
+        """False: son cevap veren modelde arama araci kullanilamiyor (ucretsiz
+        anahtarlar). Pipeline buna gore dogrulama isteyen konulari eler."""
+        return not (self.model and self.model in self._no_search)
+
     def _rest(self, model: str):
         self._cool[model] = self.clock() + COOLDOWN
 
@@ -293,7 +300,7 @@ class Gemini:
         self.reasons = {m: r for m, r in self.reasons.items()
                         if m in self._dead}
         for model in self.candidates():
-            use_grounding = grounded
+            use_grounding = grounded and model not in self._no_search
             hint: float | None = None
             net_fail = 0
             proven = model in self._proven
@@ -314,14 +321,34 @@ class Gemini:
                     self.waited += w
                     self.sleep(w)
                 hint = None
-                self._pace()
-                self.calls += 1
-                st, out = self.transport(
-                    "POST", f"{BASE}/models/{model}:generateContent", self.key,
-                    self._body(prompt, system, temperature, max_tokens,
-                               json_mode, use_grounding),
-                    timeout=(self.timeout if proven or wait
-                             else min(self.timeout, FIRST_TIMEOUT)))
+                tmo = (self.timeout if proven or wait
+                       else min(self.timeout, FIRST_TIMEOUT))
+
+                def send(g: bool):
+                    self._pace()
+                    self.calls += 1
+                    return self.transport(
+                        "POST", f"{BASE}/models/{model}:generateContent",
+                        self.key, self._body(prompt, system, temperature,
+                                             max_tokens, json_mode, g),
+                        timeout=tmo)
+
+                st, out = send(use_grounding)
+                if st in (400, 429) and use_grounding:
+                    # Arama araci sebep olabilir: ucretsiz anahtarlarda arama
+                    # kotasi yok ve Google bunu duz "429 quota exceeded" diye
+                    # soyluyor (model kotasindan ayirt edilemiyor). Beklemeden
+                    # AYNI modele aramasiz sor: cevap gelirse sorun aramadadir,
+                    # model saglam; bu kosuda bir daha arama denenmez.
+                    first = gist((out.get("error") or {}).get("message", ""), 120)
+                    st2, out2 = send(False)
+                    if st2 == 200:
+                        use_grounding = False
+                        self._no_search.add(model)
+                        self.log(f"  [gemini] {tag}{model} arama araci "
+                                 f"kullanilamiyor ({st}: {first}); aramasiz "
+                                 "devam")
+                    st, out = st2, out2     # modelin kendi durumu neyse o
                 if st == 200:
                     text = self._text(out)
                     if text is None:
@@ -334,22 +361,9 @@ class Gemini:
                     self.last_grounded = use_grounding
                     return text
                 msg = gist((out.get("error") or {}).get("message", ""))
-                if st == 400 and use_grounding:
-                    # Bu model/hesap arama destegini vermiyor: aramasiz dene.
-                    self.log(f"  [gemini] {tag}arama destegi yok, "
-                             f"aramasiz deneniyor ({msg})")
-                    use_grounding = False
-                    continue
                 if st == 429:
                     kind, delay = quota_hint(out)
                     self.reasons[model] = f"429 {kind or '?'}: {msg}"
-                    if (kind in ("zero", "daily") and use_grounding
-                            and re.search(r"ground|search", msg, re.I)):
-                        # Kota ARAMA icin bitmis, modelin kendisi icin degil.
-                        self.log(f"  [gemini] {tag}{model} arama kotasi yok, "
-                                 f"aramasiz deneniyor ({msg})")
-                        use_grounding = False
-                        continue
                     if kind in ("zero", "daily"):
                         what = ("bu anahtarda kotasi yok" if kind == "zero"
                                 else "gunluk kotasi dolmus")

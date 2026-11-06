@@ -45,6 +45,11 @@ def recommend(rows: list[dict]) -> tuple[str | None, str]:
         return None, "HICBIR model cevap vermedi. Anahtar gecersiz, kota yok " \
                      "ya da Gemini genel olarak kesintide."
     first = healthy[0]
+    skipped = rows.index(first)       # siradaki ilk saglikliyi gecen bozuk modeller
+    pin = (f" Onundeki {skipped} model su an cevap vermiyor; her kosunun basinda "
+           f"onlari yoklayip vakit yitirmemek icin GEMINI_MODEL={first['model']} "
+           "olarak sabitle (o da bozulursa kendiliginden listeye duser)."
+           if skipped else "")
     if first["grounded"] is not None and not first["grounded"]["ok"]:
         with_search = [r for r in healthy if r["grounded"] and r["grounded"]["ok"]]
         if with_search:
@@ -54,9 +59,10 @@ def recommend(rows: list[dict]) -> tuple[str | None, str]:
                 f"Sabitlemek icin GEMINI_MODEL={with_search[0]['model']}")
         return first["model"], (
             f"{first['model']} calisiyor ama hicbir modelde arama yok: yalniz "
-            "formullu (measured) konular yayina girer")
-    return first["model"], (f"{first['model']} calisiyor; pipeline zaten bunu "
-                            "secer, bir sey yapmana gerek yok")
+            "formullu (measured) konular yayina girer." + pin)
+    return first["model"], (
+        f"{first['model']} calisiyor." +
+        (pin if pin else " Pipeline zaten bunu secer, bir sey yapmana gerek yok"))
 
 
 def render(rows: list[dict]) -> str:

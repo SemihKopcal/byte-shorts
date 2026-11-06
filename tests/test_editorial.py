@@ -456,7 +456,21 @@ class GeminiCheckTool(unittest.TestCase):
         best, why = C.recommend([self.row("a", False), self.row("b", True, True),
                                  self.row("c", True, True)])
         self.assertEqual(best, "b")
+        self.assertIn("GEMINI_MODEL=b", why)            # onundeki "a" bozuk
+        self.assertIn("1 model", why)
+        best, why = C.recommend([self.row("a", True, True), self.row("b", True, True)])
+        self.assertEqual(best, "a")
         self.assertIn("bir sey yapmana gerek yok", why)
+
+    def test_recommend_no_search_anywhere_still_suggests_pinning(self):
+        from tools import gemini_check as C
+        best, why = C.recommend([self.row("x", False), self.row("y", False),
+                                 self.row("z", True, False),
+                                 self.row("w", True, False)])
+        self.assertEqual(best, "z")
+        self.assertIn("hicbir modelde arama yok", why)
+        self.assertIn("GEMINI_MODEL=z", why)
+        self.assertIn("2 model", why)
 
     def test_recommend_prefers_a_model_with_search(self):
         from tools import gemini_check as C
@@ -715,12 +729,13 @@ def root_with_content(tmp: str) -> Path:
 
 
 class Pipeline(unittest.TestCase):
-    def run_pipeline(self, replies, grounded=True, scripts=(), **kw):
+    def run_pipeline(self, replies, grounded=True, scripts=(), llm_cls=FakeLLM,
+                     **kw):
         with tempfile.TemporaryDirectory() as tmp:
             root = root_with_content(tmp)
             for name, body in scripts:
                 (root / "content/scripts" / name).write_text(json.dumps(body))
-            llm = FakeLLM(replies)
+            llm = llm_cls(replies)
             llm.last_grounded = grounded
             try:
                 spec = pipeline.run(llm, root=root, today="2026-11-06",
@@ -980,6 +995,54 @@ class Pipeline(unittest.TestCase):
                          "deep")
 
 
+    STORY = "the week a support bot promised refunds it could not give"
+
+    def two_candidates(self):
+        story = copy.deepcopy(cands()["candidates"][0])
+        story.update(format="story", angle=self.STORY)
+        story["scores"]["curiosity"] = 10                # ilk sirada olsun
+        measured = copy.deepcopy(cands()["candidates"][0])
+        measured["format"] = "measured"
+        return {"candidates": [story, measured]}
+
+    def searchless_replies(self):
+        return {"yapimci": [self.two_candidates()], "yazar": [good_spec()],
+                "editor": [review("publish", 8)],
+                "dogrulayici": [{"results": [{"shown": "$0.40",
+                                              "status": "confirmed"}]}],
+                "sanat": [{"theme": "ember"}], "metin": [copy_parts()]}
+
+    def test_with_search_the_story_candidate_is_tried_first(self):
+        _, llm, *_ = self.run_pipeline(self.searchless_replies())
+        first = [p for r, p in llm.log if r == "yazar"][0]
+        self.assertIn(self.STORY, first)
+
+    def test_without_search_story_and_trend_candidates_are_skipped(self):
+        class NoSearch(FakeLLM):
+            def search_ok(self):
+                return False
+        spec, llm, *_, err = self.run_pipeline(self.searchless_replies(),
+                                               llm_cls=NoSearch)
+        self.assertIsNone(err)
+        self.assertEqual(spec["brief"]["format"], "measured")
+        prompts = [p for r, p in llm.log if r == "yazar"]
+        self.assertEqual(len(prompts), 1)               # tek yazar cagrisi
+        self.assertFalse(any(self.STORY in p for p in prompts))
+
+    def test_without_search_and_only_story_candidates_falls_back_to_backlog(self):
+        class NoSearch(FakeLLM):
+            def search_ok(self):
+                return False
+        only = self.two_candidates()
+        only["candidates"] = only["candidates"][:1]
+        rep = self.searchless_replies()
+        rep["yapimci"] = [only]
+        spec, llm, *_, err = self.run_pipeline(rep, llm_cls=NoSearch)
+        self.assertIsNone(err)
+        first = [p for r, p in llm.log if r == "yazar"][0]
+        self.assertIn("UTF-8", first)                   # yedek havuzdaki olcum
+        self.assertNotIn(self.STORY, first)
+
 # ═══ render tarafi ══════════════════════════════════════════════════════
 class RenderSide(unittest.TestCase):
     def _timeline_pixels(self, steps, t):
@@ -1071,6 +1134,121 @@ class RenderSide(unittest.TestCase):
         from worker.themes import NAMES as T
         self.assertEqual(set(T), set(THEMES))
         self.assertEqual(set(roles.THEME_DOC), set(THEMES))
+
+
+# ═══ ucretsiz anahtar: Semih'in gemini-check tablosu (6 Kasim 2026) ═════
+HIS_MODELS = ["gemini-3.8-flash", "gemini-3.7-flash", "gemini-3.6-flash",
+              "gemini-3.5-flash", "gemini-2.5-flash", "gemini-3.5-flash-lite",
+              "gemini-3.1-flash-lite", "gemini-2.5-flash-lite",
+              "gemini-3-flash-preview", "gemini-2.5-flash-preview-tts",
+              "gemini-flash-latest", "gemini-2.0-flash"]
+
+
+class FreeTierTransport:
+    """Gercek tablo: 3.8/3.7/latest 503 (asiri yuklu); 2.x 404; digerleri
+    aramasiz 200, ARAMALI istek 429 -- ve o 429 DUZ bir kota mesaji: ne
+    QuotaFailure ne 'limit: 0' ne 'search' kelimesi var (tabloda kind bos)."""
+
+    def __init__(self, grounded_ok=()):
+        self.calls = []
+        self.grounded_ok = set(grounded_ok)
+
+    def __call__(self, method, url, key, body=None, timeout=120):
+        if method == "GET":
+            return models(*HIS_MODELS)
+        model = url.split("/models/")[1].split(":")[0]
+        grounded = bool((body or {}).get("tools"))
+        self.calls.append((model, grounded))
+        if model in ("gemini-3.8-flash", "gemini-3.7-flash",
+                     "gemini-flash-latest"):
+            return 503, {"error": {"message": "This model is currently "
+                                   "experiencing high demand."}}
+        if model.startswith(("gemini-2.5", "gemini-2.0")):
+            return 404, {"error": {"message": f"models/{model} is no longer "
+                                   "available to new users."}}
+        if grounded and model not in self.grounded_ok:
+            return 429, {"error": {"code": 429, "message":
+                                   "You exceeded your current quota, please "
+                                   "check your plan and billing details."}}
+        return ok(json.dumps({"candidates": [], "ready": True}))
+
+
+class FreeTierKey(unittest.TestCase):
+    def client(self, **kw):
+        sleeps, logs = [], []
+        stub = FreeTierTransport(**kw)
+        return gem(stub, sleeps, logs), stub, sleeps, logs
+
+    def test_tts_and_image_models_are_never_candidates(self):
+        names = L.rank_models(models(*HIS_MODELS, "gemini-2.5-flash-image",
+                                     "gemini-3-flash-live")[1]["models"])
+        self.assertNotIn("gemini-2.5-flash-preview-tts", names)
+        self.assertEqual(names[:3], ["gemini-3.8-flash", "gemini-3.7-flash",
+                                     "gemini-3.6-flash"])
+        self.assertIn("gemini-3-flash-preview", names)
+
+    def test_search_429_without_details_does_not_burn_the_run(self):
+        llm, stub, sleeps, logs = self.client()
+        llm._cands = ["gemini-3.6-flash", "gemini-3.5-flash"]   # 503'ler atlandi
+        out = llm.ask("x", grounded=True, role="yapimci")
+        self.assertIsNotNone(out)
+        self.assertEqual(llm.model, "gemini-3.6-flash")
+        self.assertFalse(llm.last_grounded)             # aramasiz: kod fail-closed
+        self.assertEqual(sleeps, [])                    # HIC bekleme yok
+        self.assertEqual(stub.calls, [("gemini-3.6-flash", True),
+                                      ("gemini-3.6-flash", False)])
+        self.assertEqual(llm._dead, set())
+        self.assertEqual(llm._cool, {})                 # dinlendirilmedi
+        self.assertTrue(any("arama araci" in m for m in logs))
+
+    def test_search_is_not_retried_for_the_rest_of_the_run(self):
+        llm, stub, sleeps, _ = self.client()
+        llm._cands = ["gemini-3.6-flash"]
+        for role in ("yapimci", "dogrulayici", "dogrulayici"):
+            self.assertIsNotNone(llm.ask("x", grounded=True, role=role))
+        self.assertEqual(sum(1 for _, g in stub.calls if g), 1)   # tek deneme
+        self.assertEqual(len(stub.calls), 4)
+        self.assertEqual(sleeps, [])
+
+    def test_search_still_used_when_a_model_supports_it(self):
+        llm, stub, _, _ = self.client(grounded_ok={"gemini-3.6-flash"})
+        llm._cands = ["gemini-3.6-flash"]
+        self.assertIsNotNone(llm.ask("x", grounded=True))
+        self.assertTrue(llm.last_grounded)
+        self.assertEqual(stub.calls, [("gemini-3.6-flash", True)])
+
+    def test_real_rate_limit_is_not_mistaken_for_missing_search(self):
+        # model GERCEKTEN hiz siniri veriyorsa aramasiz da 429 doner: arama
+        # "yok" diye isaretlenmez, bekleyip aramayla tekrar denenir
+        seq = [quota("rate", 3), quota("rate", 3), ok("{}")]
+        st = Stub(seq)
+        sleeps = []
+        llm = gem(st, sleeps)
+        llm._cands = ["m"]
+        self.assertIsNotNone(llm.ask("x", grounded=True))
+        self.assertEqual(llm._no_search, set())
+        self.assertEqual(sleeps, [5])                  # yalniz 1 bekleme
+        self.assertEqual(len(st.calls), 3)
+
+    def test_warm_skips_overloaded_models_and_settles_on_the_first_healthy(self):
+        llm, stub, _, _ = self.client()
+        self.assertEqual(llm.warm(), "gemini-3.6-flash")
+        self.assertEqual([m for m, _ in stub.calls],
+                         ["gemini-3.8-flash", "gemini-3.7-flash",
+                          "gemini-3.6-flash"])
+
+    def test_producer_and_factcheck_work_on_this_key(self):
+        llm, stub, sleeps, _ = self.client()
+        llm._cands = ["gemini-3.6-flash"]
+        spec = good_spec()
+        lookups = [{"shown": "$0.40", "source": 0}]
+        # yapimci: JSON gelir ama aday yok -> bos liste, cokme yok
+        self.assertEqual(roles.produce(llm, live="(none)", backlog=[],
+                                       recent=[], today="2026-11-06"), [])
+        # dogrulayici: arama yok -> hicbir sey dogrulanmis sayilmaz
+        problems, unverified, grounded = roles.factcheck(llm, spec, lookups)
+        self.assertEqual((problems, unverified, grounded), ([], 1, False))
+        self.assertEqual(sleeps, [])
 
 
 if __name__ == "__main__":
