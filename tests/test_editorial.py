@@ -28,9 +28,11 @@ class Stub:
     def __init__(self, replies):
         self.replies = list(replies)
         self.calls = []
+        self.timeouts = []
 
     def __call__(self, method, url, key, body=None, timeout=120):
         self.calls.append((method, url, body))
+        self.timeouts.append(timeout)
         return self.replies.pop(0) if self.replies else (500, {})
 
 
@@ -184,6 +186,59 @@ class Client(unittest.TestCase):
         g = gem(s, logs=logs)
         self.assertIsNone(g.ask("x", json_mode=False))
         self.assertTrue(any("hicbir model cevap vermedi" in m for m in logs))
+
+    def test_overloaded_model_rests_so_later_calls_skip_it(self):
+        # canli kosuda: yazar, editor, metin ayni bozuk modele bastan vuruyordu
+        s = Stub([models("gemini-3.8-flash", "gemini-3.7-flash"),
+                  (503, {}), (503, {}), (503, {}), ok("a"), ok("b")])
+        g = gem(s)
+        self.assertEqual(g.ask("x", json_mode=False), "a")
+        self.assertEqual(g.model, "gemini-3.7-flash")
+        self.assertEqual(g.ask("y", json_mode=False), "b")
+        urls = [c[1] for c in s.calls if c[0] == "POST"]
+        self.assertEqual(sum("3.8-flash" in u for u in urls), 3)    # sadece ilk rolde
+        self.assertEqual(sum("3.7-flash" in u for u in urls), 2)
+
+    def test_503_gets_two_retries_not_four(self):
+        s = Stub([models("gemini-3.8-flash", "gemini-3.7-flash")]
+                 + [(503, {})] * 3 + [ok("fine")])
+        g = gem(s)
+        self.assertEqual(g.ask("x", json_mode=False), "fine")
+        self.assertEqual(sum("3.8-flash" in c[1] for c in s.calls), 3)
+
+    def test_timeouts_give_up_after_two_attempts(self):
+        sleeps = []
+        s = Stub([models("gemini-3.8-flash", "gemini-3.7-flash"),
+                  (0, {"error": {"message": "timed out"}}),
+                  (0, {"error": {"message": "timed out"}}), ok("fine")])
+        g = gem(s, sleeps)
+        self.assertEqual(g.ask("x", json_mode=False), "fine")
+        self.assertEqual(g.model, "gemini-3.7-flash")
+        self.assertEqual(sum("3.8-flash" in c[1] for c in s.calls), 2)
+
+    def test_all_models_resting_still_tries_again(self):
+        s = Stub([(503, {})] * 3 + [ok("recovered")])
+        g = gem(s)
+        g._cands = ["gemini-3.8-flash"]          # tek model, liste cagrisi yok
+        self.assertIsNone(g.ask("x", json_mode=False))
+        self.assertEqual(g.candidates(), ["gemini-3.8-flash"])   # dinleniyor ama
+        self.assertEqual(g.ask("y", json_mode=False), "recovered")  # denenir
+
+    def test_deadline_stops_everything(self):
+        s = Stub([models("gemini-3.8-flash", "gemini-3.7-flash")]
+                 + [(503, {})] * 60)
+        g = gem(s)
+        g.deadline = 6                      # sahte saat: cagri basina 2 tik
+        self.assertIsNone(g.ask("x", json_mode=False))
+        self.assertLess(len(s.calls), 8)
+        self.assertIsNone(g.ask("y", json_mode=False))   # tavan kalici
+
+    def test_request_timeout_is_passed_to_transport(self):
+        s = Stub([models("gemini-3.8-flash"), ok("x")])
+        g = gem(s)
+        g.timeout = 33
+        g.ask("x", json_mode=False)
+        self.assertEqual(set(s.timeouts), {33})
 
     def test_list_failure_still_tries_fallback_names(self):
         s = Stub([(500, {}), ok("fine")])

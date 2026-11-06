@@ -160,6 +160,7 @@ yaparken ikisini de guncelle ya da `cp ci/*.yml .github/workflows/`.
 | "UYARI: public istendi, YouTube private yapti" | API projesi dogrulanmamis | videoyu Studio'dan elle public yap; Google'a API denetimi basvurusu |
 | Actions "startup failure" | GitHub faturalandirma kilidi | Settings > Billing > odeme yontemi ekle |
 | Gemini 404 | model adi emekli | kendiliginden siradakine gecer; `GEMINI_MODEL` ile zorlayabilirsin |
+| "konu uret" yarim saat siriyor | Gemini modelleri 503 (asiri yuklu) ya da zaman asimi veriyor | bozuk model 5 dk dinlendirilir (sonraki roller ona gitmez), 503'te 2 tekrar, zaman asiminda 2 deneme, tek cagri 90 sn (`GEMINI_TIMEOUT`), tum Gemini asamasi 20 dk (`GEMINI_DEADLINE`), adim 25 dk. Dolunca "BUGUN VIDEO YOK" ile kirmizi biter, sonraki kosu temiz baslar |
 | Gemini 429 | kota/hiz siniri | log nedenini yazar: "bu anahtarda kotasi yok" ve "gunluk kota" modeli hemen eler, "hiz siniri" Google'in istedigi sure kadar bekler (en fazla 65 sn, toplam `GEMINI_WAIT_BUDGET` = 480 sn). Hicbir model cevap vermezse log sonunda her modelin nedeni tek satirda |
 | "dogrulanamayan ... web search is unavailable" | arama destegi (grounding) bu anahtarda/modelde yok | yalniz formullu konular gecer; hikaye icin AI Studio'da anahtarin arama kotasini kontrol et |
 

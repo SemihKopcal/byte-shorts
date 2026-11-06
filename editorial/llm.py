@@ -14,6 +14,13 @@ Tasarim kararlari
   * Anahtar URL'de degil `x-goog-api-key` basliginda: hata mesajlari ve
     Actions logu URL'yi yazdirabiliyor, anahtar logda kalmasin.
   * Hicbir cagri hata FIRLATMIYOR; None donuyor. Cagiran taraf yedege dusebilsin.
+  * Bozuk model DINLENDIRILIYOR: tekrarlari biten (503/zaman asimi) model 5
+    dakika boyunca denenmiyor. Yoksa sonraki her rol (yazar, editor, metin)
+    ayni bozuk modele bastan vurup dakikalar harciyor; canli kosuda 27 dakika
+    boyle gitti.
+  * Sert tavan: GEMINI_DEADLINE (varsayilan 1200 sn). Dolunca ask() hemen None
+    doner, hat "bugun video yok" der; Actions saatlerce asili kalmaz.
+  * Tek cagri zaman asimi GEMINI_TIMEOUT (varsayilan 90 sn).
   * Ardisik cagrilar arasinda en az MIN_INTERVAL saniye: ucretsiz katman
     dakikada birkac istege izin veriyor, bir videonun 10+ cagrisi bunu asar.
   * `transport` disaridan verilebiliyor: testler ag olmadan calisiyor.
@@ -28,7 +35,8 @@ import urllib.request
 
 BASE = "https://generativelanguage.googleapis.com/v1beta"
 RETRY = {429, 500, 502, 503, 504}
-BACKOFF = (5, 15, 40)                 # saniye; uc tekrar, sonra siradaki model
+BACKOFF = (5, 15)                     # saniye; iki tekrar, sonra siradaki model
+COOLDOWN = 300                        # tekrarlari biten model bu kadar saniye dinlenir
 MAX_HINT = 65                         # Google "55s sonra dene" derse en fazla bu kadar bekle
 LAST_RESORT = ("gemini-flash-latest", "gemini-2.5-flash", "gemini-2.0-flash")
 
@@ -170,6 +178,10 @@ class Gemini:
         self._dead: set[str] = set()
         self._last = -1e9
         self.wait_budget = float(os.environ.get("GEMINI_WAIT_BUDGET") or 480)
+        self.deadline = float(os.environ.get("GEMINI_DEADLINE") or 1200)
+        self.timeout = float(os.environ.get("GEMINI_TIMEOUT") or 90)
+        self._t0 = clock()
+        self._cool: dict[str, float] = {}   # model -> dinlenme bitis zamani
         self.waited = 0.0             # 429/5xx icin toplam beklenen saniye
         self.reasons: dict[str, str] = {}   # model -> son hata ozeti
         self.model = ""               # son basarili cagrinin modeli
@@ -182,7 +194,7 @@ class Gemini:
             forced = os.environ.get("GEMINI_MODEL", "").strip()
             names: list[str] = [forced] if forced else []
             st, out = self.transport("GET", f"{BASE}/models?pageSize=200",
-                                     self.key)
+                                     self.key, timeout=self.timeout)
             if st == 200:
                 names += rank_models(out.get("models", []))
             else:
@@ -190,7 +202,16 @@ class Gemini:
                          "yedek adlar denenecek")
             names += list(LAST_RESORT)
             self._cands = list(dict.fromkeys(names))
-        return [m for m in self._cands if m not in self._dead]
+        live = [m for m in self._cands if m not in self._dead]
+        now = self.clock()
+        rested = [m for m in live if self._cool.get(m, 0) <= now]
+        return rested or live         # hepsi dinleniyorsa yine de dene
+
+    def _rest(self, model: str):
+        self._cool[model] = self.clock() + COOLDOWN
+
+    def over_deadline(self) -> bool:
+        return self.clock() - self._t0 > self.deadline
 
     # ── cagri ───────────────────────────────────────────────────────────
     def _body(self, prompt, system, temperature, max_tokens, json_mode,
@@ -225,12 +246,20 @@ class Gemini:
         for model in self.candidates():
             use_grounding = grounded
             hint: float | None = None
+            net_fail = 0
             for wait in (0,) + BACKOFF:
+                if self.over_deadline():
+                    self.failures += 1
+                    self.last_grounded = False
+                    self.log(f"  [gemini] {tag}zaman tavani doldu "
+                             f"({self.deadline:.0f} sn), vazgeciliyor")
+                    return None
                 if wait:
                     w = min(max(wait, hint or 0), MAX_HINT)
                     if self.waited + w > self.wait_budget:
                         self.log(f"  [gemini] {tag}bekleme butcesi doldu "
                                  f"({self.wait_budget:.0f} sn), siradaki model")
+                        self._rest(model)
                         break
                     self.waited += w
                     self.sleep(w)
@@ -240,7 +269,8 @@ class Gemini:
                 st, out = self.transport(
                     "POST", f"{BASE}/models/{model}:generateContent", self.key,
                     self._body(prompt, system, temperature, max_tokens,
-                               json_mode, use_grounding))
+                               json_mode, use_grounding),
+                    timeout=self.timeout)
                 if st == 200:
                     text = self._text(out)
                     if text is None:
@@ -282,6 +312,15 @@ class Gemini:
                     continue
                 if st in RETRY or st == 0:
                     self.reasons[model] = f"{st}: {msg}"
+                    if st == 0:
+                        # zaman asimi/ag hatasi: her biri dakikalar yiyor,
+                        # bir kez daha denemek yeter
+                        net_fail += 1
+                        if net_fail >= 2:
+                            self.log(f"  [gemini] {tag}{model} ulasilamiyor "
+                                     f"({msg}), dinlendiriliyor")
+                            self._rest(model)
+                            break
                     self.log(f"  [gemini] {tag}{model} {st}: tekrar "
                              f"denenecek ({msg})")
                     continue
@@ -296,8 +335,9 @@ class Gemini:
                 return None
             else:
                 # tekrarlar bitti (kota/yogunluk): baska modelin kotasi ayri
+                self._rest(model)
                 self.log(f"  [gemini] {tag}{model} yanit vermedi, "
-                         "siradaki model")
+                         f"{COOLDOWN // 60} dk dinlendiriliyor, siradaki model")
         self.failures += 1
         self.last_grounded = False
         if self.reasons:
