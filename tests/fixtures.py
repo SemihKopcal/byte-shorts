@@ -10,6 +10,7 @@ THEMES = ("midnight", "ember", "deep", "moss", "slate", "plum", "rust", "ice")
 def good_spec() -> dict:
     """Tum kurallardan gecen, 11 beat'lik senaryo."""
     return copy.deepcopy({
+        "format": "measured",
         "title": "A minute of AI video costs sixty seconds of money",
         "summary": "Video models bill by the second, so length sets the bill.",
         "tags": ["pricing", "video"],
@@ -73,11 +74,13 @@ CLAIMS = [
 ]
 
 
-def review(verdict="publish", score=8, risk="low", fixes=None, claims=None):
+def review(verdict="publish", score=8, risk="low", fixes=None, claims=None,
+           facts=None):
     return {"scores": {k: score for k in
                        ("hook", "story", "clarity", "audience", "voice")},
             "notes": {}, "risk": {"level": risk, "flags": []},
             "claims": CLAIMS if claims is None else claims,
+            "facts": facts or [],
             "verdict": verdict, "fixes": fixes or []}
 
 

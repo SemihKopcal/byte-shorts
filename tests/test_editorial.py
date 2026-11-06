@@ -324,6 +324,66 @@ class Claims(unittest.TestCase):
         self.assertTrue(any("hesaplanamadi" in x for x in p))
 
 
+class Facts(unittest.TestCase):
+    def test_story_needs_at_least_two_listed_statements(self):
+        p, out = rules.fact_lookups(
+            {"format": "story"}, [{"claim": "it went offline", "source": 0}], 2)
+        self.assertEqual(len(out), 1)
+        self.assertTrue(any("at least 2" in x for x in p))
+
+    def test_measured_does_not_need_statements(self):
+        self.assertEqual(rules.fact_lookups({"format": "measured"}, [], 2),
+                         ([], []))
+        self.assertEqual(rules.fact_lookups({"format": "explain"}, None, 2),
+                         ([], []))
+
+    def test_statement_without_valid_source_is_a_problem_not_a_lookup(self):
+        p, out = rules.fact_lookups(
+            {"format": "story"},
+            [{"claim": "a", "source": 0}, {"claim": "b", "source": 7},
+             {"claim": "c", "source": None}, {"claim": "", "source": 0},
+             {"claim": "d", "source": True}, "junk"], 2)
+        self.assertEqual([o["claim"] if "claim" in o else o["shown"]
+                          for o in out], ["a"])
+        self.assertEqual(sum("no valid source" in x for x in p), 3)
+
+    def test_lookups_are_capped(self):
+        facts = [{"claim": f"statement {i}", "source": 0} for i in range(20)]
+        _, out = rules.fact_lookups({"format": "story"}, facts, 2)
+        self.assertEqual(len(out), rules.MAX_FACTS)
+
+    def test_ungrounded_factcheck_verifies_nothing(self):
+        # model "confirmed" dese de arama yoksa hafizadan konusuyor
+        llm = FakeLLM({"dogrulayici": [{"results": [
+            {"shown": "a", "status": "confirmed"},
+            {"shown": "b", "status": "confirmed"}]}]})
+        llm.last_grounded = False
+        lookups = [{"shown": "a", "source": 0}, {"shown": "b", "source": 1}]
+        problems, unverified, grounded = roles.factcheck(
+            llm, good_spec(), lookups)
+        self.assertEqual((problems, unverified, grounded), ([], 2, False))
+
+    def test_grounded_factcheck_counts_statuses(self):
+        llm = FakeLLM({"dogrulayici": [{"results": [
+            {"shown": "a", "status": "confirmed"},
+            {"shown": "b", "status": "contradicted", "correct": "c"},
+            {"shown": "d", "status": "unverifiable"}]}]})
+        lookups = [{"shown": s, "source": 0} for s in "abd"]
+        problems, unverified, grounded = roles.factcheck(
+            llm, good_spec(), lookups)
+        self.assertEqual(len(problems), 1)
+        self.assertEqual((unverified, grounded), (1, True))
+
+    def test_format_is_required_in_a_script(self):
+        s = good_spec()
+        del s["format"]
+        self.assertTrue(any("format" in x
+                            for x in rules.validate_script(s, SCENES)))
+        s["format"] = "gossip"
+        self.assertTrue(any("format" in x
+                            for x in rules.validate_script(s, SCENES)))
+
+
 class Decision(unittest.TestCase):
     def d(self, **kw):
         probs = kw.pop("problems", [])
@@ -370,6 +430,52 @@ class Producer(unittest.TestCase):
         self.assertEqual([c["angle"] for c in got],
                          ["gpu electricity cost per token",
                           "alpha ratios in tokenizers across scripts"])
+
+    def test_format_rotation_prefers_the_format_not_used_lately(self):
+        a = self.cand("tokens per alphabet across scripts")
+        a["format"] = "measured"
+        b = self.cand("a chatbot that was shut down within a day")
+        b["format"] = "story"
+        got = roles.rank([a, b], [], ["measured", "measured", "measured"])
+        self.assertEqual([c["format"] for c in got], ["story", "measured"])
+        # gecmis yoksa ikisi esit: uretici sirasi bozulmadan kalir
+        got = roles.rank([self.cand("first idea about caches"),
+                          self.cand("second idea about quotas")], [], [])
+        self.assertEqual(len(got), 2)
+
+    def test_strong_measured_still_beats_weak_story_with_rotation(self):
+        a = self.cand("gpu electricity cost per token", curiosity=10,
+                      timeliness=10)
+        a["format"] = "measured"
+        b = self.cand("a very average story about a bot", curiosity=7,
+                      timeliness=6, audience_fit=7)
+        b["format"] = "story"
+        got = roles.rank([a, b], [], ["story", "story", "measured"])
+        self.assertEqual(got[0]["format"], "measured")
+
+    def test_curiosity_gate_and_new_score_name(self):
+        dull = self.cand("a dull but exact table of prices", curiosity=5)
+        new = {"angle": "tokens differ per alphabet by a wide margin",
+               "measure": "m", "format": "explain",
+               "scores": {"timeliness": 7, "verifiability": 8, "curiosity": 8,
+                          "audience_fit": 8, "safety": 9}}
+        got = roles.rank([dull, new], [])
+        self.assertEqual([c["format"] for c in got], ["explain"])
+
+    def test_unknown_format_becomes_measured(self):
+        c = self.cand("cache break even reuse count")
+        c["format"] = "gossip"
+        self.assertEqual(roles.rank([c], [])[0]["format"], "measured")
+
+    def test_producer_prompt_shows_recent_formats_and_backlog_format(self):
+        llm = FakeLLM({"yapimci": [{"candidates": []}]})
+        roles.produce(llm, live="(none)", today="2026-11-06",
+                      recent=[], formats=["measured", "story"],
+                      backlog=[{"format": "explain", "angle": "no clock",
+                                "measure": "request body"}])
+        prompt = llm.log[0][1]
+        self.assertIn("measured, story", prompt)
+        self.assertIn("[explain] no clock", prompt)
 
     def test_drops_repeats_of_recent_titles(self):
         got = roles.rank([self.cand("cost of video generation per second")],
@@ -439,10 +545,13 @@ def root_with_content(tmp: str) -> Path:
 
 
 class Pipeline(unittest.TestCase):
-    def run_pipeline(self, replies, **kw):
+    def run_pipeline(self, replies, grounded=True, scripts=(), **kw):
         with tempfile.TemporaryDirectory() as tmp:
             root = root_with_content(tmp)
+            for name, body in scripts:
+                (root / "content/scripts" / name).write_text(json.dumps(body))
             llm = FakeLLM(replies)
+            llm.last_grounded = grounded
             try:
                 spec = pipeline.run(llm, root=root, today="2026-11-06",
                                     scene_names=SCENES, theme_names=THEMES,
@@ -529,6 +638,101 @@ class Pipeline(unittest.TestCase):
             "dogrulayici": [{"results": []}],
         })
         self.assertIsNone(two_bad)
+
+    FACTS = [{"claim": "the bot launched on Twitter", "source": 0},
+             {"claim": "the company took it offline within a day", "source": 1}]
+
+    def story(self):
+        s = good_spec()
+        s["format"] = "story"
+        return s
+
+    def verdicts(self, *claims, status="confirmed"):
+        return {"results": [{"shown": c, "status": status} for c in claims]}
+
+    def test_story_happy_path_checks_events_and_records_format(self):
+        spec, llm, *_ , err = self.run_pipeline({
+            "yazar": [self.story()],
+            "editor": [review("publish", 8, facts=self.FACTS)],
+            "dogrulayici": [self.verdicts(
+                "$0.40", *[f["claim"] for f in self.FACTS])],
+            "sanat": [{"theme": "plum"}], "metin": [copy_parts()],
+        }, topic="a chatbot that was shut down in a day")
+        self.assertIsNone(err)
+        self.assertEqual(spec["brief"]["format"], "story")
+        fc = [p for r, p in llm.log if r == "dogrulayici"][0]
+        self.assertIn("took it offline within a day", fc)    # olay iddiasi da gitti
+
+    def test_story_without_listed_statements_is_sent_back(self):
+        spec, *_ , err = self.run_pipeline({
+            "yazar": [self.story()],
+            "editor": [review("publish", 9, facts=[])],
+            "yazar-duzeltme": [self.story()],
+            "dogrulayici": [self.verdicts("$0.40")],
+        }, topic="a story with nothing to check")
+        self.assertIsNone(spec)
+        self.assertIn("at least 2", str(err.args[0]) + "")
+
+    def test_story_cannot_publish_when_search_is_down(self):
+        spec, *_ , err = self.run_pipeline({
+            "yazar": [self.story()],
+            "editor": [review("publish", 9, facts=self.FACTS)],
+            "yazar-duzeltme": [self.story()],
+            "dogrulayici": [self.verdicts(
+                "$0.40", *[f["claim"] for f in self.FACTS])],
+        }, grounded=False, topic="a story we cannot check")
+        self.assertIsNone(spec)
+        self.assertIsNotNone(err)
+
+    def test_measured_with_one_lookup_still_publishes_without_search(self):
+        # tek rakam (<= ALLOW_UNVERIFIED) aramasiz da gecer; formuller kodla
+        # kanitlandigi icin arama gerekmiyor
+        spec, *_ , err = self.run_pipeline({
+            "yapimci": [cands()], "yazar": [good_spec()],
+            "editor": [review("publish", 8)],
+            "dogrulayici": [self.verdicts("$0.40")],
+            "sanat": [{"theme": "ember"}], "metin": [copy_parts()],
+        }, grounded=False)
+        self.assertIsNone(err)
+        self.assertFalse(spec["review"]["grounded"])
+
+    def test_writer_must_keep_the_briefed_format(self):
+        wrong = good_spec()                       # measured
+        problems = pipeline._draft_problems(
+            wrong, SCENES, [], {"format": "story"})
+        self.assertTrue(any('"story"' in p for p in problems))
+        self.assertEqual(pipeline._draft_problems(
+            wrong, SCENES, [], {"format": "auto"}), [])
+
+    def test_recent_formats_read_from_scripts_legacy_means_measured(self):
+        old = good_spec()
+        del old["format"]
+        st = good_spec()
+        st["brief"] = {"format": "story"}
+        with tempfile.TemporaryDirectory() as tmp:
+            root = root_with_content(tmp)
+            (root / "content/scripts/2026-11-01-a.json").write_text(
+                json.dumps(old))
+            (root / "content/scripts/2026-11-02-b.json").write_text(
+                json.dumps(st))
+            self.assertEqual(pipeline.recent_formats(root),
+                             ["measured", "story"])
+
+    def test_backlog_puts_unused_formats_first(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = root_with_content(tmp)
+            (root / "content/backlog.json").write_text(json.dumps({"topics": [
+                {"format": "measured", "angle": "alpha measure topic here",
+                 "measure": "m"},
+                {"format": "story", "angle": "bravo story topic here",
+                 "measure": "m"},
+                {"angle": "charlie legacy topic here", "measure": "m"}]}))
+            got = pipeline.backlog_candidates(
+                root, [], "2026-11-06", ["story", "story"])
+            self.assertNotEqual(got[-1]["format"], "measured")
+            self.assertEqual(got[-1]["format"], "story")
+            self.assertEqual({g["format"] for g in got},
+                             {"measured", "story"})
 
     def test_gemini_down_stops_loudly_without_hammering(self):
         spec, llm, files, rej, err = self.run_pipeline({"yapimci": [cands()]})

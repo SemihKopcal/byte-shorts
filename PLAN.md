@@ -13,6 +13,16 @@ sorduğumuzda cevap kodun içinde değil burada olsun.
 YouTube → defter → release). Günde 2 video, `AUTO_PRIVACY` değişkeniyle tek
 düğmeli yayın kontrolü.
 
+**Konu çeşitliliği (6 Kasım, kullanıcı isteği: "sadece bilgi değil ilgi çekici
+konular da"):** dört biçim: `measured` (rakamlar), `story` (belgelenmiş olay,
+zaman sırasıyla), `explain` (bir davranışın tek şaşırtıcı nedeni), `trend`
+(gündem, birincil kaynakla karşılaştırma). Yapımcı 5 aday verir, merak çift
+ağırlıklı, son üç videoda kullanılmayan biçim +2. Hikayede olay iddiaları
+aramayla doğrulanır; **arama kapalıysa hiçbir şey doğrulanmış sayılmaz**
+(fail-closed). Yedek havuz 20 konu: 12 ölçüm, 5 hikaye, 3 açıklama. İlk
+haftada YouTube Analytics'te biçim başına izlenme/tutma karşılaştırılacak;
+tutmayan biçimin ağırlığı `rank` içindeki bonustan ayarlanır.
+
 **Sırada (öncelik sırasıyla):**
 
 1. BYTE anlatıcı (aşağıda madde 1): `draw_byte_pointing` yazıldı, sahnelere

@@ -6,9 +6,9 @@ Gemini seciyor, YouTube'a kendiliginden yukleniyor.
 ```
         ┌───────────────────────────── editorial/ (Gemini) ─────────────────────────────┐
 canli   │ yapimci → yazar → editor ⇄ yazar (en fazla 2 tur) → sanat yon. → metin yazari │
-sinyal ─┤   4 konu    senaryo   yargi + sayi iddialari   revize    tema     baslik +    │
-        │   kod eler  JSON      KOD aritmetigi hesaplar            secer    3 platform   │
-        │             arama destekli dogrulayici: formulsuz rakamlari canli kontrol eder │
+sinyal ─┤   5 konu    senaryo   yargi + sayi/olay        revize    tema     baslik +    │
+        │   4 bicim   JSON      iddialari; KOD hesaplar            secer    3 platform   │
+        │   kod eler  arama destekli dogrulayici: formulsuz rakam ve olaylari kontrol eder│
         └──────────────────────────────────┬────────────────────────────────────────────┘
                                            ▼ content/scripts/<id>.json
         worker/  synth (Piper) → sahneler → Pillow → ffmpeg → qc
@@ -28,6 +28,29 @@ sinyal ─┤   4 konu    senaryo   yargi + sayi iddialari   revize    tema     
 5. `content/built.json` ve `published.json` repoya geri yazilir.
 6. Video + Instagram/TikTok metinleri bir GitHub Release'e konur
    (telefondan indirilebilir).
+
+## Konu bicimleri: bilgi + ilgi
+
+Kanal sadece olcum yapmiyor; dort bicim donuyor (`editorial/roles.py`):
+
+| bicim | ne anlatir | dogrulama |
+|---|---|---|
+| `measured` | rakamlar hikaye: fiyat, bayt, token aritmetigi | editor formul yazar, **kod hesaplar** |
+| `story` | belgelenmis bir olay, zaman sirasiyla (kapatilan bot, mahkemeye giden chatbot, icinde insan olan makine) | olay/tarih iddialari **aramayla** dogrulanir, en az 2 iddia sart |
+| `explain` | bir yapay zeka davranisinin tek sasirtici nedeni, tek ornekle | gosterilen sayi turetilebilir olmali |
+| `trend` | bu hafta konusulan sey, birincil kaynakla karsilastirilmis | iddia basina arama dogrulamasi |
+
+Yapimci 5 aday uretir (en az 3 farkli bicim). Kod eler: dogrulanabilirlik,
+**merak** ve guvenlik puani 7'nin altindaysa gider. Siralamada merak iki kat
+sayilir; son uc videoda kullanilmayan bicim +2, kullanilan her tekrar -2 alir,
+yani kanal ayni bicimi ust uste uretmez ama zayif bir hikaye guclu bir olcumun
+onune de gecmez. Yedek havuz (`content/backlog.json`) ayni mantikla doner.
+
+**Arama kapaliysa hicbir sey dogrulanmis sayilmaz.** Model aramasiz "dogruladim"
+derse hafizasindan konusuyordur; bu kanit degil. O durumda yalniz formulle
+kanitlanan icerik yayina girer, hikaye/gundem konulari elenir ve log nedenini
+soyler. Bilincli gevsetmek istersen `ALLOW_UNVERIFIED` degiskeni (0-5,
+varsayilan 1): dogrulanamayan en fazla kac iddia kabul.
 
 ## Tek dugme: AUTO_PRIVACY
 
@@ -57,10 +80,10 @@ Actions > daily > Run workflow:
 
 | rol | is | kodun kontrolu |
 |---|---|---|
-| yapimci | 4 konu adayi + kendi puani (arama destekli) | olculebilirlik ve guvenlik < 7 elenir, tekrar elenir |
+| yapimci | 5 konu adayi, 4 bicim, kendi puani (arama destekli) | dogrulanabilirlik/merak/guvenlik < 7 elenir, tekrar elenir, bicim dengesi |
 | yazar | senaryo; hook→why→data→turn→resolve | `rules.validate_script`: sahne, pose, sure, rol sirasi, yasakli kalip |
-| editor | 5 puan + risk + her rakam icin formul | puan < 7 ya da risk orta/yuksek = revize/ret |
-| dogrulayici | formulsuz rakamlari canli aramayla kontrol | celisen = revize; dogrulanamayan en fazla 1 |
+| editor | 5 puan + risk + her rakam icin formul + olay iddialari | puan < 7 ya da risk orta/yuksek = revize/ret; hikayede >= 2 olay iddiasi sart |
+| dogrulayici | formulsuz rakamlari ve olay iddialarini canli aramayla kontrol | celisen = revize; dogrulanamayan en fazla `ALLOW_UNVERIFIED`; arama yoksa hepsi dogrulanamayan |
 | sanat yon. | 8 temadan birini secer | bilinmeyen/son 3'te kullanilan reddedilir |
 | metin yazari | 4 baslik + YouTube/Instagram/TikTok metni | `publish/manifest.py`: hashtag sayisi, link, emoji, kaynak bolumu |
 
@@ -116,6 +139,7 @@ GEMINI_API_KEY=... python -m editorial --dry-run
 | `YOUTUBE_REFRESH_TOKEN` | secret | yukleme |
 | `AUTO_PRIVACY` | **variable** | yayin modu (yukaridaki tablo) |
 | `MIN_SCORE` | **variable** | editor esigi, 5-9, varsayilan 7 (kalite kadrani) |
+| `ALLOW_UNVERIFIED` | **variable** | aramayla dogrulanamayan en fazla kac iddia kabul, 0-5, varsayilan 1 |
 
 **OAuth onay ekrani "In production" olmali.** "Testing" modunda Google
 refresh token'i 7 gunde iptal ediyor: ilk hafta calisir, sekizinci gun
@@ -136,6 +160,8 @@ yaparken ikisini de guncelle ya da `cp ci/*.yml .github/workflows/`.
 | "UYARI: public istendi, YouTube private yapti" | API projesi dogrulanmamis | videoyu Studio'dan elle public yap; Google'a API denetimi basvurusu |
 | Actions "startup failure" | GitHub faturalandirma kilidi | Settings > Billing > odeme yontemi ekle |
 | Gemini 404 | model adi emekli | kendiliginden siradakine gecer; `GEMINI_MODEL` ile zorlayabilirsin |
+| Gemini 429 | kota/hiz siniri | log nedenini yazar: "bu anahtarda kotasi yok" ve "gunluk kota" modeli hemen eler, "hiz siniri" Google'in istedigi sure kadar bekler (en fazla 65 sn, toplam `GEMINI_WAIT_BUDGET` = 480 sn). Hicbir model cevap vermezse log sonunda her modelin nedeni tek satirda |
+| "dogrulanamayan ... web search is unavailable" | arama destegi (grounding) bu anahtarda/modelde yok | yalniz formullu konular gecer; hikaye icin AI Studio'da anahtarin arama kotasini kontrol et |
 
 ## brand.json
 

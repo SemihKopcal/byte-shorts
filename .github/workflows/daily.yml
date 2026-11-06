@@ -12,6 +12,10 @@ name: daily
 #   Settings > Secrets and variables > Actions > Variables
 #   public | unlisted | private | off      (yoksa: public)
 # Bir sey ters giderse tek yapacagin: AUTO_PRIVACY=off. Kod degismiyor.
+# KALITE KADRANI: depo degiskeni MIN_SCORE (5-9, varsayilan 7). Editorun her
+# puaninin gecmesi gereken esik; yukseltirsen daha az ama daha iyi video.
+# ALLOW_UNVERIFIED (0-5, varsayilan 1): aramayla dogrulanamayan en fazla kac
+# iddia kabul. Arama kapaliysa hicbir sey dogrulanmis sayilmaz.
 on:
   schedule:
     - cron: "15 4 * * *"
@@ -127,6 +131,8 @@ jobs:
           YOUTUBE_API_KEY: ${{ secrets.YOUTUBE_API_KEY }}
           GITHUB_TOKEN: ${{ github.token }}
           TOPIC: ${{ inputs.topic }}
+          MIN_SCORE: ${{ vars.MIN_SCORE }}
+          ALLOW_UNVERIFIED: ${{ vars.ALLOW_UNVERIFIED }}
         run: python -m editorial
 
       - name: yeni senaryoyu sec

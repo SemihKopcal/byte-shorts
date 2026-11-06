@@ -2,7 +2,7 @@
 Gemini'nin rolleri. Bes ayri is, bes ayri istem, hepsi ayni sozlesme:
 girdi al, JSON dondur, hata olursa None dondur (cagiran yedege dusuyor).
 
-  yapimci       4 konu adayi onerir, kendi puanlar (arama destekli)
+  yapimci       5 konu adayi onerir (4 bicim), kendi puanlar (arama destekli)
   yazar         secilen konudan senaryo yazar / editorun notlariyla yeniden yazar
   editor        senaryoyu yargilar, sayi iddialarini formule doker
   dogrulayici   formulsuz rakamlari canli aramayla kontrol eder
@@ -23,13 +23,45 @@ from . import rules
 
 SYSTEM = """You work for BYTE, a faceless short-video channel (YouTube Shorts,
 Instagram Reels, TikTok) for people aged 10 to 30. BYTE is openly a machine: a
-CRT-headed robot whose only expression is a cursor. It measures things about
-AI tools and reports numbers. It never claims expertise, never gives advice,
-never pretends to be human, never sells anything.
+CRT-headed robot whose only expression is a cursor. It reports what it measured
+and what actually happened with AI tools. It never claims expertise, never
+gives advice, never pretends to be human, never sells anything.
 
-Voice: dry, exact, a little deadpan. Short sentences. Concrete comparisons the
-audience can feel (a coffee, a month of streaming, a phone battery) instead of
-abstractions. No hype words. No questions to the viewer. No calls to action."""
+Voice: a deadpan friend who just found something strange and cannot quite let
+it go. Dry, exact, short sentences. Concrete comparisons the audience can feel
+(a coffee, a month of streaming, a phone battery, their homework) instead of
+abstractions. Put the strangest detail first and keep one concrete payoff for
+the last third, so the viewer has a reason to stay. No hype words. No questions
+to the viewer. No calls to action."""
+
+FORMATS = rules.FORMATS
+
+FORMAT_DOC = {
+    "measured": """FORMAT measured - the numbers are the story.
+  hook = the contradiction in one number. why = the mechanism. data = the
+  measured figures, one idea per beat. turn = the outlier. resolve = flat
+  conclusion. Prefer arithmetic you do yourself over figures you half remember.""",
+    "story": """FORMAT story - a documented episode, told in time order. People stay for
+a story: something happened, something went wrong or turned out strange.
+  hook = the strangest moment, stated first. why = the setup in one or two
+  beats (who, what was supposed to happen). data = the events IN ORDER, one per
+  beat; use timeline, split or byte_says scenes to show the sequence. turn =
+  the twist or the consequence. resolve = what is true today, flat.
+  Every date, company, product, ruling and quote must be checkable on a primary
+  page or in major news. Companies, products, projects and historical systems
+  may be named; no private individuals, no living people. Do not invent
+  dialogue, motives or details. If you are unsure of a detail, leave it out.""",
+    "explain": """FORMAT explain - one surprising reason an AI tool behaves the way it does.
+  hook = the odd behaviour, stated as a fact. why = the mechanism in plain
+  words. data = ONE concrete example the viewer can picture or try, shown
+  step by step. turn = what that means for how they use it. resolve = flat
+  takeaway. Few or no big numbers; any number shown must be derivable.""",
+    "trend": """FORMAT trend - something people are talking about this week, checked
+against the primary source.
+  hook = what people are saying. why = where it came from. data = what the
+  primary page actually says, claim by claim. turn = the gap between the two.
+  resolve = flat conclusion. Name the page you checked in "sources".""",
+}
 
 SCENE_DOC = """
 title      big headline. data: {kicker?, lines:[1-3 short lines], accent?}
@@ -69,41 +101,64 @@ def _j(o) -> str:
 
 
 # ═══ 1. YAPIMCI ═════════════════════════════════════════════════════════
-PRODUCER = """Today is {today}. Propose exactly 4 candidate topics for the next
+PRODUCER = """Today is {today}. Propose exactly 5 candidate topics for the next
 BYTE video.
 
+BYTE tells things about AI that are TRUE and make a 10 to 30 year old think
+"wait, really?". Interesting comes first; correct is the entry fee. Offer at
+least 3 different formats among the 5:
+
+  measured  the numbers are the story: arithmetic, or published prices/specs.
+  story     a documented episode told in time order: what happened, what went
+            wrong or turned out strange, what changed. Real events from AI and
+            tech history or from the last weeks (a bot that was shut down in a
+            day, a chatbot whose promise ended up in court, a machine that hid
+            a human).
+  explain   one surprising reason an AI tool behaves the way it does, shown
+            with one example the viewer can picture (why a model miscounts
+            letters, why it forgets you).
+  trend     something being talked about this week, checked against the
+            primary source: what people say against what the page says.
+
+Formats used by the latest videos (newest last): {formats}
+Prefer a format that is NOT among the most recent ones.
+
 A good topic has ALL of these:
- 1. A measurable claim. The numbers come from arithmetic you can do, or from a
-    published page a viewer can open. No vibes, no rankings of opinion.
- 2. A visible contradiction in the first sentence: what people expect against
-    what the measurement shows.
- 3. Something a 10 to 30 year old cares about this week.
+ 1. A hook: a specific, strange or counter-intuitive first sentence. The viewer
+    must want the next sentence.
+ 2. Everything in it is checkable: arithmetic you can do, or a primary page,
+    court filing, paper, vendor post or major news report a viewer could open.
+    Never rely on memory for a date, a name or a figure.
+ 3. Something a 10 to 30 year old cares about or can picture (phone, homework,
+    games, feeds, jobs), not an abstraction.
  4. An angle that differs from the recent titles below.
 
 WHAT IS BEING TALKED ABOUT RIGHT NOW
 {live}
 
-EVERGREEN IDEAS (use one only if no live signal can be measured honestly)
+EVERGREEN IDEAS (use one only if no live signal works better)
 {backlog}
 
 RECENT TITLES - do not repeat or paraphrase
 {recent}
 
 Rules: no health, finance, legal or political advice; nothing about a named
-living person; nothing you cannot source. When you use a live signal put its
-URL in "signal_url". Search the web first to confirm that news is real and
-recent. Everyone else explains the announcement; BYTE computes the bill.
+living person (companies, products, projects and historical systems are fine);
+nothing you cannot source. When you use a live signal put its URL in
+"signal_url". Search the web first to confirm that news is real and recent.
 
-Score each candidate honestly from 1 to 10. A 9 or 10 is rare. Reply with
-JSON only:
+Score each candidate honestly from 1 to 10. A 9 or 10 is rare. "verifiability"
+is how easily a viewer could check every claim; "curiosity" is how much the
+first sentence makes a stranger keep watching. Reply with JSON only:
 {{"candidates": [{{
-  "angle": "one sentence: the surprising fact",
-  "measure": "what exactly is measured, and how",
-  "calc": "the arithmetic or lookup, in one line",
+  "format": "measured|story|explain|trend",
+  "angle": "one sentence: the surprising fact or the strangest moment",
+  "measure": "what exactly is measured, or which events are told, and how",
+  "calc": "the arithmetic, or the sequence of events, in one line",
   "sources": ["published page or document", "second one"],
   "signal_url": "url or null",
   "why_now": "one short line",
-  "scores": {{"timeliness": 0, "measurability": 0, "curiosity": 0,
+  "scores": {{"timeliness": 0, "verifiability": 0, "curiosity": 0,
              "audience_fit": 0, "safety": 0}}
 }}]}}"""
 
@@ -113,36 +168,51 @@ def _words(s: str) -> set:
 
 
 def produce(llm, *, live: str, backlog: list[dict], recent: list[str],
-            today: str) -> list[dict]:
+            today: str, formats: list[str] | None = None) -> list[dict]:
     """Siralanmis aday listesi (en iyi basta). Gemini calismazsa bos liste."""
+    formats = formats or []
     prompt = PRODUCER.format(
         today=today, live=live,
-        backlog="\n".join(f"- {b['angle']}  [measure: {b['measure']}]"
-                          for b in backlog[:6]) or "(none)",
+        formats=", ".join(formats[-4:]) or "(none yet)",
+        backlog="\n".join(
+            f"- [{b.get('format', 'measured')}] {b['angle']}  "
+            f"[{b['measure']}]" for b in backlog[:6]) or "(none)",
         recent="\n".join(f"- {t}" for t in recent) or "- (none yet)")
     raw = llm.ask_json(prompt, system=SYSTEM, temperature=1.0, grounded=True,
                        role="yapimci")
     cands = raw.get("candidates") if isinstance(raw, dict) else None
-    return rank(cands or [], recent)
+    return rank(cands or [], recent, formats)
 
 
-def rank(cands: list, recent: list[str]) -> list[dict]:
+def rank(cands: list, recent: list[str],
+         formats: list[str] | None = None) -> list[dict]:
     """Adaylari filtreler ve siralar. Kod karar veriyor, Gemini degil:
-    olculebilirlik ve guvenlik 7'nin altindaysa ne kadar parlak olursa olsun
-    elenir."""
+    dogrulanabilirlik, merak ve guvenlik 7'nin altindaysa ne kadar parlak
+    olursa olsun elenir.
+
+    Siralama: toplam puan (merak iki kat) + bicim dengesi. Son uc videoda
+    kullanilmayan bicim +2, kullanilan her tekrar icin -2: kanal ayni bicimi
+    ust uste uretmiyor, ama kotu bir hikaye iyi bir olcumun onune de gecmiyor.
+    """
     seen = [_words(t) for t in recent]
+    last = [f for f in (formats or [])][-3:]
     out = []
     for c in cands:
         if not isinstance(c, dict) or not c.get("angle") or not c.get("measure"):
             continue
         sc = c.get("scores") if isinstance(c.get("scores"), dict) else {}
         nums = {k: v for k, v in sc.items() if isinstance(v, (int, float))}
-        if nums.get("measurability", 0) < 7 or nums.get("safety", 0) < 7:
+        # "measurability": eski ad, geriye uyum
+        ver = nums.get("verifiability", nums.get("measurability", 0))
+        if ver < 7 or nums.get("safety", 0) < 7 or nums.get("curiosity", 0) < 7:
             continue
         aw = _words(c["angle"])
         if any(aw and w and len(aw & w) / len(aw | w) > 0.5 for w in seen):
             continue
-        c["_total"] = sum(nums.values())
+        fmt = c.get("format") if c.get("format") in FORMATS else "measured"
+        c["format"] = fmt
+        bonus = 2 if fmt not in last else -2 * last.count(fmt)
+        c["_total"] = sum(nums.values()) + nums.get("curiosity", 0) + bonus
         out.append(c)
     out.sort(key=lambda c: (-c["_total"],
                             -c.get("scores", {}).get("timeliness", 0)))
@@ -153,11 +223,17 @@ def rank(cands: list, recent: list[str]) -> list[dict]:
 WRITER = """Write ONE script as JSON for this topic.
 
 TOPIC
+  format  : {format}
   angle   : {angle}
   measure : {measure}
   calc    : {calc}
   sources : {sources}
   signal  : {signal}
+
+{format_doc}
+
+The video must be INTERESTING, not only correct: open on the strangest true
+detail, let the middle build, and hold one concrete payoff for the last third.
 
 HARD RULES
 LENGTH
@@ -170,11 +246,11 @@ TWO TEXTS PER BEAT
 - "cap" is what appears on screen. Digits and symbols: "$3", "47%", "UTF-8".
 - No URL, bracket or emoji in either.
 
-STORY - every beat has a "role", in exactly this order, each used:
+STRUCTURE - every beat has a "role", in exactly this order, each used:
   hook    (1 beat)   the surprising, specific, verifiable fact. At most 12
                      words. Not a question. The contradiction is visible at once.
-  why     (2-3)      the mechanism: why it is true.
-  data    (3-6)      the measured numbers, one idea per beat.
+  why     (2-3)      the mechanism or the setup: why it is true.
+  data    (3-6)      the measured numbers or the events, one idea per beat.
   turn    (1-2)      the expectation flips: "but X is the strange one".
   resolve (1-2)      a flat conclusion. No call to action, no question.
 
@@ -185,10 +261,12 @@ SCENES - choose from this catalogue only. Never invent a name.
   same scene with no data keep it on screen.
 - Open with "title" or "contrast". Close with "close".
 
-NUMBERS
+NUMBERS AND FACTS
 - Every number on screen must be checkable from the sources. Prefer arithmetic
   you do yourself (ratios, byte counts, price x duration) over figures you
   half remember. If unsure of a figure, change the angle instead of guessing.
+- Every event, date, name and ruling you state must be on a listed source.
+  Leave out any detail you cannot place on one.
 - "sources": real, checkable things, at least two.
 
 FORBIDDEN: health/finance/legal/political advice; named living people;
@@ -197,7 +275,8 @@ anything you cannot source.
 TITLE: under 60 characters, plain statement, no ALL CAPS, no "shocking".
 
 {feedback}Reply with ONLY this JSON object:
-{{"title": "...", "summary": "one sentence", "tags": ["3 to 6 lowercase"],
+{{"format": "{format_pick}", "title": "...", "summary": "one sentence",
+ "tags": ["3 to 6 lowercase"],
  "sources": ["...", "..."],
  "beats": [
   {{"id": "b1", "role": "hook", "scene": "contrast", "say": "...", "cap": "...",
@@ -228,7 +307,9 @@ def write(llm, brief: dict, *, max_words: int, problems: list[str] | None = None
     if problems:
         fb = ("Your last attempt was rejected. Fix all of these:\n"
               + "\n".join(f"- {x}" for x in problems) + "\n\n")
+    fmt = brief.get("format") if brief.get("format") in FORMATS else "auto"
     prompt = WRITER.format(
+        format=fmt, format_doc=_format_doc(fmt), format_pick=_pick(fmt),
         angle=brief["angle"], measure=brief["measure"],
         calc=brief.get("calc", ""), sources=", ".join(brief.get("sources", [])),
         signal=brief.get("signal_url") or "none", scenes=SCENE_DOC,
@@ -237,13 +318,24 @@ def write(llm, brief: dict, *, max_words: int, problems: list[str] | None = None
                                  role="yazar"))
 
 
+def _format_doc(fmt: str) -> str:
+    if fmt in FORMAT_DOC:
+        return FORMAT_DOC[fmt]
+    return ("Choose the ONE format that fits the topic best:\n"
+            + "\n".join(FORMAT_DOC.values()))
+
+
+def _pick(fmt: str) -> str:
+    return fmt if fmt in FORMAT_DOC else "measured|story|explain|trend"
+
+
 def _as_dict(x):
     return x if isinstance(x, dict) else None
 
 
 def _strip(spec: dict) -> dict:
     """Modele gidecek kopya: ic alanlar (_ ile baslayan, review, copy...) yok."""
-    keep = ("title", "summary", "tags", "sources", "beats")
+    keep = ("format", "title", "summary", "tags", "sources", "beats")
     return {k: spec[k] for k in keep if k in spec}
 
 
@@ -263,7 +355,9 @@ SCORE 1-10
   story     hook, why, data, turn, resolve: does the turn actually flip an expectation,
             and does the ending land flat and clean?
   clarity   could a 12 year old follow it on one listen? any jargon unexplained?
-  audience  does a 10 to 30 year old care? concrete comparisons they can feel?
+  audience  does a 10 to 30 year old care AND would they repeat it to a friend?
+            concrete comparisons they can feel? A correct list of numbers with
+            no tension scores 5 or 6, however accurate.
   voice     dry, exact, deadpan; no hype, no advice, no calls to action, no pretending
 
 RISK (low / medium / high) - flag any of:
@@ -281,8 +375,16 @@ title. For each:
 A number you cannot trace to arithmetic or to a listed source is a defect:
 say so in "fixes".
 
+FACTS - the script states what happened (events, dates, rulings, who did what,
+what a page says). List the 6 most important such statements that are NOT just
+numbers on screen, each with the 0-based index of the listed source that backs
+it. Stories and trend checks MUST list at least 2. A statement you cannot place
+on a listed source is a defect: say so in "fixes".
+
 VERDICT: "publish" only if every score is 7 or more and risk is low.
 "revise" if fixable. "reject" if the premise itself is unsound.
+
+FORMAT: {format}
 
 SCRIPT
 {script}
@@ -293,6 +395,7 @@ Reply with JSON only:
            "audience": "short", "voice": "short"}},
  "risk": {{"level": "low", "flags": []}},
  "claims": [{{"shown": "", "expr": null, "value": null, "source": null}}],
+ "facts": [{{"claim": "", "source": 0}}],
  "verdict": "revise",
  "fixes": ["concrete instruction, one per problem"]}}"""
 
@@ -300,7 +403,8 @@ Reply with JSON only:
 def edit(llm, spec: dict) -> dict:
     """Normalize edilmis inceleme. Gemini cevap vermezse EN KOTU varsayim
     (skor 0 -> revise); sessizce 'yayinla' demiyor."""
-    raw = llm.ask_json(EDITOR.format(script=_j(_strip(spec))),
+    raw = llm.ask_json(EDITOR.format(script=_j(_strip(spec)),
+                                     format=spec.get("format") or "unknown"),
                        system=EDITOR_SYSTEM, temperature=0.2,
                        max_tokens=8192, role="editor")
     return rules.normalize_review(raw)
@@ -326,7 +430,12 @@ Never guess. Reply with JSON only:
 
 
 def factcheck(llm, spec: dict, lookups: list[dict]):
-    """(sorunlar, dogrulanamayan_sayisi, aramali_mi)."""
+    """(sorunlar, dogrulanamayan_sayisi, aramali_mi).
+
+    ARAMA YOKSA HICBIR SEY DOGRULANMIS SAYILMAZ. Model aramasiz "confirmed"
+    derse bu hafizasindan konusuyor demek; olay ve rakam iddiasi icin bu
+    kanit degil. O durumda her arama gerektiren iddia dogrulanamayan sayilir
+    (fail-closed): yalniz formulle kanitlanan icerik yayina girebilir."""
     if not lookups:
         return [], 0, True
     items = "\n".join(
@@ -338,6 +447,8 @@ def factcheck(llm, spec: dict, lookups: list[dict]):
                                            enumerate(spec["sources"]))),
         system=SYSTEM, temperature=0.0, grounded=True, role="dogrulayici")
     grounded = bool(getattr(llm, "last_grounded", False))
+    if not grounded:
+        return [], len(lookups), False
     res = raw.get("results") if isinstance(raw, dict) else None
     by = {str(r.get("shown")).strip(): r for r in res or []
           if isinstance(r, dict)}

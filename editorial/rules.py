@@ -14,6 +14,9 @@ import re
 from dataclasses import dataclass, field
 
 ROLES = ("hook", "why", "data", "turn", "resolve")
+FORMATS = ("measured", "story", "explain", "trend")
+NEEDS_FACTS = {"story": 2, "trend": 2}        # bicim -> en az listelenen olay iddiasi
+MAX_FACTS = 8
 POSES = ("idle", "point_r", "point_l", "point_up", "shrug", "alert")
 CURSORS = ("mint", "amber", "red", "violet")
 SCORE_KEYS = ("hook", "story", "clarity", "audience", "voice")
@@ -104,6 +107,9 @@ def validate_script(spec: dict, scene_names) -> list[str]:
 
     if len(spec["sources"]) < 2:
         p.append("en az 2 kaynak gerekiyor")
+
+    if spec.get("format") not in FORMATS:
+        p.append('"format" must be exactly one of: ' + ", ".join(FORMATS))
 
     beats = spec["beats"]
     if not isinstance(beats, list) or not 10 <= len(beats) <= 18:
@@ -321,6 +327,43 @@ def check_claims(spec: dict, claims: list, n_sources: int):
     return p, lookups
 
 
+def fact_lookups(spec: dict, facts, n_sources: int):
+    """Editorun listeledigi OLAY iddialari (tarih, karar, kim ne yapti).
+
+    Rakamlar check_claims'te formulle kanitlaniyor; hikaye ve gundem
+    bicimlerinde videonun asil agirligi olaylar ve bunlar formullenemez. Bu
+    iddialar arama destekli dogrulayiciya gider. Hikaye/gundem icin editor en
+    az iki tane listelemek zorunda: bos liste "denetlenecek bir sey yok"
+    anlamina gelmesin.
+
+    Donus: (sorunlar, aramayla dogrulanacak iddialar) -- check_claims ile ayni
+    sekil, boylece ikisi birlestirilip tek dogrulama cagrisina gidiyor.
+    """
+    p: list[str] = []
+    out: list[dict] = []
+    for f in facts if isinstance(facts, list) else []:
+        if not isinstance(f, dict):
+            continue
+        claim = str(f.get("claim", "")).strip()
+        src = f.get("source")
+        if not claim:
+            continue
+        if not isinstance(src, int) or isinstance(src, bool) \
+                or not 0 <= src < n_sources:
+            p.append(f"statement '{claim[:70]}' has no valid source index; "
+                     "put it on a listed source or remove it")
+            continue
+        out.append({"shown": claim, "expr": None, "value": None,
+                    "source": src, "kind": "fact"})
+    fmt = spec.get("format")
+    need = NEEDS_FACTS.get(fmt, 0)
+    if len(out) < need:
+        p.append(f"a {fmt} script must list at least {need} checkable "
+                 f"statements (found {len(out)}): state which event or page "
+                 "each beat rests on, and add the missing sources")
+    return p, out[:MAX_FACTS]
+
+
 # ── karar ────────────────────────────────────────────────────────────────
 @dataclass
 class Decision:
@@ -356,6 +399,8 @@ def normalize_review(raw) -> dict:
                                                  risk.get("flags", [])][:6]},
             "verdict": verdict, "fixes": fixes, "notes": notes,
             "claims": raw.get("claims") if isinstance(raw.get("claims"), list)
+            else [],
+            "facts": raw.get("facts") if isinstance(raw.get("facts"), list)
             else []}
 
 

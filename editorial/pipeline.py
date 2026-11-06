@@ -6,10 +6,11 @@ Editorial hat: konu -> taslak -> editor dongusu -> dogrulama -> tema -> metin.
     python -m editorial --dry-run             # dosya yazmadan dene
 
 Akis
-  1. yapimci    4 aday uretir, kod eler ve siralar (olculebilirlik/guvenlik >= 7)
+  1. yapimci    5 aday uretir (olcum/hikaye/aciklama/gundem), kod eler ve siralar
+                (dogrulanabilirlik/merak/guvenlik >= 7, bicim dengesi)
   2. yazar      senaryoyu yazar; kural dogrulamasi gecene kadar 3 deneme
   3. editor     yargilar; kod sayi iddialarini HESAPLAR; arama destekli
-                dogrulayici formulsuz rakamlari kontrol eder
+                dogrulayici formulsuz rakamlari ve olay iddialarini kontrol eder
                 -> publish | revise (en fazla 2 tur) | reject
   4. sanat yon. temayi secer
   5. metin yaz. baslik alternatifleri + platform basina metin; kod dogrular
@@ -34,10 +35,21 @@ from editorial import roles, rules, signals          # noqa: E402
 from editorial.llm import Gemini                      # noqa: E402
 from publish import manifest as M                     # noqa: E402
 
-MIN_SCORE = int(os.environ.get("MIN_SCORE", "7"))
+# Kalite kadrani. Depo degiskeni MIN_SCORE ile ayarlaniyor; tanimsiz ya da
+# bos birakilirsa 7. Yukseltirsen daha az ama daha iyi video cikar.
+try:
+    MIN_SCORE = max(5, min(9, int(os.environ.get("MIN_SCORE") or 7)))
+except ValueError:
+    MIN_SCORE = 7
 MAX_REVISIONS = 2
 MAX_CANDIDATES = 3
-ALLOW_UNVERIFIED = 1       # aramayla dogrulanamayan en fazla bir rakam
+try:
+    # Aramayla dogrulanamayan en fazla kac iddia kabul. Varsayilan 1; depo
+    # degiskeni ALLOW_UNVERIFIED ile 0-5 arasi ayarlanir (bos = 1).
+    ALLOW_UNVERIFIED = max(0, min(5, int(os.environ.get("ALLOW_UNVERIFIED")
+                                         or 1)))
+except ValueError:
+    ALLOW_UNVERIFIED = 1
 
 
 class Failure(Exception):
@@ -70,6 +82,16 @@ def recent_themes(root: Path, n: int = 3) -> list[str]:
     return [t for t in out if t][-n:]
 
 
+def recent_formats(root: Path, n: int = 4) -> list[str]:
+    """Son videolarin bicimleri, eskiden yeniye. Bicimi kayitsiz eski
+    senaryolar 'measured' sayiliyor (hepsi olcumdu)."""
+    out = []
+    for s in _scripts(root):
+        f = (s.get("brief") or {}).get("format") or s.get("format")
+        out.append(f if f in rules.FORMATS else "measured")
+    return out[-n:]
+
+
 def _slug(title: str) -> str:
     return re.sub(r"[^a-z0-9]+", "-", title.lower()).strip("-")[:52] or "untitled"
 
@@ -87,9 +109,11 @@ def similar_title(title: str, recent: list[str]) -> str | None:
     return None
 
 
-def backlog_candidates(root: Path, recent: list[str], today: str) -> list[dict]:
+def backlog_candidates(root: Path, recent: list[str], today: str,
+                       formats: list[str] | None = None) -> list[dict]:
     """Yedek havuzdan, basliklarda gecmeyen konular. Gunun sirasina gore
-    donuyor: ayni gun ayni sonuc, ertesi gun bir sonraki."""
+    donuyor: ayni gun ayni sonuc, ertesi gun bir sonraki. Son iki videoda
+    kullanilmayan bicimler one geciyor (siralama kararli: gun sirasi korunur)."""
     topics = _read(root / "content/backlog.json", {}).get("topics", [])
     if not topics:
         return []
@@ -100,7 +124,12 @@ def backlog_candidates(root: Path, recent: list[str], today: str) -> list[dict]:
     pool = fresh or topics
     k = dt.date.fromisoformat(today).toordinal() % len(pool)
     pool = pool[k:] + pool[:k]
-    return [{"angle": t["angle"], "measure": t["measure"], "calc": "",
+    last = (formats or [])[-2:]
+    pool.sort(key=lambda t: t.get("format", "measured") in last)
+    return [{"format": t.get("format") if t.get("format") in rules.FORMATS
+             else "measured",
+             "angle": t["angle"], "measure": t["measure"],
+             "calc": t.get("calc", ""),
              "sources": t.get("sources", []), "signal_url": None}
             for t in pool]
 
@@ -124,7 +153,7 @@ def develop(llm, brief: dict, scene_names, recent: list[str], log=print,
                 return None, {"stage": "llm", "problems": ["Gemini cevap vermedi"]}
             problems = ["reply with one valid JSON object"]
             continue
-        problems = _draft_problems(spec, scene_names, recent)
+        problems = _draft_problems(spec, scene_names, recent, brief)
         if not problems:
             break
         log(f"  taslak {attempt} reddedildi:\n    " + "\n    ".join(problems))
@@ -137,13 +166,24 @@ def develop(llm, brief: dict, scene_names, recent: list[str], log=print,
         review = roles.edit(llm, spec)
         claim_problems, lookups = rules.check_claims(
             spec, review["claims"], len(spec["sources"]))
+        event_problems, events = rules.fact_lookups(
+            spec, review.get("facts"), len(spec["sources"]))
+        seen = {c["shown"] for c in lookups}
+        lookups += [e for e in events if e["shown"] not in seen]
         fact_problems, unverified, grounded = roles.factcheck(llm, spec, lookups)
-        extra = claim_problems + fact_problems
+        extra = claim_problems + event_problems + fact_problems
         if unverified > ALLOW_UNVERIFIED:
-            extra.append(
-                f"{unverified} figures could not be verified online. Replace "
-                "them with arithmetic you can show, or with figures from the "
-                "listed sources, or remove them")
+            if not grounded:
+                extra.append(
+                    f"{unverified} statements need a web check, but web search "
+                    "is unavailable right now, so nothing can be verified. Use "
+                    "only numbers you derive by arithmetic, or leave the "
+                    "statements out")
+            else:
+                extra.append(
+                    f"{unverified} statements could not be verified online. "
+                    "Replace them with arithmetic you can show, or with "
+                    "statements from the listed sources, or remove them")
         d = rules.decide(review, extra, min_score)
         log(f"  editor tur {rnd}: {d.verdict}  ort {d.mean:.1f}  "
             + " ".join(f"{k}={v}" for k, v in d.scores.items())
@@ -160,7 +200,7 @@ def develop(llm, brief: dict, scene_names, recent: list[str], log=print,
             if new is None:
                 return None, {"stage": "llm",
                               "problems": ["duzeltme cevabi gelmedi"]}
-            problems = _draft_problems(new, scene_names, recent)
+            problems = _draft_problems(new, scene_names, recent, brief)
             if not problems:
                 break
             log("  duzeltme gecersiz:\n    " + "\n    ".join(problems))
@@ -178,8 +218,13 @@ def develop(llm, brief: dict, scene_names, recent: list[str], log=print,
     return spec, {"stage": "ok"}
 
 
-def _draft_problems(spec: dict, scene_names, recent: list[str]) -> list[str]:
+def _draft_problems(spec: dict, scene_names, recent: list[str],
+                    brief: dict | None = None) -> list[str]:
     p = rules.validate_script(spec, scene_names)
+    want = (brief or {}).get("format")
+    if want in rules.FORMATS and spec.get("format") in rules.FORMATS \
+            and spec["format"] != want:
+        p.append(f'"format" must be "{want}" for this topic')
     if not p:
         title = spec["title"]
         if len(title) > 60:
@@ -219,11 +264,12 @@ def run(llm, *, root: Path = ROOT, today: str | None = None,
     today = today or dt.date.today().isoformat()
     recent = recent_titles(root)
     brand = M.load_brand(root)
-    backlog = _read(root / "content/backlog.json", {}).get("topics", [])
+    formats = recent_formats(root)
 
     # 1. adaylar
     if topic:
-        cands = [{"angle": topic, "calc": "", "signal_url": None, "sources": [],
+        cands = [{"format": "auto", "angle": topic, "calc": "",
+                  "signal_url": None, "sources": [],
                   "measure": "whatever the topic needs, from arithmetic or "
                              "published pages"}]
         log(f"konu verildi: {topic[:90]}")
@@ -231,12 +277,14 @@ def run(llm, *, root: Path = ROOT, today: str | None = None,
         if live is None:
             log("canli sinyal toplaniyor...")
             live = signals.as_prompt(signals.collect())
-        cands = roles.produce(llm, live=live, backlog=backlog, recent=recent,
-                              today=today)
-        log(f"yapimci {len(cands)} uygun aday verdi")
+        pool = backlog_candidates(root, recent, today, formats)
+        cands = roles.produce(llm, live=live, backlog=pool, recent=recent,
+                              today=today, formats=formats)
+        log(f"yapimci {len(cands)} uygun aday verdi"
+            + (": " + ", ".join(c["format"] for c in cands[:5]) if cands else ""))
         if not cands:
             log("-> yedek havuza dusuluyor")
-            cands = backlog_candidates(root, recent, today)
+            cands = pool
     if not cands:
         raise Failure("konu adayi yok: yapimci bos dondu, yedek havuz da bos")
 
@@ -271,6 +319,7 @@ def run(llm, *, root: Path = ROOT, today: str | None = None,
     spec.setdefault("summary", copy["title"])
     spec["brief"] = {k: brief.get(k) for k in
                      ("angle", "signal_url", "why_now") if brief.get(k)}
+    spec["brief"]["format"] = spec.get("format")
 
     spec = {**spec, "id": _unique_id(root, today, spec["title"]),
             "series": "G", "lang": "en", "generated_by": llm.model,

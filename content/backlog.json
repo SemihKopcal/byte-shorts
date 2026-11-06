@@ -1,65 +1,185 @@
 {
- "_note": "Gemini bir senaryo uretemezse (API kesintisi, kota, uc kez dogrulamayi gecememe) hat durmasin diye yedek konu havuzu. Hepsi OLCULEBILIR: ya aritmetik ya da herkese acik bir belgeden dogrulanabilir. write_script.py bunlardan birini secip tam senaryoya cevirmeyi dener; o da olmazsa kosu temiz bir uyariyla biter.",
+ "_note": "Yedek konu havuzu: Gemini bir senaryo uretemezse hat durmasin diye, ayrica yapimciya 'evergreen fikir' olarak veriliyor. Her konunun bir bicimi var: measured (rakamlar hikaye), story (belgelenmis bir olay, zaman sirasiyla), explain (bir yapay zeka davranisinin tek sasirtici nedeni), trend (gundem; yapimci canli sinyalden uretir). Hepsi DOGRULANABILIR: aritmetik ya da herkese acik bir belge. Hikayelerde ozel kisi/yasayan kisi adi yok; sirket, urun ve tarihi sistemler serbest. Konu secimi pipeline.backlog_candidates: son iki videoda kullanilmayan bicim one gecer.",
  "topics": [
   {
+   "format": "measured",
    "angle": "A 60-second Short rendered in code costs $0. The same 60 seconds from the cheapest video model costs about $3.",
    "measure": "published per-second price x 60",
-   "sources": ["model provider public pricing pages"]
+   "sources": [
+    "model provider public pricing pages"
+   ]
   },
   {
+   "format": "measured",
    "angle": "UTF-8 makes the same sentence cost different amounts in different alphabets. Latin 1 byte, accented 2, Japanese 3.",
    "measure": "UTF-8 byte length of a parallel text",
-   "sources": ["Universal Declaration of Human Rights, Article 1, parallel text"]
+   "sources": [
+    "Universal Declaration of Human Rights, Article 1, parallel text"
+   ]
   },
   {
+   "format": "measured",
    "angle": "A model's context window is advertised in tokens, but what you can actually fit depends on the alphabet you write in.",
    "measure": "characters per token across scripts",
-   "sources": ["tokenizer documentation", "measured sample"]
+   "sources": [
+    "tokenizer documentation",
+    "measured sample"
+   ]
   },
   {
+   "format": "measured",
    "angle": "Output tokens usually cost several times more than input tokens, so a short answer to a long question is the cheap case.",
    "measure": "input vs output price ratio across providers",
-   "sources": ["provider pricing pages"]
+   "sources": [
+    "provider pricing pages"
+   ]
   },
   {
+   "format": "measured",
    "angle": "Running a model locally is free per request but not free per hour: electricity plus hardware amortisation gives a real per-token cost.",
    "measure": "GPU watts x local electricity price / tokens per second",
-   "sources": ["GPU TDP spec", "national average electricity price"]
+   "sources": [
+    "GPU TDP spec",
+    "national average electricity price"
+   ]
   },
   {
+   "format": "measured",
    "angle": "Image generation is priced per image, video per second. At one frame per second the two prices stop matching.",
    "measure": "price per image x 30 vs price per second of video",
-   "sources": ["provider pricing pages"]
+   "sources": [
+    "provider pricing pages"
+   ]
   },
   {
+   "format": "measured",
    "angle": "A speech model that runs on a laptop CPU is slower than real time; one that runs on a phone is not. The gap is smaller than the price gap.",
    "measure": "real-time factor on CPU vs hosted price per minute",
-   "sources": ["measured render", "provider pricing"]
+   "sources": [
+    "measured render",
+    "provider pricing"
+   ]
   },
   {
+   "format": "measured",
    "angle": "Free API tiers differ by three orders of magnitude in requests per day. The generous ones are not the ones with the famous names.",
    "measure": "published free-tier request limits",
-   "sources": ["provider documentation"]
+   "sources": [
+    "provider documentation"
+   ]
   },
   {
+   "format": "measured",
    "angle": "Caching a prompt costs money to write and saves money to read. Below a certain reuse count it loses.",
    "measure": "cache write price vs read saving, break-even reuse count",
-   "sources": ["provider pricing pages"]
+   "sources": [
+    "provider pricing pages"
+   ]
   },
   {
+   "format": "measured",
    "angle": "A thinking model that reasons for ten seconds bills those seconds as output tokens you never see.",
    "measure": "reasoning token price x typical reasoning length",
-   "sources": ["provider pricing and documentation"]
+   "sources": [
+    "provider pricing and documentation"
+   ]
   },
   {
+   "format": "measured",
    "angle": "Embedding a million documents is cheaper than one hour of video generation, by a wide margin.",
    "measure": "embedding price per million tokens vs video price per second",
-   "sources": ["provider pricing pages"]
+   "sources": [
+    "provider pricing pages"
+   ]
   },
   {
+   "format": "measured",
    "angle": "Open-weight models are free to download but the download itself is the smallest cost in using them.",
    "measure": "model file size vs VRAM requirement vs rental price per hour",
-   "sources": ["model card", "GPU rental pricing"]
+   "sources": [
+    "model card",
+    "GPU rental pricing"
+   ]
+  },
+  {
+   "format": "story",
+   "angle": "In 2016 Microsoft put a chatbot on Twitter that learned from the replies it received. It was taken offline in under a day.",
+   "measure": "timeline from launch to shutdown, as told in Microsoft's own post",
+   "calc": "launch, what users did, shutdown, what the company said afterwards",
+   "sources": [
+    "Microsoft blog post 'Learning from Tay's introduction' (March 2016)",
+    "contemporary press coverage of the shutdown"
+   ]
+  },
+  {
+   "format": "story",
+   "angle": "An airline argued that its own chatbot was a separate entity responsible for what it said. The tribunal disagreed.",
+   "measure": "the sequence of the case: wrong answer, refused refund, argument, ruling",
+   "calc": "events in order, from the published decision",
+   "sources": [
+    "British Columbia Civil Resolution Tribunal decision (February 2024)",
+    "press coverage of the ruling"
+   ]
+  },
+  {
+   "format": "story",
+   "angle": "In 1770 a chess machine beat nobles across Europe. It had a human hiding inside. Decades later a crowd-work marketplace borrowed its name.",
+   "measure": "timeline of the machine, from its debut to its exposure, and the later naming",
+   "calc": "debut, tours, how the hidden player worked, the later marketplace",
+   "sources": [
+    "Encyclopaedia Britannica entry on the Turk chess automaton",
+    "Amazon Mechanical Turk documentation"
+   ]
+  },
+  {
+   "format": "story",
+   "angle": "A 1966 program only turned what you typed into a question, and people still told it their problems.",
+   "measure": "how the program worked, step by step, and how users reacted",
+   "calc": "one example exchange rebuilt from the published script, then the reaction",
+   "sources": [
+    "Weizenbaum, 'ELIZA', Communications of the ACM (January 1966)",
+    "MIT archive material on ELIZA"
+   ]
+  },
+  {
+   "format": "story",
+   "angle": "In 2023 a court filing cited legal cases that a chatbot had made up. The judge looked for them. None existed.",
+   "measure": "sequence from the filing to the court's order",
+   "calc": "filing, the opposing side's check, the judge's order, the outcome",
+   "sources": [
+    "US District Court (S.D.N.Y.) order of June 2023",
+    "press coverage of the sanctions hearing"
+   ]
+  },
+  {
+   "format": "explain",
+   "angle": "A language model never sees the letters in 'strawberry'. It sees a few chunks, which is why it can miscount them.",
+   "measure": "how a tokenizer splits the word, against counting the letters in code",
+   "calc": "token chunks of the word versus a letter count of the same word",
+   "sources": [
+    "tokenizer documentation of a major model provider",
+    "public tokenizer demo page"
+   ]
+  },
+  {
+   "format": "explain",
+   "angle": "A chatbot does not remember your chat. The app sends the whole conversation again with every message, and you pay for all of it.",
+   "measure": "input tokens billed per turn, summed over a ten-message chat",
+   "calc": "turn n re-sends turns 1 to n-1, so the total grows with the square of the length",
+   "sources": [
+    "provider API documentation on conversation messages",
+    "provider pricing page for input tokens"
+   ]
+  },
+  {
+   "format": "explain",
+   "angle": "A language model has no clock. It knows today's date only if the app writes it into the prompt.",
+   "measure": "what a bare API call contains versus what a chat app adds in front of it",
+   "calc": "a minimal request body versus the same request with a date line added",
+   "sources": [
+    "provider API documentation on request structure",
+    "provider documentation on system prompts"
+   ]
   }
  ]
 }
