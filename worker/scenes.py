@@ -220,32 +220,82 @@ def split(d, t, t0, t1, data):
                       D.fade(D.MUTE, al), track=6, anchor="mt")
 
 
+def _wrap2(d, text, mk, size, max_w, min_size=28):
+    """(font, satirlar). Tek satira sigmiyorsa en dengeli iki satira boler;
+    iki satira da sigmiyorsa fontu kucultur (min_size'a kadar)."""
+    words = text.split()
+    while True:
+        f = mk(size)
+        if d.textlength(text, font=f) <= max_w or len(words) < 2:
+            return f, [text]
+        best = None
+        for k in range(1, len(words)):
+            l1, l2 = " ".join(words[:k]), " ".join(words[k:])
+            w = max(d.textlength(l1, font=f), d.textlength(l2, font=f))
+            if best is None or w < best[0]:
+                best = (w, [l1, l2])
+        if best[0] <= max_w or size <= min_size:
+            return f, best[1]
+        size -= 2
+
+
 def timeline(d, t, t0, t1, data):
     """Soldan saga akan adimlar. 'Once su oldu, sonra bu' icin.
-    data: {steps:[{at,label,tone?}]}"""
+    data: {steps:[{at,label,tone?}]}
+
+    Uc duzeltme (hikaye bicimi zaman cizelgesini agir kullaniyor):
+      * ilk/son adimin cizgisi etiketin yarisi kadar iceri aliniyor: ilk etiket
+        ekranin soluna tasip kesiliyordu ("Bot goes live" -> "3ot goes live");
+      * uzun etiket komsusunun ustune binmek yerine iki satira bolunuyor;
+      * SON ADIM HIC CIZILMIYORDU: ilerleme 1'de kalip son adimin belirme
+        penceresi 0 genislikte kaliyordu. Pencere artik son adimda biter."""
     steps = data.get("steps", [])[:5]
     if not steps:
         return
-    x0, x1 = MARGIN + 30, D.W - MARGIN - 30
+    n = len(steps)
     y = MID - 40
+    lo, hi = MARGIN + 30, D.W - MARGIN - 30
+    labs = [str(s.get("label", "")) for s in steps]
+    ats = [str(s.get("at", "")).upper() for s in steps]
+    f_at = D.F_SEMI(30)
+
+    def lay(span):
+        lim = max(150, span / (n - 1) - 24) if n > 1 else D.W - 2 * MARGIN
+        return [_wrap2(d, lab, D.F_DISP, 40, lim) for lab in labs]
+
+    def width(i, f, lines):
+        return max([d.textlength(ln, font=f) for ln in lines]
+                   + [d.textlength(ats[i], font=f_at) + 5 * len(ats[i])])
+
+    L = lay(hi - lo)
+    x0 = max(lo, MARGIN + width(0, *L[0]) / 2)
+    x1 = min(hi, D.W - MARGIN - width(n - 1, *L[-1]) / 2)
+    if n > 1 and x1 - x0 < 240:                  # asiri dar: varsayilana don
+        x0, x1 = lo, hi
+    L = lay(x1 - x0)
+
     prog = D.clamp01((t - t0 - 0.2) / max(0.6, (t1 - t0) * 0.55))
     d.rectangle((x0, y - 2, x1, y + 2), fill=D.fade(D.LINE, D.appear(t, t0)))
     d.rectangle((x0, y - 3, x0 + (x1 - x0) * prog, y + 3),
                 fill=D.fade(D.VIOLET, 1.0))
-    n = len(steps)
     for i, s in enumerate(steps):
-        px = x0 + (x1 - x0) * (i / max(1, n - 1))
-        a = D.clamp01((prog - i / max(1, n - 1)) * 6)
+        at_i = i / max(1, n - 1)
+        px = x0 + (x1 - x0) * at_i
+        # adim, cizgi ona varirken belirir ve cizgi vardiginda tamamlanir
+        a = D.clamp01((prog - at_i) * 6 + 1)
         if a <= 0.01:
             continue
         col = _tone(s.get("tone", "base"))
         r = 13 + 5 * a
         d.ellipse((px - r, y - r, px + r, y + r), fill=D.fade(col, a))
-        D.tracked(d, (px, y - 70), str(s.get("at", "")).upper(), D.F_SEMI(30),
+        f, lines = L[i]
+        half = width(i, f, lines) / 2
+        lx = min(max(px, MARGIN + half), D.W - MARGIN - half)   # ekran disina tasma
+        D.tracked(d, (lx, y - 70), ats[i], f_at,
                   D.fade(D.MUTE, a), track=5, anchor="mb")
-        lab = str(s.get("label", ""))
-        f = _fit(d, lab, D.F_DISP, 40, (x1 - x0) / max(1, n) + 60)
-        d.text((px, y + 46), lab, font=f, fill=D.fade(D.INK, a), anchor="mt")
+        for j, ln in enumerate(lines):
+            d.text((lx, y + 46 + j * f.size * 1.16), ln, font=f,
+                   fill=D.fade(D.INK, a), anchor="mt")
 
 
 def byte_says(d, t, t0, t1, data):

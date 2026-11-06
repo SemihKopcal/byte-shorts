@@ -374,6 +374,23 @@ class Facts(unittest.TestCase):
         self.assertEqual(len(problems), 1)
         self.assertEqual((unverified, grounded), (1, True))
 
+    def test_timeline_text_must_fit_the_screen(self):
+        s = good_spec()
+        s["beats"][3]["scene"] = "timeline"
+        s["beats"][3]["data"] = {"steps": [
+            {"at": "Morning", "label": "Bot goes live"},
+            {"at": "A very long time label", "label": "ok"}]}
+        self.assertTrue(any("timeline" in x
+                            for x in rules.validate_script(s, SCENES)))
+        s["beats"][3]["data"] = {"steps": [
+            {"at": "Morning", "label": "A label that is much too long to read"}]}
+        self.assertTrue(any("timeline" in x
+                            for x in rules.validate_script(s, SCENES)))
+        s["beats"][3]["data"] = {"steps": [
+            {"at": "Morning", "label": "Bot goes live"},
+            {"at": "Night", "label": "Taken offline"}]}
+        self.assertEqual(rules.validate_script(s, SCENES), [])
+
     def test_format_is_required_in_a_script(self):
         s = good_spec()
         del s["format"]
@@ -788,6 +805,42 @@ class Pipeline(unittest.TestCase):
 
 # ═══ render tarafi ══════════════════════════════════════════════════════
 class RenderSide(unittest.TestCase):
+    def _timeline_pixels(self, steps, t):
+        from PIL import Image, ImageDraw
+        from worker import draw as D, scenes
+        try:
+            D.F_DISP(40)
+        except RuntimeError:                  # check.yml runner'inda font yok
+            self.skipTest("Inter fontu kurulu degil")
+        im = Image.new("RGB", (D.W, D.H), (18, 10, 28))
+        scenes.timeline(ImageDraw.Draw(im), t, 0.0, 6.0, {"steps": steps})
+        return im
+
+    def test_timeline_draws_its_last_step_and_stays_on_screen(self):
+        from worker import draw as D, scenes
+        steps = [{"at": "Morning", "label": "Bot goes live"},
+                 {"at": "Hours", "label": "Users test it"},
+                 {"at": "Evening", "label": "Replies turn ugly", "tone": "bad"},
+                 {"at": "Night", "label": "Taken offline", "tone": "bad"}]
+        im = self._timeline_pixels(steps, 9.0)            # ilerleme bitmis
+        y = int(scenes.MID - 40)
+        # Noktalar yaricapi ~18 px, cizgi 6 px kalinliginda: sutun yuksekligi
+        # >= 25 olan ardisik bolgeler = nokta. 4 adim = 4 nokta.
+        px = im.load()
+        tall = []
+        for x in range(D.W):
+            ext = sum(1 for yy in range(y - 25, y + 26)
+                      if sum(px[x, yy]) > 300)
+            tall.append(ext >= 25)
+        dots = sum(1 for x in range(1, D.W) if tall[x] and not tall[x - 1])
+        self.assertEqual(dots, len(steps), "son adim cizilmiyor")
+        # etiketler kenar bosluguna tasmiyor: sol/sag 60 px bos
+        band = im.crop((0, y + 40, D.W, y + 160)).convert("L")
+        px = band.load()
+        for x in list(range(0, 60)) + list(range(D.W - 60, D.W)):
+            for yy in range(band.height):
+                self.assertLess(px[x, yy], 60, f"tasma x={x}")
+
     def test_manifest_uses_copy_and_exposes_three_captions(self):
         spec = good_spec()
         spec.update(id="x", series="G", _theme="ember")

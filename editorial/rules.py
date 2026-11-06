@@ -83,6 +83,9 @@ def _shape(scene: str, data: dict, who: str) -> list[str]:
         for s in lst("steps", 1, 5):
             if not isinstance(s, dict) or not s.get("label"):
                 p.append(f"{who} (timeline): adimda label yok")
+            elif len(str(s["label"])) > 26 or len(str(s.get("at", ""))) > 12:
+                p.append(f"{who} (timeline): label en fazla 26, at en fazla 12 "
+                         f"karakter ({str(s['label'])[:30]!r})")
     elif scene == "byte_says":
         if data.get("pose", "idle") not in POSES:
             # cizim burada KeyError ile coker
