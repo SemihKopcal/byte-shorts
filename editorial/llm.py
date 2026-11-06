@@ -258,6 +258,21 @@ class Gemini:
                      f"{self.reasons[model][:160]}")
         return None
 
+    def check_search(self) -> bool:
+        """Aramayi kosunun basinda BIR kez yoklar (warm'dan sonra): yapimci ve
+        yazar bugun aramanin kapali oldugunu bastan bilsin, dogrulanamayacak
+        konu yazmasin. Belirsizse (503, zaman asimi) arama VAR sayilir."""
+        if not self.model:
+            return True
+        st, out, _ = self.probe(self.model, grounded=True)
+        if st in (400, 429):
+            self._no_search.add(self.model)
+            self.log(f"  [gemini] {self.model} arama araci yok "
+                     f"({st}: {gist((out.get('error') or {}).get('message', ''), 90)})"
+                     ": hikaye/gundem konulari bugun kapali")
+            return False
+        return True
+
     def search_ok(self) -> bool:
         """False: son cevap veren modelde arama araci kullanilamiyor (ucretsiz
         anahtarlar). Pipeline buna gore dogrulama isteyen konulari eler."""

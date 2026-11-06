@@ -1043,6 +1043,127 @@ class Pipeline(unittest.TestCase):
         self.assertIn("UTF-8", first)                   # yedek havuzdaki olcum
         self.assertNotIn(self.STORY, first)
 
+    def reject_then_publish(self):
+        rep = self.searchless_replies()
+        rep["editor"] = [review("reject", 4), review("publish", 8)]
+        rep["yapimci"] = [{"candidates": [self.two_candidates()["candidates"][1]]}]
+        return rep
+
+    def test_one_rejected_candidate_falls_through_to_the_backlog(self):
+        spec, llm, files, rej, err = self.run_pipeline(self.reject_then_publish())
+        self.assertIsNone(err)
+        prompts = [p for r, p in llm.log if r == "yazar"]
+        self.assertEqual(len(prompts), 2)
+        self.assertIn("UTF-8", prompts[1])              # ikinci deneme yedekten
+        self.assertEqual(files, [spec["id"] + ".json"])
+
+    def test_no_search_note_reaches_producer_and_writer(self):
+        class NoSearch(FakeLLM):
+            def search_ok(self):
+                return False
+        _, llm, *_ = self.run_pipeline(self.searchless_replies(),
+                                       llm_cls=NoSearch)
+        prod = [p for r, p in llm.log if r == "yapimci"][0]
+        wr = [p for r, p in llm.log if r == "yazar"][0]
+        self.assertIn("WEB SEARCH IS OFF", prod)
+        self.assertIn("WEB SEARCH IS OFF", wr)
+        _, llm, *_ = self.run_pipeline(self.searchless_replies())
+        self.assertNotIn("WEB SEARCH IS OFF",
+                         [p for r, p in llm.log if r == "yapimci"][0])
+        self.assertNotIn("WEB SEARCH IS OFF",
+                         [p for r, p in llm.log if r == "yazar"][0])
+
+    def test_manual_topic_without_search_also_gets_the_note(self):
+        class NoSearch(FakeLLM):
+            def search_ok(self):
+                return False
+        rep = self.searchless_replies()
+        _, llm, *_ = self.run_pipeline(rep, llm_cls=NoSearch,
+                                       topic="pixels in a short")
+        self.assertIn("WEB SEARCH IS OFF",
+                      [p for r, p in llm.log if r == "yazar"][0])
+
+    def test_main_warms_then_checks_search_before_running(self):
+        from unittest import mock
+        order = []
+
+        class G:
+            reasons = {}
+            model = "m"
+
+            def __init__(self, key):
+                pass
+
+            def warm(self):
+                order.append("warm")
+                return "m"
+
+            def check_search(self):
+                order.append("check_search")
+                return False
+
+        def fake_run(llm, **kw):
+            order.append("run")
+            raise pipeline.Failure("test")
+
+        env = {"GEMINI_API_KEY": "k"}
+        with mock.patch.object(pipeline, "Gemini", G), \
+                mock.patch.object(pipeline, "run", fake_run), \
+                mock.patch.dict("os.environ", env):
+            with self.assertRaises(SystemExit):
+                pipeline.main([])
+        self.assertEqual(order, ["warm", "check_search", "run"])
+
+    def test_main_stops_when_no_model_answers_and_never_checks_search(self):
+        from unittest import mock
+        order = []
+
+        class G:
+            reasons = {"m": "503: busy"}
+
+            def __init__(self, key):
+                pass
+
+            def warm(self):
+                order.append("warm")
+                return None
+
+            def check_search(self):
+                order.append("check_search")
+
+        with mock.patch.object(pipeline, "Gemini", G), \
+                mock.patch.dict("os.environ", {"GEMINI_API_KEY": "k"}):
+            with self.assertRaises(SystemExit):
+                pipeline.main([])
+        self.assertEqual(order, ["warm"])
+
+    def lookups(self, n):
+        return [{"shown": f"${i + 5}.50", "source": 0} for i in range(n)]
+
+    def test_hopeless_topic_skips_the_revision_rounds(self):
+        n = pipeline.ALLOW_UNVERIFIED + pipeline.HOPELESS + 1
+        rep = self.searchless_replies()
+        rep["editor"] = [review("revise", 8, fixes=["x"],
+                                claims=self.lookups(n))]
+        rep["yapimci"] = [{"candidates": [self.two_candidates()["candidates"][1]]}]
+        spec, llm, files, rej, err = self.run_pipeline(
+            rep, grounded=False, topic=None)
+        roles_used = [r for r, _ in llm.log]
+        self.assertEqual(roles_used.count("yazar-duzeltme"), 0)   # revizyon yok
+        self.assertEqual(roles_used.count("editor"), 2)           # 2 konu, tur 0
+        self.assertEqual(len(rej), 2)
+
+    def test_few_unverified_statements_still_get_revised(self):
+        n = pipeline.ALLOW_UNVERIFIED + 2
+        rep = self.searchless_replies()
+        rep["editor"] = [review("revise", 8, fixes=["x"], claims=self.lookups(n)),
+                         review("publish", 8)]
+        rep["yapimci"] = [{"candidates": [self.two_candidates()["candidates"][1]]}]
+        rep["yazar-duzeltme"] = [good_spec()]
+        spec, llm, *_, err = self.run_pipeline(rep, grounded=False)
+        roles_used = [r for r, _ in llm.log]
+        self.assertGreaterEqual(roles_used.count("yazar-duzeltme"), 1)
+
 # ═══ render tarafi ══════════════════════════════════════════════════════
 class RenderSide(unittest.TestCase):
     def _timeline_pixels(self, steps, t):
@@ -1236,6 +1357,43 @@ class FreeTierKey(unittest.TestCase):
         self.assertEqual([m for m, _ in stub.calls],
                          ["gemini-3.8-flash", "gemini-3.7-flash",
                           "gemini-3.6-flash"])
+
+    def test_check_search_tells_the_run_up_front(self):
+        llm, stub, sleeps, logs = self.client()
+        self.assertEqual(llm.warm(), "gemini-3.6-flash")
+        self.assertFalse(llm.check_search())
+        self.assertFalse(llm.search_ok())
+        self.assertEqual(stub.calls[-1], ("gemini-3.6-flash", True))
+        self.assertTrue(any("kapali" in m for m in logs))
+        self.assertEqual(sleeps, [])
+
+    def test_check_search_true_when_the_model_has_search(self):
+        llm, *_ = self.client(grounded_ok={"gemini-3.6-flash"})
+        llm.warm()
+        self.assertTrue(llm.check_search())
+        self.assertTrue(llm.search_ok())
+
+    def test_check_search_unknown_counts_as_available(self):
+        # 503/zaman asimi "arama yok" demek degildir
+        st = Stub([ok("ready"), (503, {"error": {"message": "busy"}})])
+        llm = gem(st)
+        llm._cands = ["m"]
+        self.assertEqual(llm.warm(), "m")
+        self.assertTrue(llm.check_search())
+        self.assertTrue(llm.search_ok())
+        self.assertTrue(gem(Stub([])).check_search())     # model secilmemis
+
+    def test_note_is_added_to_producer_and_writer_prompts(self):
+        llm = FakeLLM({"yapimci": [{"candidates": []}], "yazar": [None]})
+        roles.produce(llm, live="x", backlog=[], recent=[], today="2026-11-06",
+                      search=False)
+        roles.write(llm, {"angle": "a", "measure": "m", "search": False},
+                    max_words=100)
+        self.assertTrue(all("WEB SEARCH IS OFF" in p for _, p in llm.log))
+        llm2 = FakeLLM({"yapimci": [{"candidates": []}], "yazar": [None]})
+        roles.produce(llm2, live="x", backlog=[], recent=[], today="2026-11-06")
+        roles.write(llm2, {"angle": "a", "measure": "m"}, max_words=100)
+        self.assertFalse(any("WEB SEARCH IS OFF" in p for _, p in llm2.log))
 
     def test_producer_and_factcheck_work_on_this_key(self):
         llm, stub, sleeps, _ = self.client()

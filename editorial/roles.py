@@ -101,9 +101,28 @@ def _j(o) -> str:
 
 
 # ═══ 1. YAPIMCI ═════════════════════════════════════════════════════════
+NO_SEARCH_PRODUCER = """
+WEB SEARCH IS OFF FOR THIS RUN, so nothing can be fact-checked online. Propose
+ONLY topics whose every figure is arithmetic a viewer can redo from numbers the
+video itself states (sizes, counts, rates, seconds times a price given as an
+assumption). Use the formats "measured" or "explain" only. Do not rely on how a
+named product, model, tokenizer, company or paper behaves, and give no dates,
+versions or published prices: each of those would be rejected as unverifiable.
+Ignore any instruction below to search the web.
+"""
+
+NO_SEARCH_WRITER = """WEB SEARCH IS OFF TODAY: nothing can be fact-checked online, so the editor
+rejects every statement that is not pure arithmetic. Show only numbers you
+derive from numbers stated in the video. Do not state how a specific tokenizer,
+model, product or company behaves, and give no dates, versions, prices or event
+details. Build the video from the arithmetic and from what is true by
+definition.
+
+"""
+
 PRODUCER = """Today is {today}. Propose exactly 5 candidate topics for the next
 BYTE video.
-
+{search_note}
 BYTE tells things about AI that are TRUE and make a 10 to 30 year old think
 "wait, really?". Interesting comes first; correct is the entry fee. Offer at
 least 3 different formats among the 5:
@@ -168,11 +187,13 @@ def _words(s: str) -> set:
 
 
 def produce(llm, *, live: str, backlog: list[dict], recent: list[str],
-            today: str, formats: list[str] | None = None) -> list[dict]:
+            today: str, formats: list[str] | None = None,
+            search: bool = True) -> list[dict]:
     """Siralanmis aday listesi (en iyi basta). Gemini calismazsa bos liste."""
     formats = formats or []
     prompt = PRODUCER.format(
         today=today, live=live,
+        search_note="" if search else NO_SEARCH_PRODUCER,
         formats=", ".join(formats[-4:]) or "(none yet)",
         backlog="\n".join(
             f"- [{b.get('format', 'measured')}] {b['angle']}  "
@@ -230,7 +251,7 @@ TOPIC
   sources : {sources}
   signal  : {signal}
 
-{format_doc}
+{search_note}{format_doc}
 
 The video must be INTERESTING, not only correct: open on the strangest true
 detail, let the middle build, and hold one concrete payoff for the last third.
@@ -313,6 +334,7 @@ def write(llm, brief: dict, *, max_words: int, problems: list[str] | None = None
         angle=brief["angle"], measure=brief["measure"],
         calc=brief.get("calc", ""), sources=", ".join(brief.get("sources", [])),
         signal=brief.get("signal_url") or "none", scenes=SCENE_DOC,
+        search_note="" if brief.get("search", True) else NO_SEARCH_WRITER,
         max_words=max_words, feedback=fb)
     return _as_dict(llm.ask_json(prompt, system=SYSTEM, temperature=0.9,
                                  role="yazar"))

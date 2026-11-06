@@ -58,10 +58,16 @@ kanitlanan icerik yayina girer, hikaye/gundem konulari elenir ve log nedenini
 soyler. Bilincli gevsetmek istersen `ALLOW_UNVERIFIED` degiskeni (0-5,
 varsayilan 1): dogrulanamayan en fazla kac iddia kabul.
 
-**Ucretsiz anahtarla:** arama (grounding) yok, o yuzden `story` ve `trend`
-bicimleri calismaz; kod bunu fark edip yalniz `measured` ve `explain`
-konulari yazar. Bu hata degil, bilincli kapi: dogrulanamayan olay iddiasi
-videoya girmiyor. `python tools/gemini_check.py` (ya da Actions >
+**Ucretsiz anahtarla:** arama (grounding) yok. Kod bunu kosunun basinda bir
+kez yoklar; yapimci ve yazar prompt'ta "arama kapali, yalniz aritmetik"
+notunu gorur, `story`/`trend` adaylari elenir, aday azsa yedek havuzdan
+tamamlanir, 5'ten fazla dogrulanamayan iddiaya dayanan konu revizyon turu
+harcamadan birakilir. Ama durust sinir su: arama olmadan **hicbir dis olgu
+dogrulanamaz**, yani bir sayfadan okunan fiyat da. Yalniz kendi icinde
+aritmetikle kurulan konular gecer; yedek havuzdaki fiyat tabanli konularin
+cogu gecmez. Kalici cozum arama (faturalandirma). Bu hata degil, bilincli
+kapi: dogrulanamayan iddia videoya girmiyor. Bir deneme/test icin
+`ALLOW_UNVERIFIED=5` + `private`. `python tools/gemini_check.py` (ya da Actions >
 gemini-check) tabloda "arama" sutununda bunu gosterir.
 
 ## Tek dugme: AUTO_PRIVACY

@@ -43,6 +43,7 @@ except ValueError:
     MIN_SCORE = 7
 MAX_REVISIONS = 2
 MAX_CANDIDATES = 3
+HOPELESS = 3          # arama yokken ALLOW_UNVERIFIED'in bu kadar ustu: revizyon bos
 try:
     # Aramayla dogrulanamayan en fazla kac iddia kabul. Varsayilan 1; depo
     # degiskeni ALLOW_UNVERIFIED ile 0-5 arasi ayarlanir (bos = 1).
@@ -188,6 +189,13 @@ def develop(llm, brief: dict, scene_names, recent: list[str], log=print,
         log(f"  editor tur {rnd}: {d.verdict}  ort {d.mean:.1f}  "
             + " ".join(f"{k}={v}" for k, v in d.scores.items())
             + f"  risk={d.risk}")
+        if rnd == 0 and not grounded and unverified > ALLOW_UNVERIFIED + HOPELESS:
+            # Konunun kendisi dogrulanamayan iddialara dayaniyor; iki revizyon
+            # turu (her biri dakikalar) bunu degistirmez. Siradaki konuya gec.
+            log(f"  umutsuz: arama yok, {unverified} iddia dogrulanamiyor; "
+                "siradaki konuya geciliyor")
+            return None, {"stage": "editor", "problems": d.fixes,
+                          "spec": spec, "scores": d.scores}
         if d.verdict == "publish":
             break
         if d.verdict == "reject" or rnd == max_revisions:
@@ -216,6 +224,11 @@ def develop(llm, brief: dict, scene_names, recent: list[str], log=print,
         "unverified": unverified, "model": llm.model,
     }
     return spec, {"stage": "ok"}
+
+
+def _search_ok(llm) -> bool:
+    """Calisan modelde arama araci var mi (sahte istemcilerde: var)."""
+    return bool(getattr(llm, "search_ok", lambda: True)())
 
 
 def _draft_problems(spec: dict, scene_names, recent: list[str],
@@ -279,22 +292,37 @@ def run(llm, *, root: Path = ROOT, today: str | None = None,
             live = signals.as_prompt(signals.collect())
         pool = backlog_candidates(root, recent, today, formats)
         cands = roles.produce(llm, live=live, backlog=pool, recent=recent,
-                              today=today, formats=formats)
+                              today=today, formats=formats,
+                              search=_search_ok(llm))
         log(f"yapimci {len(cands)} uygun aday verdi"
             + (": " + ", ".join(c["format"] for c in cands[:5]) if cands else ""))
         if not cands:
             log("-> yedek havuza dusuluyor")
             cands = pool
-    if not topic and not getattr(llm, "search_ok", lambda: True)():
-        # Arama araci yok (ucretsiz anahtar): hikaye/gundem olay iddialarini
-        # kimse dogrulayamaz, editor kapisindan gecemez. Onlara yazar+editor
-        # turlari harcamak yerine bastan ele; yalniz rakami formulle kanitlanan
-        # konular kalir.
-        keep = [c for c in cands if c.get("format") not in rules.NEEDS_FACTS]
-        if len(keep) < len(cands):
-            log(f"arama yok: dogrulanamayan {len(cands) - len(keep)} "
-                "hikaye/gundem adayi elendi")
-        cands = keep or [c for c in pool if c.get("format") not in rules.NEEDS_FACTS]
+    if not topic:
+        search = _search_ok(llm)
+        if not search:
+            # Arama araci yok (ucretsiz anahtar): hikaye/gundem olay iddialarini
+            # kimse dogrulayamaz. Onlara yazar+editor turlari harcamak yerine
+            # bastan ele.
+            keep = [c for c in cands
+                    if c.get("format") not in rules.NEEDS_FACTS]
+            if len(keep) < len(cands):
+                log(f"arama yok: dogrulanamayan {len(cands) - len(keep)} "
+                    "hikaye/gundem adayi elendi")
+            cands = keep
+        if len(cands) < MAX_CANDIDATES:
+            # Tek aday reddedilince gun bitmesin: yedek havuzdan tamamla.
+            have = {c["angle"] for c in cands}
+            more = [p for p in pool if p["angle"] not in have and
+                    (search or p.get("format") not in rules.NEEDS_FACTS)]
+            cands = cands + more[:MAX_CANDIDATES - len(cands)]
+        if not search:
+            for c in cands:
+                c["search"] = False         # yazar bunu prompt'ta goruyor
+    elif not _search_ok(llm):
+        for c in cands:                     # elle verilen konuya da soyle
+            c["search"] = False
     if not cands:
         raise Failure("konu adayi yok: yapimci bos dondu, yedek havuz da bos")
 
@@ -389,6 +417,7 @@ def main(argv=None) -> None:
         print(f"\nBUGUN VIDEO YOK: hicbir Gemini modeli yoklamaya cevap "
               f"vermedi ({why})", file=sys.stderr)
         sys.exit(1)
+    llm.check_search()
     topic = (a.topic or os.environ.get("TOPIC", "")).strip() or None
     try:
         spec = run(llm, topic=topic, scene_names=NAMES, theme_names=THEMES,
