@@ -371,6 +371,14 @@ def main(argv=None) -> None:
     from worker.themes import NAMES as THEMES             # noqa: E402
 
     llm = Gemini(key)
+    # Pahali cagrilardan once saglikli modeli bul: bozuk modele 20 sn'den
+    # fazla harcama. Hicbiri cevap vermiyorsa kosuyu burada, nedeniyle bitir.
+    if not llm.warm():
+        why = "; ".join(f"{m}: {r[:80]}" for m, r in
+                        list(llm.reasons.items())[:6]) or "model listesi bos"
+        print(f"\nBUGUN VIDEO YOK: hicbir Gemini modeli yoklamaya cevap "
+              f"vermedi ({why})", file=sys.stderr)
+        sys.exit(1)
     topic = (a.topic or os.environ.get("TOPIC", "")).strip() or None
     try:
         spec = run(llm, topic=topic, scene_names=NAMES, theme_names=THEMES,

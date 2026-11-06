@@ -88,8 +88,12 @@ Actions > daily > Run workflow:
 | metin yazari | 4 baslik + YouTube/Instagram/TikTok metni | `publish/manifest.py`: hashtag sayisi, link, emoji, kaynak bolumu |
 
 Model adi sabit degil: `editorial/llm.py` her kosuda `ListModels`'e sorup
-o anahtarla cagirilabilen en yeni kararli flash'i seciyor; calismayana
-(404/kota) siradakine geciyor.
+adaylari diziyor (en yeni kararli flash basta), sonra **kosunun basinda her
+aday icin kucuk bir yoklama** (`warm`, 20 sn) atip ilk cevap vereni seciyor.
+Bozuk model (503/zaman asimi) dinleniyor, kotasi olmayan ya da 404 veren
+kosu boyunca eleniyor. Hicbiri cevap vermezse kosu hemen, nedenleriyle biter.
+Anahtarin hangi modelleri calistirdigini gozle gormek icin: Actions >
+**gemini-check** > Run workflow (arama destegi var mi, kac saniye, 429 nedeni).
 
 **Editor yetmez, kod da hesaplar.** Editorden her ekran rakami icin bir
 formul isteniyor (`0.40*60 = 24`); `safe_eval` onu hesaplayip Gemini'nin
@@ -104,7 +108,7 @@ editorial/   Gemini: llm.py (istemci) roles.py (istemler) rules.py (kurallar)
 worker/      cizim: synth, draw, scenes, themes, byte, series_*, qc, build
 publish/     youtube.py (yukleme) manifest.py (platform metinleri)
 tools/       setup_runner.sh, fetch_voice.sh, pick_script.py, release.sh,
-             check_token.py, get_refresh_token.py
+             check_token.py, get_refresh_token.py, gemini_check.py
 tests/       agsiz testler (sahte Gemini)
 content/     scripts/ rejected/ backlog.json built.json published.json
 ci/          .github/workflows'un kopyasi (asagiya bak)

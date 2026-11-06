@@ -41,6 +41,7 @@ RETRY = {429, 500, 502, 503, 504}
 BACKOFF = (5, 15)                     # saniye; iki tekrar, sonra siradaki model
 COOLDOWN = 300                        # tekrarlari biten model bu kadar saniye dinlenir
 FIRST_TIMEOUT = 45                    # hic cevap vermemis modele ilk istek
+PING_TIMEOUT = 20                     # saglik yoklamasi (warm/probe) zaman asimi
 MAX_HINT = 65                         # Google "55s sonra dene" derse en fazla bu kadar bekle
 LAST_RESORT = ("gemini-flash-latest", "gemini-2.5-flash", "gemini-2.0-flash")
 
@@ -210,7 +211,50 @@ class Gemini:
         live = [m for m in self._cands if m not in self._dead]
         now = self.clock()
         rested = [m for m in live if self._cool.get(m, 0) <= now]
-        return rested or live         # hepsi dinleniyorsa yine de dene
+        # bu kosuda cevap vermis modeller one (sira kararli)
+        return sorted(rested or live, key=lambda m: m not in self._proven)
+
+    # ── saglik yoklamasi ───────────────────────────────────────────────
+    def probe(self, model: str, *, grounded: bool = False,
+              timeout: float = PING_TIMEOUT):
+        """Tek kucuk istek: (durum, govde, saniye). Hic firlatmaz."""
+        self._pace()
+        self.calls += 1
+        t = self.clock()
+        st, out = self.transport(
+            "POST", f"{BASE}/models/{model}:generateContent", self.key,
+            self._body("Reply with the single word: ready", None, 0.0, 64,
+                       False, grounded), timeout=timeout)
+        return st, out, self.clock() - t
+
+    def warm(self, limit: int = 10, budget: float = 120) -> str | None:
+        """Ilk SAGLIKLI modeli bulur ve one alir; bulamazsa None.
+
+        Yazar/editor gibi pahali cagrilari bozuk bir modele harcamak yerine,
+        kosunun basinda her aday icin 20 sn'lik kucuk bir yoklama: en yeni
+        kararli modelden baslar, ilk cevap vereni secer. Bozuklar dinlenir
+        ya da (kotasi yok/404) kosu boyunca elenir."""
+        start = self.clock()
+        for model in self.candidates():
+            if limit <= 0 or self.clock() - start > budget:
+                break
+            limit -= 1
+            st, out, secs = self.probe(model)
+            if st == 200:
+                self.model = model
+                self._proven.add(model)
+                self.log(f"  [gemini] {model} hazir ({secs:.1f} sn)")
+                return model
+            msg = gist((out.get("error") or {}).get("message", ""))
+            kind = quota_hint(out)[0] if st == 429 else ""
+            self.reasons[model] = f"{st} {kind}".strip() + f": {msg}"
+            if st in (403, 404) or kind in ("zero", "daily"):
+                self._dead.add(model)
+            else:
+                self._rest(model)
+            self.log(f"  [gemini] {model} yoklamaya cevap vermedi: "
+                     f"{self.reasons[model][:160]}")
+        return None
 
     def _rest(self, model: str):
         self._cool[model] = self.clock() + COOLDOWN

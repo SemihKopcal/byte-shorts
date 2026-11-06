@@ -256,6 +256,55 @@ class Client(unittest.TestCase):
         g.ask("x", json_mode=False)
         self.assertEqual(set(s.timeouts), {33})
 
+    def test_warm_picks_the_first_healthy_model_and_prefers_it(self):
+        s = Stub([models("gemini-3.8-flash", "gemini-3.7-flash"),
+                  (503, {}), ok("ready"), ok("answer")])
+        g = gem(s)
+        self.assertEqual(g.warm(), "gemini-3.7-flash")
+        self.assertEqual(g.model, "gemini-3.7-flash")
+        self.assertNotIn("gemini-3.8-flash", g.candidates())     # dinleniyor
+        self.assertEqual(g.ask("x", json_mode=False), "answer")  # dogrudan saglikliya
+        self.assertEqual([c[1].split("/models/")[-1].split(":")[0]
+                          for c in s.calls if c[0] == "POST"],
+                         ["gemini-3.8-flash", "gemini-3.7-flash",
+                          "gemini-3.7-flash"])
+
+    def test_warm_drops_models_without_quota_or_gone(self):
+        s = Stub([models("gemini-3.8-flash", "gemini-3.7-flash",
+                         "gemini-3.6-flash"),
+                  quota("zero"), (404, {"error": {"message": "gone"}}),
+                  ok("ready")])
+        g = gem(s)
+        self.assertEqual(g.warm(), "gemini-3.6-flash")
+        self.assertNotIn("gemini-3.8-flash", g.candidates())
+        self.assertNotIn("gemini-3.7-flash", g.candidates())
+        # kotasi olmayan ve 404 veren KALICI elenir (dinlenmez)
+        self.assertEqual(g._dead, {"gemini-3.8-flash", "gemini-3.7-flash"})
+        self.assertEqual(set(g.reasons), {"gemini-3.8-flash", "gemini-3.7-flash"})
+
+    def test_models_that_answered_this_run_come_first(self):
+        s = Stub([models("gemini-3.8-flash", "gemini-2.5-flash")])
+        g = gem(s)
+        self.assertEqual(g.candidates()[0], "gemini-3.8-flash")
+        g._proven.add("gemini-2.5-flash")
+        self.assertEqual(g.candidates()[0], "gemini-2.5-flash")
+
+    def test_warm_gives_up_with_reasons_and_bounded_calls(self):
+        s = Stub([models("gemini-3.8-flash", "gemini-3.7-flash")]
+                 + [(503, {"error": {"message": "overloaded"}})] * 30)
+        g = gem(s)
+        self.assertIsNone(g.warm(limit=3))
+        self.assertLessEqual(len(s.calls), 4)                  # liste + 3 yoklama
+        self.assertIn("overloaded", g.reasons["gemini-3.8-flash"])
+
+    def test_probe_is_one_small_request_with_short_timeout(self):
+        s = Stub([ok("ready")])
+        g = gem(s)
+        st, _, _ = g.probe("gemini-3.8-flash")
+        self.assertEqual(st, 200)
+        self.assertEqual(s.timeouts, [L.PING_TIMEOUT])
+        self.assertLessEqual(s.calls[0][2]["generationConfig"]["maxOutputTokens"], 64)
+
     def test_list_failure_still_tries_fallback_names(self):
         s = Stub([(500, {}), ok("fine")])
         g = gem(s)
@@ -393,6 +442,39 @@ class Claims(unittest.TestCase):
         bad[1]["expr"] = "__import__('os').getcwd()"
         p, _ = rules.check_claims(good_spec(), bad, 2)
         self.assertTrue(any("hesaplanamadi" in x for x in p))
+
+
+class GeminiCheckTool(unittest.TestCase):
+    def row(self, name, ok_, grounded=None):
+        mk = lambda o: {"model": name, "ok": o, "secs": 1.0,
+                        "why": "" if o else "503: busy"}
+        return {"model": name, "plain": mk(ok_),
+                "grounded": None if grounded is None else mk(grounded)}
+
+    def test_recommend_first_healthy_with_search(self):
+        from tools import gemini_check as C
+        best, why = C.recommend([self.row("a", False), self.row("b", True, True),
+                                 self.row("c", True, True)])
+        self.assertEqual(best, "b")
+        self.assertIn("bir sey yapmana gerek yok", why)
+
+    def test_recommend_prefers_a_model_with_search(self):
+        from tools import gemini_check as C
+        best, why = C.recommend([self.row("a", True, False),
+                                 self.row("b", True, True)])
+        self.assertEqual(best, "b")
+        self.assertIn("GEMINI_MODEL=b", why)
+
+    def test_recommend_nothing_works(self):
+        from tools import gemini_check as C
+        best, why = C.recommend([self.row("a", False), self.row("b", False)])
+        self.assertIsNone(best)
+        self.assertIn("HICBIR", why)
+
+    def test_render_marks_missing_search(self):
+        from tools import gemini_check as C
+        out = C.render([self.row("a", True, False)])
+        self.assertIn("| a | evet | 1.0 | YOK |", out)
 
 
 class Facts(unittest.TestCase):
@@ -821,6 +903,30 @@ class Pipeline(unittest.TestCase):
             self.assertEqual(got[-1]["format"], "story")
             self.assertEqual({g["format"] for g in got},
                              {"measured", "story"})
+
+    def test_main_stops_at_once_when_no_model_answers_the_ping(self):
+        import contextlib
+        import io
+        from unittest import mock
+
+        class Dead:
+            reasons = {"gemini-3.8-flash": "503: overloaded"}
+
+            def __init__(self, key):
+                pass
+
+            def warm(self):
+                return None
+
+        err = io.StringIO()
+        with mock.patch.dict("os.environ", {"GEMINI_API_KEY": "k"}), \
+                mock.patch.object(pipeline, "Gemini", Dead), \
+                contextlib.redirect_stderr(err):
+            with self.assertRaises(SystemExit) as cm:
+                pipeline.main(["--dry-run"])
+        self.assertEqual(cm.exception.code, 1)
+        self.assertIn("BUGUN VIDEO YOK", err.getvalue())
+        self.assertIn("overloaded", err.getvalue())
 
     def test_gemini_down_stops_loudly_without_hammering(self):
         spec, llm, files, rej, err = self.run_pipeline({"yapimci": [cands()]})

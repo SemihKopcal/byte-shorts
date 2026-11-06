@@ -1,0 +1,21 @@
+name: gemini-check
+
+# Anahtarin hangi Gemini modellerini gercekten calistirdigini olcer (cevap
+# veriyor mu, kac saniyede, arama destegi var mi, 429 ise nedeni). Video
+# uretmez, hicbir sey yazmaz. 1-2 dakika. Actions > gemini-check > Run workflow.
+on:
+  workflow_dispatch:
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: modelleri olc
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        run: python tools/gemini_check.py
