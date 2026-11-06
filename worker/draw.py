@@ -99,15 +99,53 @@ F_REG = lambda s: _ttf(("Inter", "Regular",
                         ("Inter-Regular.otf", "Inter-Regular.ttf")), s)
 
 
+@lru_cache(maxsize=None)
+def _cjk_file() -> str:
+    """CJK fontunu BUL -- dosya adlarini sabit yazma.
+
+    Onceki hali uc sabit yol deniyordu ve Ubuntu 24.04'te fonts-noto-cjk
+    paketi dosyayi baska adla koyunca "CJK fontu yok" diye patliyordu;
+    font aslinda kuruluydu. Artik once bizim indirdigimiz dosya, sonra
+    sistemdeki HERHANGI bir CJK fontu, en son fontconfig.
+    """
+    own = Path.home() / ".local/share/fonts/cjk/NotoSansJP.ttf"
+    if own.exists():
+        return str(own)
+    for d in ("/usr/share/fonts/opentype/noto", "/usr/share/fonts/truetype/noto",
+              "/usr/share/fonts/opentype", "/usr/share/fonts/truetype",
+              "/usr/share/fonts", "/Library/Fonts", "/System/Library/Fonts"):
+        base = Path(d)
+        if not base.exists():
+            continue
+        for pat in ("**/NotoSansCJK*", "**/NotoSansJP*", "**/*CJK*",
+                    "**/*japanese*", "**/*Gothic*"):
+            hits = sorted(base.glob(pat))
+            if hits:
+                return str(hits[0])
+    try:
+        out = subprocess.run(["fc-match", "-f", "%{file}", ":lang=ja"],
+                             capture_output=True, text=True, timeout=10).stdout.strip()
+    except Exception:
+        out = ""
+    if out and Path(out).exists():
+        return out
+    raise RuntimeError(
+        "CJK fontu bulunamadi. tools/setup_runner.sh calistir "
+        "(ya da apt-get install fonts-noto-cjk).")
+
+
 def cjk_font(size: int) -> ImageFont.FreeTypeFont:
     """Japonca glif icin. Seri B'nin ders sahnesi bunu kullaniyor."""
-    for p in ("/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc",
-              "/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.otf",
-              "/usr/share/fonts/truetype/fonts-japanese-gothic.ttf"):
-        if Path(p).exists():
-            return ImageFont.truetype(p, size, index=0) if p.endswith(".ttc") \
-                else ImageFont.truetype(p, size)
-    raise RuntimeError("CJK fontu yok: apt-get install fonts-noto-cjk")
+    p = _cjk_file()
+    f = ImageFont.truetype(p, size, index=0) if p.endswith((".ttc", ".otc")) \
+        else ImageFont.truetype(p, size)
+    # Degisken fontlar varsayilan olarak en ince agirlikta aciliyor; ekranda
+    # neredeyse gorunmez oluyorlar.
+    try:
+        f.set_variation_by_name("Regular")
+    except Exception:
+        pass
+    return f
 
 
 # ───────────────────────── yardimcilar ─────────────────────────

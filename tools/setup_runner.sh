@@ -61,7 +61,22 @@ else
   rm -rf "$tmp2"
 fi
 
-fc-cache -f "$FONTS" >/dev/null 2>&1 || true
+# ── Japonca (CJK) ──
+# apt'taki fonts-noto-cjk hem 60 MB hem de dosya adi surume gore degisiyor;
+# Ubuntu 24.04'te adi degisince "CJK fontu yok" diye patlamistik. Bu tek
+# dosya 9.6 MB, adi sabit, 7 saniyede iniyor.
+CJK="${RUNNER_CJK:-$HOME/.local/share/fonts/cjk}"
+mkdir -p "$CJK"
+if [ -f "$CJK/NotoSansJP.ttf" ]; then
+  echo "CJK fontu zaten var, atlaniyor"
+else
+  echo "CJK fontu indiriliyor..."
+  curl -fsSL --retry 3 --retry-delay 2 \
+    "https://github.com/google/fonts/raw/main/ofl/notosansjp/NotoSansJP%5Bwght%5D.ttf" \
+    -o "$CJK/NotoSansJP.ttf"
+fi
+
+fc-cache -f "$FONTS" "$CJK" >/dev/null 2>&1 || true
 
 # ── dogrula ──
 echo "PATH'e ekleniyor: $BIN"
@@ -73,4 +88,5 @@ export PATH="$BIN:$PATH"
 for f in $NEED; do
   [ -f "$FONTS/$f" ] || { echo "EKSIK FONT: $f" >&2; exit 1; }
 done
-echo "fontlar tamam ($(ls "$FONTS" | wc -l) dosya)"
+[ -f "$CJK/NotoSansJP.ttf" ] || { echo "EKSIK: CJK fontu" >&2; exit 1; }
+echo "fontlar tamam ($(ls "$FONTS" | wc -l) Inter + CJK)"
