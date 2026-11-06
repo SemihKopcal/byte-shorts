@@ -1,0 +1,156 @@
+{
+ "brief": {
+  "format": "explain",
+  "angle": "A chatbot does not remember your chat. The app sends the whole conversation again with every message, and you pay for all of it.",
+  "measure": "input tokens billed per turn, summed over a ten-message chat",
+  "calc": "turn n re-sends turns 1 to n-1, so the total grows with the square of the length",
+  "sources": [
+   "provider API documentation on conversation messages",
+   "provider pricing page for input tokens"
+  ],
+  "signal_url": null,
+  "search": false
+ },
+ "stage": "draft",
+ "problems": [
+  "8 beat -- 10..18 arasi olmali"
+ ],
+ "spec": {
+  "format": "explain",
+  "title": "Your chat history is an illusion",
+  "summary": "Chatbots do not remember past messages and instead re-read the whole transcript every time you speak.",
+  "tags": [
+   "ai",
+   "tokens",
+   "chatbots",
+   "byte"
+  ],
+  "sources": [
+   "provider api documentation on conversation messages",
+   "provider pricing page for input tokens"
+  ],
+  "beats": [
+   {
+    "id": "b1",
+    "role": "hook",
+    "scene": "contrast",
+    "say": "Your chatbot does not remember anything you tell it.",
+    "cap": "Zero Memory",
+    "data": {
+     "left": {
+      "label": "Brain",
+      "value": "0"
+     },
+     "right": {
+      "label": "Files",
+      "value": "All"
+     }
+    }
+   },
+   {
+    "id": "b2",
+    "role": "why",
+    "scene": "byte_says",
+    "say": "Every new message mails the entire past chat back to the server.",
+    "cap": "Resending whole chat",
+    "data": {
+     "line": "resending whole chat",
+     "pose": "point_r",
+     "cursor": "mint"
+    }
+   },
+   {
+    "id": "b3",
+    "role": "why",
+    "scene": "bars",
+    "say": "Turn one sends one line.",
+    "cap": "Turn 1: 1 line",
+    "data": {
+     "rows": [
+      {
+       "name": "Turn one",
+       "v": 1,
+       "label": "1"
+      }
+     ]
+    }
+   },
+   {
+    "id": "b4",
+    "role": "data",
+    "scene": "bars",
+    "say": "Turn two sends the first line plus the second line.",
+    "cap": "Turn 2: 3 lines",
+    "data": {
+     "rows": [
+      {
+       "name": "Turn two",
+       "v": 3,
+       "label": "3"
+      }
+     ]
+    }
+   },
+   {
+    "id": "b5",
+    "role": "data",
+    "scene": "bars",
+    "say": "Turn three adds all previous lines again.",
+    "cap": "Turn 3: 6 lines",
+    "data": {
+     "rows": [
+      {
+       "name": "Turn three",
+       "v": 6,
+       "label": "6"
+      }
+     ]
+    }
+   },
+   {
+    "id": "b6",
+    "role": "data",
+    "scene": "counter",
+    "say": "Ten turns repeat fifty five total lines.",
+    "cap": "55 lines total",
+    "data": {
+     "from": 1,
+     "to": 55,
+     "prefix": "Sum: ",
+     "suffix": " lines"
+    }
+   },
+   {
+    "id": "b7",
+    "role": "turn",
+    "scene": "split",
+    "say": "You pay for the same text ten times over.",
+    "cap": "Paid repeatedly",
+    "data": {
+     "a": {
+      "label": "Sent",
+      "sub": "55 lines"
+     },
+     "b": {
+      "label": "Billed",
+      "sub": "Every time"
+     }
+    }
+   },
+   {
+    "id": "b8",
+    "role": "resolve",
+    "scene": "close",
+    "say": "The chat only looks smart.",
+    "cap": "Just an illusion",
+    "data": {
+     "lines": [
+      "Memory is fake",
+      "You pay for repeats"
+     ],
+     "accent": "mid"
+    }
+   }
+  ]
+ }
+}

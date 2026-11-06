@@ -1,0 +1,154 @@
+{
+ "brief": {
+  "format": "explain",
+  "angle": "An AI tool does not count letters in a word because it literally never sees the letters.",
+  "measure": "how a tokenizer splits text into numerical token IDs rather than character strings",
+  "calc": "splitting the word 'strawberry' into three token chunks instead of ten distinct letters",
+  "sources": [
+   "OpenAI tokenizer documentation",
+   "Transformer architecture papers"
+  ],
+  "signal_url": null,
+  "why_now": "perennial confusion point for users testing language models",
+  "scores": {
+   "timeliness": 6,
+   "verifiability": 10,
+   "curiosity": 9,
+   "audience_fit": 9,
+   "safety": 10
+  },
+  "_total": 55,
+  "search": false
+ },
+ "stage": "draft",
+ "problems": [
+  "8 beat -- 10..18 arasi olmali"
+ ],
+ "spec": {
+  "format": "explain",
+  "title": "An AI never reads the letters in a word",
+  "summary": "Tokens replace letters inside an AI model.",
+  "tags": [
+   "ai",
+   "tokens",
+   "code"
+  ],
+  "sources": [
+   "OpenAI tokenizer documentation",
+   "Transformer architecture papers"
+  ],
+  "beats": [
+   {
+    "id": "b1",
+    "role": "hook",
+    "scene": "contrast",
+    "say": "An artificial intelligence never sees the letters in a word.",
+    "cap": "NO LETTERS",
+    "data": {
+     "left": {
+      "label": "Letters",
+      "value": "10"
+     },
+     "right": {
+      "label": "Tokens",
+      "value": "3",
+      "tone": "mid"
+     }
+    }
+   },
+   {
+    "id": "b2",
+    "role": "why",
+    "scene": "byte_says",
+    "say": "Text is sliced into numerical token fragments first.",
+    "cap": "TEXT TO NUMBERS",
+    "data": {
+     "line": "TOKEN CHUNKS",
+     "pose": "point_r",
+     "cursor": "mint"
+    }
+   },
+   {
+    "id": "b3",
+    "role": "why",
+    "scene": "byte_says",
+    "say": "Every fragment maps directly to an internal list index.",
+    "cap": "INDEX MAPPING"
+   },
+   {
+    "id": "b4",
+    "role": "data",
+    "scene": "table",
+    "say": "Take the word strawberry and check its pieces.",
+    "cap": "STRAWBERRY",
+    "data": {
+     "unit": "id",
+     "rows": [
+      {
+       "name": "str",
+       "value": "491",
+       "ratio": 0.3
+      },
+      {
+       "name": "aw",
+       "value": "729",
+       "ratio": 0.5
+      },
+      {
+       "name": "berry",
+       "value": "11623",
+       "ratio": 1.0
+      }
+     ]
+    }
+   },
+   {
+    "id": "b5",
+    "role": "data",
+    "scene": "table",
+    "say": "Ten distinct characters become just three table numbers.",
+    "cap": "3 TOKENS"
+   },
+   {
+    "id": "b6",
+    "role": "data",
+    "scene": "table",
+    "say": "Counting letters is impossible without any letters present.",
+    "cap": "NO COUNT"
+   },
+   {
+    "id": "b7",
+    "role": "turn",
+    "scene": "split",
+    "say": "It calculates math between integers instead of spelling.",
+    "cap": "MATH ONLY",
+    "data": {
+     "a": {
+      "label": "Spelling",
+      "sub": "Zero",
+      "tone": "bad"
+     },
+     "b": {
+      "label": "Integers",
+      "sub": "Active",
+      "tone": "good"
+     }
+    }
+   },
+   {
+    "id": "b8",
+    "role": "resolve",
+    "scene": "close",
+    "say": "The screen displays text while the processor runs arithmetic.",
+    "cap": "ARITHMETIC",
+    "data": {
+     "lines": [
+      "Tokens are numbers",
+      "Not letters"
+     ],
+     "accent": "mint"
+    }
+   }
+  ]
+ }
+}

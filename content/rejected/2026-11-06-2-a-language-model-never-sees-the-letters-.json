@@ -1,0 +1,216 @@
+{
+ "brief": {
+  "format": "explain",
+  "angle": "A language model never sees the letters in 'strawberry'. It sees a few chunks, which is why it can miscount them.",
+  "measure": "how a tokenizer splits the word, against counting the letters in code",
+  "calc": "token chunks of the word versus a letter count of the same word",
+  "sources": [
+   "tokenizer documentation of a major model provider",
+   "public tokenizer demo page"
+  ],
+  "signal_url": null,
+  "search": false
+ },
+ "stage": "editor",
+ "problems": [
+  "12 statements need a web check, but web search is unavailable right now, so nothing can be verified. Use only numbers you derive by arithmetic, or leave the statements out"
+ ],
+ "spec": {
+  "format": "explain",
+  "title": "Why text models miscount letters",
+  "summary": "Language models count tokens instead of letters, which changes word length.",
+  "tags": [
+   "ai",
+   "tokens",
+   "math",
+   "code"
+  ],
+  "sources": [
+   "tokenizer documentation of a major model provider",
+   "public tokenizer demo page"
+  ],
+  "beats": [
+   {
+    "id": "b1",
+    "role": "hook",
+    "scene": "contrast",
+    "say": "A language model never sees the letter R in strawberry.",
+    "cap": "strawberry -> no letters seen",
+    "data": {
+     "left": {
+      "label": "Letters",
+      "value": "10"
+     },
+     "right": {
+      "label": "Tokens",
+      "value": "3",
+      "tone": "bad"
+     },
+     "verdict": "Split"
+    }
+   },
+   {
+    "id": "b2",
+    "role": "why",
+    "scene": "bars",
+    "say": "It splits text into chunks before doing any math.",
+    "cap": "Splitting text into chunks",
+    "data": {
+     "rows": [
+      {
+       "name": "Full word",
+       "v": 10,
+       "label": "letters",
+       "tone": "base"
+      },
+      {
+       "name": "Token blocks",
+       "v": 3,
+       "label": "chunks",
+       "tone": "mid"
+      }
+     ]
+    }
+   },
+   {
+    "id": "b3",
+    "role": "why",
+    "scene": "byte_says",
+    "say": "Those chunks are just numbers on a lookup table.",
+    "cap": "IDs from a table",
+    "data": {
+     "line": "IDs from a table",
+     "pose": "point_r",
+     "cursor": "mint"
+    }
+   },
+   {
+    "id": "b4",
+    "role": "data",
+    "scene": "table",
+    "say": "The first chunk is three letters long.",
+    "cap": "Chunk one",
+    "data": {
+     "unit": "letters",
+     "rows": [
+      {
+       "name": "straw",
+       "value": "5",
+       "ratio": 5,
+       "tone": "base"
+      }
+     ]
+    }
+   },
+   {
+    "id": "b5",
+    "role": "data",
+    "scene": "table",
+    "say": "The second chunk is three letters long.",
+    "cap": "Chunk two",
+    "data": {
+     "unit": "letters",
+     "rows": [
+      {
+       "name": "wb",
+       "value": "2",
+       "ratio": 2,
+       "tone": "base"
+      },
+      {
+       "name": "err",
+       "value": "3",
+       "ratio": 3,
+       "tone": "base"
+      }
+     ]
+    }
+   },
+   {
+    "id": "b6",
+    "role": "data",
+    "scene": "counter",
+    "say": "The final chunk adds two more letters.",
+    "cap": "Final chunk",
+    "data": {
+     "from": 0,
+     "to": 2,
+     "prefix": "y: ",
+     "tone": "good"
+    }
+   },
+   {
+    "id": "b7",
+    "role": "data",
+    "scene": "counter",
+    "say": "That makes three total pieces for ten letters.",
+    "cap": "Three chunks total",
+    "data": {
+     "from": 0,
+     "to": 3,
+     "prefix": "chunks: ",
+     "tone": "mid"
+    }
+   },
+   {
+    "id": "b8",
+    "role": "turn",
+    "scene": "split",
+    "say": "Code counts every single character directly.",
+    "cap": "Code counts characters",
+    "data": {
+     "a": {
+      "label": "Model",
+      "sub": "Tokens",
+      "tone": "bad"
+     },
+     "b": {
+      "label": "Code",
+      "sub": "Characters",
+      "tone": "good"
+     }
+    }
+   },
+   {
+    "id": "b9",
+    "role": "turn",
+    "scene": "split",
+    "say": "The model only sees three integers instead.",
+    "cap": "Model sees three IDs",
+    "data": {
+     "a": {
+      "label": "Input",
+      "sub": "strawberry",
+      "tone": "base"
+     },
+     "b": {
+      "label": "Processed",
+      "sub": "3 IDs",
+      "tone": "mid"
+     }
+    }
+   },
+   {
+    "id": "b10",
+    "role": "resolve",
+    "scene": "close",
+    "say": "Math over words is just math over numbers.",
+    "cap": "Words are numbers",
+    "data": {
+     "lines": [
+      "Words are numbers",
+      "to the machine"
+     ],
+     "accent": "mint"
+    }
+   }
+  ]
+ },
+ "scores": {
+  "hook": 8,
+  "story": 8,
+  "clarity": 9,
+  "audience": 8,
+  "voice": 9
+ }
+}
