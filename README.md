@@ -139,6 +139,7 @@ GEMINI_API_KEY=... python -m editorial --dry-run
 | `YOUTUBE_REFRESH_TOKEN` | secret | yukleme |
 | `AUTO_PRIVACY` | **variable** | yayin modu (yukaridaki tablo) |
 | `MIN_SCORE` | **variable** | editor esigi, 5-9, varsayilan 7 (kalite kadrani) |
+| `GEMINI_MODEL` | **variable** | bos = otomatik en yeni kararli flash; yeni modeller 503/429 veriyorsa `gemini-2.5-flash` gibi sabitle (basarisiz olursa yine otomatik listeye duser) |
 | `ALLOW_UNVERIFIED` | **variable** | aramayla dogrulanamayan en fazla kac iddia kabul, 0-5, varsayilan 1 |
 
 **OAuth onay ekrani "In production" olmali.** "Testing" modunda Google

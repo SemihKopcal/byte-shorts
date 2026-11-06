@@ -14,6 +14,8 @@ name: daily
 # Bir sey ters giderse tek yapacagin: AUTO_PRIVACY=off. Kod degismiyor.
 # KALITE KADRANI: depo degiskeni MIN_SCORE (5-9, varsayilan 7). Editorun her
 # puaninin gecmesi gereken esik; yukseltirsen daha az ama daha iyi video.
+# GEMINI_MODEL: yeni modeller asiri yukluyse tek degiskenle sabitle
+# (ornek: gemini-2.5-flash). Bos = otomatik en yeni kararli flash.
 # ALLOW_UNVERIFIED (0-5, varsayilan 1): aramayla dogrulanamayan en fazla kac
 # iddia kabul. Arama kapaliysa hicbir sey dogrulanmis sayilmaz.
 on:
@@ -134,6 +136,7 @@ jobs:
           TOPIC: ${{ inputs.topic }}
           MIN_SCORE: ${{ vars.MIN_SCORE }}
           ALLOW_UNVERIFIED: ${{ vars.ALLOW_UNVERIFIED }}
+          GEMINI_MODEL: ${{ vars.GEMINI_MODEL }}
         run: python -m editorial
 
       - name: yeni senaryoyu sec
