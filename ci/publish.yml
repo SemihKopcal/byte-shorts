@@ -1,0 +1,88 @@
+name: publish
+
+# Onay kapisi. Sadece ELLE tetikleniyor -- hicbir video senin bakmadigin
+# bir anda yayina cikmiyor. daily.yml videoyu uretir, sen izlersin, burayi
+# calistirirsin.
+on:
+  workflow_dispatch:
+    inputs:
+      script:
+        description: "content/scripts altindaki dosya adi"
+        required: true
+      public:
+        description: "public olarak yukle (bos birakirsan private)"
+        type: boolean
+        default: false
+
+concurrency:
+  group: publish
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    permissions:
+      contents: write          # published.json'u geri yazmak icin
+    steps:
+      - uses: actions/checkout@v4
+      # apt DEGIL: runner'in Ubuntu aynasi 50 KB/s'ye dusup kosuyu 40 dakikalik
+      # zaman asimina soktu. Ayni ikililer GitHub release'inden 15 saniyede
+      # geliyor, ustelik cache'lenince hic inmiyor.
+      - name: arac cache
+        id: tools
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.local/bin
+            ~/.local/share/fonts/inter
+            ~/.local/share/fonts/cjk
+          key: runner-tools-ffmpeg-inter4-notojp-v2
+
+      - name: ffmpeg + fontlar
+        run: bash tools/setup_runner.sh
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - run: pip install -r requirements.txt
+
+      - name: ses modeli cache
+        id: voice
+        uses: actions/cache@v4
+        with:
+          path: voices
+          key: piper-en-us-ryan-high-v1
+
+      - name: ses modeli indir
+        if: steps.voice.outputs.cache-hit != 'true'
+        run: bash tools/fetch_voice.sh en-us-ryan-high
+      - name: yeniden uret + QC
+        run: python -m worker.build "content/scripts/${{ inputs.script }}"
+
+      - name: cikti dizini
+        id: m
+        run: python tools/pick_script.py --dir "${{ inputs.script }}" >> "$GITHUB_OUTPUT"
+
+      - name: YouTube
+        env:
+          YOUTUBE_CLIENT_ID: ${{ secrets.YOUTUBE_CLIENT_ID }}
+          YOUTUBE_CLIENT_SECRET: ${{ secrets.YOUTUBE_CLIENT_SECRET }}
+          YOUTUBE_REFRESH_TOKEN: ${{ secrets.YOUTUBE_REFRESH_TOKEN }}
+          PUBLIC: ${{ inputs.public }}
+        run: |
+          if [ "$PUBLIC" = "true" ]; then
+            python publish/youtube.py "${{ steps.m.outputs.dir }}/manifest.json" --publish
+          else
+            python publish/youtube.py "${{ steps.m.outputs.dir }}/manifest.json"
+          fi
+
+      - name: kaydi isle
+        run: |
+          git config user.name  "byte-bot"
+          git config user.email "byte-bot@users.noreply.github.com"
+          git add content/published.json
+          git diff --cached --quiet || git commit -m "publish: ${{ inputs.script }}"
+          git push
