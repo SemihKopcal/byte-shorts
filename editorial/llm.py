@@ -29,6 +29,7 @@ import urllib.request
 BASE = "https://generativelanguage.googleapis.com/v1beta"
 RETRY = {429, 500, 502, 503, 504}
 BACKOFF = (5, 15, 40)                 # saniye; uc tekrar, sonra siradaki model
+MAX_HINT = 65                         # Google "55s sonra dene" derse en fazla bu kadar bekle
 LAST_RESORT = ("gemini-flash-latest", "gemini-2.5-flash", "gemini-2.0-flash")
 
 _FLASH = re.compile(
@@ -51,6 +52,64 @@ def default_transport(method, url, key, body=None, timeout=120):
             return e.code, {}
     except (urllib.error.URLError, TimeoutError, OSError, ValueError) as e:
         return 0, {"error": {"message": str(e)}}
+
+
+def quota_hint(out: dict) -> tuple[str, float | None]:
+    """429 govdesinden (tur, bekleme_saniyesi).
+
+    tur: "zero"  bu modelde bu anahtar icin kota HIC yok (limit: 0)
+         "daily" gunluk kota dolmus; saatlerce gecmez
+         "rate"  dakikalik sinir; biraz beklenince gecer
+         ""      govdeden anlasilamadi
+    Beklemeye deger tek durum "rate". Digerlerinde ayni modele dakikalarca
+    istek atmak boşuna: sonraki modele gecilir.
+    """
+    err = (out or {}).get("error") or {}
+    msg = str(err.get("message", ""))
+    kind, delay = "", None
+    rank = {"": 0, "rate": 1, "daily": 2, "zero": 3}
+    for d in err.get("details") or []:
+        if not isinstance(d, dict):
+            continue
+        t = str(d.get("@type", ""))
+        if t.endswith("QuotaFailure"):
+            for v in d.get("violations") or []:
+                if not isinstance(v, dict):
+                    continue
+                if str(v.get("quotaValue", "")) == "0":
+                    k = "zero"
+                elif "perday" in str(v.get("quotaId", "")).lower():
+                    k = "daily"
+                else:
+                    k = "rate"
+                if rank[k] > rank[kind]:
+                    kind = k
+        if t.endswith("RetryInfo"):
+            m = re.match(r"^(\d+(?:\.\d+)?)s$", str(d.get("retryDelay", "")))
+            if m:
+                delay = float(m[1])
+    if not kind:
+        low = msg.lower()
+        if re.search(r"limit:\s*0\b", low):
+            kind = "zero"
+        elif "perday" in low.replace(" ", "") or "per day" in low:
+            kind = "daily"
+    if delay is None:
+        m = re.search(r"retry in (\d+(?:\.\d+)?)\s*s", msg, re.I)
+        if m:
+            delay = float(m[1])
+    return kind, delay
+
+
+def gist(msg: str, n: int = 220) -> str:
+    """Hata mesajinin LOGA yazilacak ozu. Gemini'nin 429 mesaji uzun bir
+    giris cumlesiyle baslar; asil bilgi ("Quota exceeded for metric ... limit:
+    0, model: ...") sonunda."""
+    t = " ".join(str(msg).split())
+    i = t.find("Quota exceeded")
+    if i >= 0:
+        t = t[i:]
+    return t[:n]
 
 
 def rank_models(models: list[dict]) -> list[str]:
@@ -110,6 +169,9 @@ class Gemini:
         self._cands: list[str] | None = None
         self._dead: set[str] = set()
         self._last = -1e9
+        self.wait_budget = float(os.environ.get("GEMINI_WAIT_BUDGET") or 480)
+        self.waited = 0.0             # 429/5xx icin toplam beklenen saniye
+        self.reasons: dict[str, str] = {}   # model -> son hata ozeti
         self.model = ""               # son basarili cagrinin modeli
         self.calls = 0
         self.failures = 0
@@ -158,11 +220,21 @@ class Gemini:
             role: str = "") -> str | None:
         """Metin dondurur; hicbir model cevap veremezse None."""
         tag = f"[{role}] " if role else ""
+        self.reasons = {m: r for m, r in self.reasons.items()
+                        if m in self._dead}
         for model in self.candidates():
             use_grounding = grounded
+            hint: float | None = None
             for wait in (0,) + BACKOFF:
                 if wait:
-                    self.sleep(wait)
+                    w = min(max(wait, hint or 0), MAX_HINT)
+                    if self.waited + w > self.wait_budget:
+                        self.log(f"  [gemini] {tag}bekleme butcesi doldu "
+                                 f"({self.wait_budget:.0f} sn), siradaki model")
+                        break
+                    self.waited += w
+                    self.sleep(w)
+                hint = None
                 self._pace()
                 self.calls += 1
                 st, out = self.transport(
@@ -179,17 +251,42 @@ class Gemini:
                     self.model = model
                     self.last_grounded = use_grounding
                     return text
-                msg = (out.get("error") or {}).get("message", "")[:200]
+                msg = gist((out.get("error") or {}).get("message", ""))
                 if st == 400 and use_grounding:
                     # Bu model/hesap arama destegini vermiyor: aramasiz dene.
                     self.log(f"  [gemini] {tag}arama destegi yok, "
                              f"aramasiz deneniyor ({msg})")
                     use_grounding = False
                     continue
+                if st == 429:
+                    kind, delay = quota_hint(out)
+                    self.reasons[model] = f"429 {kind or '?'}: {msg}"
+                    if (kind in ("zero", "daily") and use_grounding
+                            and re.search(r"ground|search", msg, re.I)):
+                        # Kota ARAMA icin bitmis, modelin kendisi icin degil.
+                        self.log(f"  [gemini] {tag}{model} arama kotasi yok, "
+                                 f"aramasiz deneniyor ({msg})")
+                        use_grounding = False
+                        continue
+                    if kind in ("zero", "daily"):
+                        what = ("bu anahtarda kotasi yok" if kind == "zero"
+                                else "gunluk kotasi dolmus")
+                        self.log(f"  [gemini] {tag}{model} {what}, siradaki "
+                                 f"model ({msg})")
+                        self._dead.add(model)
+                        break
+                    self.log(f"  [gemini] {tag}{model} 429 hiz siniri"
+                             + (f", {delay:.0f} sn sonra" if delay else "")
+                             + f" ({msg})")
+                    hint = delay
+                    continue
                 if st in RETRY or st == 0:
-                    self.log(f"  [gemini] {tag}{model} {st}: tekrar denenecek")
+                    self.reasons[model] = f"{st}: {msg}"
+                    self.log(f"  [gemini] {tag}{model} {st}: tekrar "
+                             f"denenecek ({msg})")
                     continue
                 if st in (403, 404):
+                    self.reasons[model] = f"{st}: {msg}"
                     self.log(f"  [gemini] {tag}{model} kullanilamiyor "
                              f"({st}): {msg}")
                     self._dead.add(model)
@@ -203,6 +300,9 @@ class Gemini:
                          "siradaki model")
         self.failures += 1
         self.last_grounded = False
+        if self.reasons:
+            self.log("  [gemini] hicbir model cevap vermedi: " + "; ".join(
+                f"{m}: {r[:90]}" for m, r in list(self.reasons.items())[:6]))
         return None
 
     last_grounded = False

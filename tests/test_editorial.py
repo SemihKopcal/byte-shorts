@@ -44,9 +44,27 @@ def models(*names):
                             for n in names]}
 
 
-def gem(stub):
-    return L.Gemini("k", transport=stub, sleep=lambda s: None,
-                    clock=counter(), log=lambda m: None, min_interval=0)
+def gem(stub, sleeps=None, logs=None):
+    return L.Gemini("k", transport=stub,
+                    sleep=(sleeps.append if sleeps is not None
+                           else (lambda s: None)),
+                    clock=counter(),
+                    log=(logs.append if logs is not None else (lambda m: None)),
+                    min_interval=0)
+
+
+def quota(kind="rate", delay=None, text="You exceeded your current quota."):
+    """Gemini'nin gercek 429 govdesine benzeyen sahte cevap."""
+    qid = {"zero": "GenerateRequestsPerDayPerProjectPerModel-FreeTier",
+           "daily": "GenerateRequestsPerDayPerProjectPerModel-FreeTier",
+           "rate": "GenerateRequestsPerMinutePerProjectPerModel-FreeTier"}[kind]
+    details = [{"@type": "type.googleapis.com/google.rpc.QuotaFailure",
+                "violations": [{"quotaId": qid,
+                                "quotaValue": "0" if kind == "zero" else "20"}]}]
+    if delay is not None:
+        details.append({"@type": "type.googleapis.com/google.rpc.RetryInfo",
+                        "retryDelay": f"{delay}s"})
+    return 429, {"error": {"code": 429, "message": text, "details": details}}
 
 
 class ModelPick(unittest.TestCase):
@@ -97,6 +115,75 @@ class Client(unittest.TestCase):
         self.assertIn("tools", s.calls[1][2])
         self.assertNotIn("tools", s.calls[2][2])
         self.assertFalse(g.last_grounded)
+
+    def test_zero_quota_model_is_skipped_without_waiting(self):
+        sleeps, logs = [], []
+        s = Stub([models("gemini-3.8-flash", "gemini-2.5-flash"),
+                  quota("zero"), ok("fine")])
+        g = gem(s, sleeps, logs)
+        self.assertEqual(g.ask("x", json_mode=False), "fine")
+        self.assertEqual(g.model, "gemini-2.5-flash")
+        self.assertEqual(sleeps, [])                  # bekleme YOK
+        self.assertNotIn("gemini-3.8-flash", g.candidates())
+        self.assertTrue(any("kotasi yok" in m for m in logs))
+
+    def test_daily_quota_is_dead_for_the_rest_of_the_run(self):
+        s = Stub([models("gemini-3.8-flash", "gemini-2.5-flash"),
+                  quota("daily"), ok("a"), ok("b")])
+        g = gem(s)
+        g.ask("x", json_mode=False)
+        g.ask("y", json_mode=False)
+        urls = [c[1] for c in s.calls if c[0] == "POST"]
+        self.assertEqual(sum("3.8-flash" in u for u in urls), 1)   # bir kez denendi
+
+    def test_rate_limit_waits_the_time_google_asks_for(self):
+        sleeps = []
+        s = Stub([models("gemini-3.8-flash"), quota("rate", 12), ok("hi")])
+        g = gem(s, sleeps)
+        self.assertEqual(g.ask("x", json_mode=False), "hi")
+        self.assertEqual(sleeps, [12])                 # sabit 5 degil
+
+    def test_rate_limit_hint_is_capped(self):
+        sleeps = []
+        s = Stub([models("gemini-3.8-flash"), quota("rate", 600), ok("hi")])
+        gem(s, sleeps).ask("x", json_mode=False)
+        self.assertEqual(sleeps, [L.MAX_HINT])
+
+    def test_wait_budget_stops_endless_waiting(self):
+        sleeps = []
+        s = Stub([models("gemini-3.8-flash", "gemini-2.5-flash")]
+                 + [quota("rate", 30)] * 60)
+        g = gem(s, sleeps)
+        g.wait_budget = 40
+        self.assertIsNone(g.ask("x", json_mode=False))
+        self.assertLessEqual(sum(sleeps), 40)
+        self.assertLess(len(s.calls), 20)
+
+    def test_search_quota_falls_back_to_ungrounded_same_model(self):
+        s = Stub([models("gemini-3.8-flash"),
+                  quota("zero", text="Quota exceeded for metric: "
+                        "generate_content_grounding_requests, limit: 0"),
+                  ok('{"a": 1}')])
+        g = gem(s)
+        self.assertEqual(g.ask_json("x", grounded=True), {"a": 1})
+        self.assertEqual(g.model, "gemini-3.8-flash")  # model oldurulmedi
+        self.assertFalse(g.last_grounded)
+
+    def test_quota_hint_reads_message_when_details_missing(self):
+        k, d = L.quota_hint({"error": {"message":
+            "Quota exceeded for metric: x, limit: 0, model: m\n"
+            "Please retry in 7.5s."}})
+        self.assertEqual((k, d), ("zero", 7.5))
+        self.assertEqual(L.quota_hint({}), ("", None))
+        self.assertEqual(L.quota_hint({"error": {"details": ["junk", 3]}}),
+                         ("", None))
+
+    def test_failure_log_names_the_reason(self):
+        logs = []
+        s = Stub([models("gemini-3.8-flash"), quota("zero")])
+        g = gem(s, logs=logs)
+        self.assertIsNone(g.ask("x", json_mode=False))
+        self.assertTrue(any("hicbir model cevap vermedi" in m for m in logs))
 
     def test_list_failure_still_tries_fallback_names(self):
         s = Stub([(500, {}), ok("fine")])
