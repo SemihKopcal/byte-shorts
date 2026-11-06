@@ -22,11 +22,15 @@ Yeni sahne eklemek = bu dosyaya bir fonksiyon + CATALOG'a bir satir.
 from . import draw as D
 from .byte import draw_byte, MINT as B_MINT, AMBER as B_AMBER, RED as B_RED, VIOLET as B_VIOLET
 
-# Guvenli icerik alani: ust 300px baslik/chrome, alt 1430'dan sonrasi altyazi
-TOP = 420
-BOT = 1400
-MARGIN = 90
+# Guvenli icerik alani: ust ~300px chrome, alt 1430'dan sonrasi altyazi.
+# MID bu bandin optik merkezi -- sahneler ustten degil BURADAN hizalaniyor.
+# Ustten hizalayinca ekranin alt yarisi bos kaliyordu ve video "yarim"
+# gorunuyordu; telefonda bu bosluk daha da buyuk duruyor.
+TOP = 330
+BOT = 1430
+MARGIN = 80
 MIDX = D.W / 2
+MID = (TOP + BOT) / 2          # 880
 
 _CURSOR = {"mint": B_MINT, "amber": B_AMBER, "red": B_RED, "violet": B_VIOLET}
 
@@ -58,7 +62,7 @@ def _lines(d, lines, y, mk, size, fill, gap=1.18, t=None, t0=None, stagger=0.09)
 def title(d, t, t0, t1, data):
     """Buyuk baslik. Hook ve gecis cumleleri icin.
     data: {kicker?, lines[], accent?}"""
-    y = TOP + 160
+    y = MID - 150
     if data.get("kicker"):
         a = D.appear(t, t0)
         D.tracked(d, (MIDX, y - 110), data["kicker"].upper(), D.F_SEMI(34),
@@ -84,7 +88,7 @@ def contrast(d, t, t0, t1, data):
     data: {left:{label,value}, right:{label,value}, verdict?}"""
     a = D.appear(t, t0)
     b = D.appear(t, t0 + 0.28)
-    cy = TOP + 300
+    cy = MID
     for side, al, x in (("left", a, D.W * 0.27), ("right", b, D.W * 0.73)):
         it = data.get(side, {})
         if al <= 0.01:
@@ -113,7 +117,7 @@ def table(d, t, t0, t1, data):
     """Satir satir acilan tablo. Olculmus veriyi gostermenin en net yolu.
     data: {unit?, rows:[{name,value,ratio?,tone?,beat_at?}]}"""
     rows = data.get("rows", [])[:6]
-    y = TOP + 60
+    y = TOP + 90
     if data.get("unit"):
         D.tracked(d, (MARGIN, y - 56), str(data["unit"]).upper(), D.F_SEMI(30),
                   D.fade(D.MUTE, D.appear(t, t0)), track=7)
@@ -144,7 +148,7 @@ def bars(d, t, t0, t1, data):
     rows = data.get("rows", [])[:5]
     vals = [float(r.get("v", 0) or 0) for r in rows] or [1.0]
     mx = max(vals) or 1.0
-    y = TOP + 80
+    y = TOP + 120
     h = min(190, (BOT - y - 40) / max(1, len(rows)))
     for i, r in enumerate(rows):
         a = D.appear(t, t0 + 0.15 + i * 0.22, dur=0.55)
@@ -185,11 +189,11 @@ def counter(d, t, t0, t1, data):
     txt = f"{data.get('prefix','')}{v:,.{int(data.get('dp',0))}f}{data.get('suffix','')}"
     f = _fit(d, txt, D.F_HUGE, 190, D.W - 2 * MARGIN)
     a = D.appear(t, t0)
-    d.text((MIDX, TOP + 300), txt, font=f, fill=D.fade(col, a), anchor="mm")
+    d.text((MIDX, MID - 60), txt, font=f, fill=D.fade(col, a), anchor="mm")
     if data.get("note"):
         n = D.appear(t, t0 + 0.4)
         f2 = _fit(d, data["note"], D.F_DISP, 58, D.W - 2 * MARGIN)
-        d.text((MIDX, TOP + 430), data["note"], font=f2,
+        d.text((MIDX, MID + 90), data["note"], font=f2,
                fill=D.fade(D.MUTE, n), anchor="mt")
 
 
@@ -198,7 +202,7 @@ def split(d, t, t0, t1, data):
     data: {a:{label,sub?,tone?}, b:{label,sub?,tone?}}"""
     a0 = D.appear(t, t0)
     a1 = D.appear(t, t0 + 0.22)
-    midy = (TOP + BOT) / 2
+    midy = MID
     d.rectangle((MARGIN, midy - 2, D.W - MARGIN, midy + 2),
                 fill=D.fade(D.LINE, a1))
     for key, al, cy in (("a", a0, midy - 190), ("b", a1, midy + 190)):
@@ -221,7 +225,7 @@ def timeline(d, t, t0, t1, data):
     if not steps:
         return
     x0, x1 = MARGIN + 30, D.W - MARGIN - 30
-    y = TOP + 260
+    y = MID - 40
     prog = D.clamp01((t - t0 - 0.2) / max(0.6, (t1 - t0) * 0.55))
     d.rectangle((x0, y - 2, x1, y + 2), fill=D.fade(D.LINE, D.appear(t, t0)))
     d.rectangle((x0, y - 3, x0 + (x1 - x0) * prog, y + 3),
@@ -248,7 +252,7 @@ def byte_says(d, t, t0, t1, data):
     a = D.appear(t, t0)
     # 1.25 olcek ~ 500px govde: dikey karede BYTE'in okunur oldugu en kucuk boy.
     # 0.72'de thumbnail boyutunda silik bir leke oluyordu.
-    cy = TOP + 300 + D.bob(t)
+    cy = MID - 170 + D.bob(t)
     draw_byte(d, MIDX, cy, 1.25 * (0.92 + 0.08 * a), data.get("pose", "point_up"),
               _CURSOR.get(data.get("cursor", "mint"), B_MINT),
               D.blink_on(t), 1.0)
@@ -263,7 +267,7 @@ def close(d, t, t0, t1, data):
     """Kapanis karti. Altyazi burada kapaniyor, metin zaten ekranda.
     data: {line?, lines?, handle?}"""
     lines = data.get("lines") or ([data["line"]] if data.get("line") else [])
-    y = TOP + 220
+    y = MID - 330
     for i, ln in enumerate(lines[:3]):
         a = D.appear(t, t0 + 0.1 + i * 0.18)
         if a <= 0.01:
