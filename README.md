@@ -115,6 +115,7 @@ GEMINI_API_KEY=... python -m editorial --dry-run
 | `YOUTUBE_CLIENT_SECRET` | secret | yukleme |
 | `YOUTUBE_REFRESH_TOKEN` | secret | yukleme |
 | `AUTO_PRIVACY` | **variable** | yayin modu (yukaridaki tablo) |
+| `MIN_SCORE` | **variable** | editor esigi, 5-9, varsayilan 7 (kalite kadrani) |
 
 **OAuth onay ekrani "In production" olmali.** "Testing" modunda Google
 refresh token'i 7 gunde iptal ediyor: ilk hafta calisir, sekizinci gun
