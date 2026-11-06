@@ -103,10 +103,38 @@ def upload(man_path: Path, privacy: str) -> str:
 
 def main() -> None:
     ap = argparse.ArgumentParser()
-    ap.add_argument("manifest")
+    ap.add_argument("manifest", nargs="?")
     ap.add_argument("--publish", action="store_true",
                     help="private yerine public yukle (onaylandiktan sonra)")
+    ap.add_argument("--check", action="store_true",
+                    help="sadece secrets'i dogrula, yukleme yapma")
     a = ap.parse_args()
+
+    # --check: render'dan ONCE calisiyor. Secrets yanlissa 3 dakikalik
+    # render'i bosa harcamak yerine 5 saniyede duruyoruz. Hatalar birbirine
+    # benziyor ama sebepleri ayri, o yuzden hangisi oldugunu soyluyoruz.
+    if a.check:
+        try:
+            service()
+        except Exception as e:                        # noqa: BLE001
+            msg = str(e)
+            print(f"SECRETS HATASI: {msg[:200]}", file=sys.stderr)
+            if "invalid_client" in msg:
+                print("  -> YOUTUBE_CLIENT_SECRET (veya CLIENT_ID) yanlis.",
+                      file=sys.stderr)
+                print("  -> Credentials > OAuth 2.0 Client IDs > kullandigin "
+                      "client'tan ikisini de yeniden al.", file=sys.stderr)
+            elif "invalid_grant" in msg:
+                print("  -> YOUTUBE_REFRESH_TOKEN bu client ciftiyle "
+                      "uyusmuyor ya da iptal edilmis.", file=sys.stderr)
+                print("  -> tools/get_refresh_token.py ile AYNI client'tan "
+                      "yeniden al.", file=sys.stderr)
+            sys.exit(1)
+        print("secrets tamam: token yenilendi, yukleme yapilabilir.")
+        return
+
+    if not a.manifest:
+        sys.exit("manifest yolu gerekiyor (ya da --check)")
     upload(Path(a.manifest), "public" if a.publish else "private")
 
 

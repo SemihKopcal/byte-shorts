@@ -49,6 +49,16 @@ jobs:
 
       - run: pip install -r requirements.txt
 
+      # Render'dan ONCE: secrets yanlissa 3 dakikalik render'i bosa
+      # harcamadan 5 saniyede duruyoruz ve hangi degerin yanlis oldugunu
+      # soyluyoruz.
+      - name: secrets kontrol
+        env:
+          YOUTUBE_CLIENT_ID: ${{ secrets.YOUTUBE_CLIENT_ID }}
+          YOUTUBE_CLIENT_SECRET: ${{ secrets.YOUTUBE_CLIENT_SECRET }}
+          YOUTUBE_REFRESH_TOKEN: ${{ secrets.YOUTUBE_REFRESH_TOKEN }}
+        run: python publish/youtube.py --check
+
       - name: ses modeli cache
         id: voice
         uses: actions/cache@v4
