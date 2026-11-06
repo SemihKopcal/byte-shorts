@@ -18,9 +18,12 @@ Tasarim kararlari
     dakika boyunca denenmiyor. Yoksa sonraki her rol (yazar, editor, metin)
     ayni bozuk modele bastan vurup dakikalar harciyor; canli kosuda 27 dakika
     boyle gitti.
-  * Sert tavan: GEMINI_DEADLINE (varsayilan 1200 sn). Dolunca ask() hemen None
-    doner, hat "bugun video yok" der; Actions saatlerce asili kalmaz.
-  * Tek cagri zaman asimi GEMINI_TIMEOUT (varsayilan 90 sn).
+  * Sert tavan: GEMINI_DEADLINE (varsayilan 600 sn). Dolunca ask() hemen None
+    doner, hat "bugun video yok" der; Actions saatlerce asili kalmaz. Saglikli
+    bir kosu 2-4 dakika; tavan sadece patolojik durum icin.
+  * Tek cagri zaman asimi GEMINI_TIMEOUT (varsayilan 60 sn). Bu kosuda HIC
+    cevap vermemis bir modele ilk istek en fazla 45 sn bekler ve zaman asimina
+    ugrarsa tekrar denenmez: bozuk modelin maliyeti en kotu 45 sn.
   * Ardisik cagrilar arasinda en az MIN_INTERVAL saniye: ucretsiz katman
     dakikada birkac istege izin veriyor, bir videonun 10+ cagrisi bunu asar.
   * `transport` disaridan verilebiliyor: testler ag olmadan calisiyor.
@@ -37,6 +40,7 @@ BASE = "https://generativelanguage.googleapis.com/v1beta"
 RETRY = {429, 500, 502, 503, 504}
 BACKOFF = (5, 15)                     # saniye; iki tekrar, sonra siradaki model
 COOLDOWN = 300                        # tekrarlari biten model bu kadar saniye dinlenir
+FIRST_TIMEOUT = 45                    # hic cevap vermemis modele ilk istek
 MAX_HINT = 65                         # Google "55s sonra dene" derse en fazla bu kadar bekle
 LAST_RESORT = ("gemini-flash-latest", "gemini-2.5-flash", "gemini-2.0-flash")
 
@@ -177,9 +181,10 @@ class Gemini:
         self._cands: list[str] | None = None
         self._dead: set[str] = set()
         self._last = -1e9
-        self.wait_budget = float(os.environ.get("GEMINI_WAIT_BUDGET") or 480)
-        self.deadline = float(os.environ.get("GEMINI_DEADLINE") or 1200)
-        self.timeout = float(os.environ.get("GEMINI_TIMEOUT") or 90)
+        self.wait_budget = float(os.environ.get("GEMINI_WAIT_BUDGET") or 240)
+        self.deadline = float(os.environ.get("GEMINI_DEADLINE") or 600)
+        self.timeout = float(os.environ.get("GEMINI_TIMEOUT") or 60)
+        self._proven: set[str] = set()      # bu kosuda en az bir kez cevap vermis
         self._t0 = clock()
         self._cool: dict[str, float] = {}   # model -> dinlenme bitis zamani
         self.waited = 0.0             # 429/5xx icin toplam beklenen saniye
@@ -247,6 +252,7 @@ class Gemini:
             use_grounding = grounded
             hint: float | None = None
             net_fail = 0
+            proven = model in self._proven
             for wait in (0,) + BACKOFF:
                 if self.over_deadline():
                     self.failures += 1
@@ -270,7 +276,8 @@ class Gemini:
                     "POST", f"{BASE}/models/{model}:generateContent", self.key,
                     self._body(prompt, system, temperature, max_tokens,
                                json_mode, use_grounding),
-                    timeout=self.timeout)
+                    timeout=(self.timeout if proven or wait
+                             else min(self.timeout, FIRST_TIMEOUT)))
                 if st == 200:
                     text = self._text(out)
                     if text is None:
@@ -279,6 +286,7 @@ class Gemini:
                                  f"{json.dumps(out)[:200]}")
                         return None
                     self.model = model
+                    self._proven.add(model)
                     self.last_grounded = use_grounding
                     return text
                 msg = gist((out.get("error") or {}).get("message", ""))
@@ -316,7 +324,7 @@ class Gemini:
                         # zaman asimi/ag hatasi: her biri dakikalar yiyor,
                         # bir kez daha denemek yeter
                         net_fail += 1
-                        if net_fail >= 2:
+                        if net_fail >= (2 if proven else 1):
                             self.log(f"  [gemini] {tag}{model} ulasilamiyor "
                                      f"({msg}), dinlendiriliyor")
                             self._rest(model)

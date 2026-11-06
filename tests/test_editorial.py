@@ -206,15 +206,31 @@ class Client(unittest.TestCase):
         self.assertEqual(g.ask("x", json_mode=False), "fine")
         self.assertEqual(sum("3.8-flash" in c[1] for c in s.calls), 3)
 
-    def test_timeouts_give_up_after_two_attempts(self):
-        sleeps = []
+    def test_unproven_model_that_times_out_is_dropped_at_once(self):
+        # hic cevap vermemis modelde tek zaman asimi yeter: en kotu 45 sn
         s = Stub([models("gemini-3.8-flash", "gemini-3.7-flash"),
-                  (0, {"error": {"message": "timed out"}}),
                   (0, {"error": {"message": "timed out"}}), ok("fine")])
-        g = gem(s, sleeps)
+        g = gem(s)
         self.assertEqual(g.ask("x", json_mode=False), "fine")
         self.assertEqual(g.model, "gemini-3.7-flash")
-        self.assertEqual(sum("3.8-flash" in c[1] for c in s.calls), 2)
+        self.assertEqual(sum("3.8-flash" in c[1] for c in s.calls), 1)
+
+    def test_proven_model_gets_a_second_attempt_after_a_timeout(self):
+        s = Stub([models("gemini-3.8-flash"), ok("a"),
+                  (0, {}), ok("b")])
+        g = gem(s)
+        g.ask("x", json_mode=False)
+        self.assertEqual(g.ask("y", json_mode=False), "b")
+        self.assertEqual(g.model, "gemini-3.8-flash")
+
+    def test_first_request_to_an_unproven_model_uses_the_short_timeout(self):
+        s = Stub([models("gemini-3.8-flash"), ok("a"), ok("b")])
+        g = gem(s)
+        g.timeout = 60
+        g.ask("x", json_mode=False)
+        g.ask("y", json_mode=False)
+        posts = [to for c, to in zip(s.calls, s.timeouts) if c[0] == "POST"]
+        self.assertEqual(posts, [L.FIRST_TIMEOUT, 60])
 
     def test_all_models_resting_still_tries_again(self):
         s = Stub([(503, {})] * 3 + [ok("recovered")])

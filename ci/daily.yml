@@ -128,7 +128,7 @@ jobs:
       # hicbiri gecmezse kosu burada, yuksek sesle durur.
       - name: konu uret
         if: steps.pick.outputs.path == '' || env.TOPIC_INPUT != ''
-        timeout-minutes: 25        # Gemini takilirsa saatlerce degil, 25 dakikada biter
+        timeout-minutes: 12        # saglikli kosu 2-4 dk; takilirsa 12 dk'da biter
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           YOUTUBE_API_KEY: ${{ secrets.YOUTUBE_API_KEY }}
