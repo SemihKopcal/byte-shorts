@@ -1,16 +1,18 @@
 """
 YouTube'a yukleme.
 
-Varsayilan PRIVATE. Sebebi: hat her gece calisiyor, sen sabah bakiyorsun.
-Yanlis bir sayi veya bozuk bir kare dogrudan yayina cikarsa geri almak
-izlenme gecmisini de goturuyor. Once private yukle, panelden onayla, sonra
---publish ile public'e cek.
+Gizlilik --privacy ile seciliyor (private | unlisted | public). Daily hatti
+bunu AUTO_PRIVACY deposu degiskeninden besliyor; elle calistirirken varsayilan
+private. Yayinlanan video geri alinirsa izlenme gecmisi de gider, bu yuzden
+public'e basmadan once kapilarin (editorial/ + worker/qc.py) calistigindan
+emin ol.
 
 Kota notu: videos.insert "Video Uploads" kovasindan 1 birim yiyor ve gunde
 100 cagri ile sinirli. Gunde 2 video icin fazlasiyla yeterli; tekrar denemeler
 de bu kovadan dustugu icin sonsuz retry yazmiyoruz.
 """
 import argparse
+import datetime
 import json
 import os
 import sys
@@ -87,25 +89,38 @@ def upload(man_path: Path, privacy: str) -> str:
             print(f"  %{int(status.progress() * 100)}")
 
     vid = resp["id"]
+    # Istedigimiz gizlilikle YouTube'un verdigi ayni mi? Farkliysa (ornegin
+    # dogrulanmamis API projesi private'a kilitlendiyse) sessizce gecmiyoruz:
+    # "public yukledim" sanip bos yere beklemeyelim.
+    got = (resp.get("status") or {}).get("privacyStatus", privacy)
+    if got != privacy:
+        print(f"UYARI: {privacy} istendi, YouTube {got} yapti. "
+              "API projesi dogrulanmamis olabilir; videoyu Studio'dan elle "
+              "public yap.", file=sys.stderr)
     man["youtube_id"] = vid
-    man["privacy"] = privacy
+    man["privacy"] = got
     man_path.write_text(json.dumps(man, indent=1, ensure_ascii=False))
 
     log = ROOT / "content/published.json"
     prev = json.loads(log.read_text()) if log.exists() else []
     prev.append({"id": man["id"], "series": man["series"],
-                 "title": man["title"], "youtube_id": vid})
+                 "title": man["title"], "youtube_id": vid,
+                 "theme": man.get("theme", ""), "privacy": got,
+                 "date": datetime.date.today().isoformat()})
     log.write_text(json.dumps(prev, indent=1, ensure_ascii=False))
 
-    print(f"https://youtube.com/watch?v={vid}  ({privacy})")
+    print(f"https://youtube.com/watch?v={vid}  ({got})")
     return vid
 
 
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("manifest", nargs="?")
+    ap.add_argument("--privacy", choices=("private", "unlisted", "public"),
+                    default="private",
+                    help="yukleme gizliligi (varsayilan private)")
     ap.add_argument("--publish", action="store_true",
-                    help="private yerine public yukle (onaylandiktan sonra)")
+                    help="--privacy public ile ayni (eski ad)")
     ap.add_argument("--check", action="store_true",
                     help="sadece secrets'i dogrula, yukleme yapma")
     a = ap.parse_args()
@@ -135,7 +150,7 @@ def main() -> None:
 
     if not a.manifest:
         sys.exit("manifest yolu gerekiyor (ya da --check)")
-    upload(Path(a.manifest), "public" if a.publish else "private")
+    upload(Path(a.manifest), "public" if a.publish else a.privacy)
 
 
 if __name__ == "__main__":

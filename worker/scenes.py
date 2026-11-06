@@ -117,11 +117,13 @@ def table(d, t, t0, t1, data):
     """Satir satir acilan tablo. Olculmus veriyi gostermenin en net yolu.
     data: {unit?, rows:[{name,value,ratio?,tone?,beat_at?}]}"""
     rows = data.get("rows", [])[:6]
-    y = TOP + 90
+    # Az satirli tablo ekranin ust yarisina yigilmasin: blok MID etrafinda
+    # ortalaniyor (6 satirda zaten tum alani dolduruyor).
+    h = min(150, (BOT - (TOP + 90) - 60) / max(1, len(rows)))
+    y = max(TOP + 90, MID - len(rows) * h / 2)
     if data.get("unit"):
         D.tracked(d, (MARGIN, y - 56), str(data["unit"]).upper(), D.F_SEMI(30),
                   D.fade(D.MUTE, D.appear(t, t0)), track=7)
-    h = min(150, (BOT - y - 60) / max(1, len(rows)))
     maxr = max([float(r.get("ratio", 1) or 1) for r in rows] + [1.0])
     for i, r in enumerate(rows):
         a = D.appear(t, t0 + 0.12 + i * 0.16)

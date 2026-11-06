@@ -1,8 +1,17 @@
 name: daily
 
-# Gunde 2 video. Saatler UTC.
-# Yukleme ADIMI YOK: hat sadece uretiyor, sen artifact'i indirip izliyorsun.
-# Onayladiktan sonra publish.yml'i elle tetikleyerek YouTube'a basiyoruz.
+# Gunde 2 video (saatler UTC). TAM OTOMATIK:
+#
+#   senaryo  Gemini yazar, editor yargilar, kod sayilari hesaplar
+#   render   kodla cizilir, QC'den gecer
+#   YouTube  AUTO_PRIVACY neyse o gizlilikle yuklenir
+#   defter   uretildi/yayinlandi kaydi repoya geri yazilir
+#   release  video + Instagram/TikTok metinleri kalici bir adrese konur
+#
+# YAYIN MODU: depo degiskeni AUTO_PRIVACY
+#   Settings > Secrets and variables > Actions > Variables
+#   public | unlisted | private | off      (yoksa: public)
+# Bir sey ters giderse tek yapacagin: AUTO_PRIVACY=off. Kod degismiyor.
 on:
   schedule:
     - cron: "15 4 * * *"
@@ -13,6 +22,15 @@ on:
         description: "content/scripts altindaki dosya adi (bos = siradaki)"
         required: false
         default: ""
+      topic:
+        description: "Gemini'ye verilecek konu (bos = kendi secsin)"
+        required: false
+        default: ""
+      mode:
+        description: "yayin modu (auto = AUTO_PRIVACY degiskeni, yoksa public)"
+        type: choice
+        options: [auto, public, unlisted, private, "off"]
+        default: auto
 
 concurrency:
   group: daily
@@ -21,14 +39,18 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
-    timeout-minutes: 40
+    timeout-minutes: 45
     permissions:
-      contents: write          # uretilen senaryoyu repoya geri yazmak icin
+      contents: write          # senaryo/defter commit'i + release icin
+    env:
+      SCRIPT_INPUT: ${{ inputs.script }}
+      TOPIC_INPUT: ${{ inputs.topic }}
     steps:
       - uses: actions/checkout@v4
-      # apt DEGIL: runner'in Ubuntu aynasi 50 KB/s'ye dusup kosuyu 40 dakikalik
-      # zaman asimina soktu. Ayni ikililer GitHub release'inden 15 saniyede
-      # geliyor, ustelik cache'lenince hic inmiyor.
+
+      # apt DEGIL: runner'in Ubuntu aynasi 50 KB/s'ye dusup kosuyu zaman
+      # asimina sokmustu. Ayni ikililer GitHub release'inden 15 saniyede
+      # geliyor, cache'lenince hic inmiyor.
       - name: arac cache
         id: tools
         uses: actions/cache@v4
@@ -49,7 +71,7 @@ jobs:
 
       - run: pip install -r requirements.txt
 
-      # 120 MB model her kosuda indirilmesin. Cache anahtari ses adiyla sabit.
+      # 120 MB model her kosuda indirilmesin
       - name: ses modeli cache
         id: voice
         uses: actions/cache@v4
@@ -61,51 +83,152 @@ jobs:
         if: steps.voice.outputs.cache-hit != 'true'
         run: bash tools/fetch_voice.sh en-us-ryan-high
 
+      # ── yayin modu ────────────────────────────────────────────────────
+      - name: yayin modu
+        id: mode
+        env:
+          INPUT_MODE: ${{ inputs.mode }}
+          AUTO_PRIVACY: ${{ vars.AUTO_PRIVACY }}
+        run: |
+          v="${INPUT_MODE:-auto}"
+          if [ "$v" = "auto" ]; then v="${AUTO_PRIVACY:-public}"; fi
+          case "$v" in
+            public|unlisted|private|off) ;;
+            *) echo "::warning::bilinmeyen yayin modu '$v', private kullaniliyor"; v=private ;;
+          esac
+          echo "yayin modu: $v"
+          echo "value=$v" >> "$GITHUB_OUTPUT"
+
+      # Render'dan ONCE: secrets bozuksa 3 dakikalik render'in sonunda
+      # ogrenmek yerine simdi biliyoruz. Basarisiz olsa da video uretilir
+      # (continue-on-error); sadece yukleme atlanir ve kosu sonda kirmizi yanar.
+      - name: youtube secrets kontrol
+        id: ytcheck
+        if: steps.mode.outputs.value != 'off'
+        continue-on-error: true
+        env:
+          YOUTUBE_CLIENT_ID: ${{ secrets.YOUTUBE_CLIENT_ID }}
+          YOUTUBE_CLIENT_SECRET: ${{ secrets.YOUTUBE_CLIENT_SECRET }}
+          YOUTUBE_REFRESH_TOKEN: ${{ secrets.YOUTUBE_REFRESH_TOKEN }}
+        run: python publish/youtube.py --check
+
+      # ── senaryo ───────────────────────────────────────────────────────
       - name: sirada senaryo var mi
         id: pick
-        run: python tools/pick_script.py "${{ inputs.script }}" >> "$GITHUB_OUTPUT"
+        run: python tools/pick_script.py "$SCRIPT_INPUT" >> "$GITHUB_OUTPUT"
 
-      # Sira bossa Gemini yeni bir senaryo yaziyor. Urettigi JSON once
-      # dogrulamadan geciyor (sahne adlari, kaynak, sure, tekrar); gecemezse
-      # dosya yazilmiyor ve kosu burada duruyor.
+      # Sira bossa ya da konu verildiyse Gemini yazar. Editor kapisindan
+      # gecemeyen konu dosyaya YAZILMIYOR (content/rejected'a neden yazilir);
+      # hicbiri gecmezse kosu burada, yuksek sesle durur.
       - name: konu uret
-        if: steps.pick.outputs.path == ''
+        if: steps.pick.outputs.path == '' || env.TOPIC_INPUT != ''
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
-        run: python tools/write_script.py
+          YOUTUBE_API_KEY: ${{ secrets.YOUTUBE_API_KEY }}
+          GITHUB_TOKEN: ${{ github.token }}
+          TOPIC: ${{ inputs.topic }}
+        run: python -m editorial
 
       - name: yeni senaryoyu sec
         id: pick2
-        if: steps.pick.outputs.path == ''
-        run: python tools/pick_script.py >> "$GITHUB_OUTPUT"
+        if: steps.pick.outputs.path == '' || env.TOPIC_INPUT != ''
+        run: python tools/pick_script.py --newest >> "$GITHUB_OUTPUT"
+
+      # ── uretim ────────────────────────────────────────────────────────
       - name: uret
+        id: render
+        continue-on-error: true
         env:
-          SCRIPT: ${{ steps.pick.outputs.path || steps.pick2.outputs.path }}
+          SCRIPT: ${{ steps.pick2.outputs.path || steps.pick.outputs.path }}
         run: python -m worker.build "$SCRIPT"
 
-      # Uretileni defterе isle ve geri commit et. Bu olmadan kuyruk
-      # ILERLEMIYOR: published.json sadece yayinlayinca doluyor, dolayisiyla
-      # yayinlamadigin surece daily her gece AYNI videoyu uretiyordu.
-      - name: defteri isle
+      # ── yayin ─────────────────────────────────────────────────────────
+      - name: youtube'a yukle
+        id: upload
+        if: >-
+          steps.render.outcome == 'success' &&
+          steps.mode.outputs.value != 'off' &&
+          steps.ytcheck.outcome == 'success'
+        continue-on-error: true
         env:
-          SCRIPT: ${{ steps.pick.outputs.path || steps.pick2.outputs.path }}
+          YOUTUBE_CLIENT_ID: ${{ secrets.YOUTUBE_CLIENT_ID }}
+          YOUTUBE_CLIENT_SECRET: ${{ secrets.YOUTUBE_CLIENT_SECRET }}
+          YOUTUBE_REFRESH_TOKEN: ${{ secrets.YOUTUBE_REFRESH_TOKEN }}
+          SCRIPT: ${{ steps.pick2.outputs.path || steps.pick.outputs.path }}
+          MODE: ${{ steps.mode.outputs.value }}
         run: |
-          python tools/pick_script.py --mark "$(basename "$SCRIPT")"
+          dir="$(python tools/pick_script.py --dir "$(basename "$SCRIPT")" | sed -n 's/^dir=//p')"
+          python publish/youtube.py "$dir/manifest.json" --privacy "$MODE"
+
+      # Instagram/TikTok icin: video + metinler kalici bir adreste. Basarisiz
+      # olursa kosuyu kirmizi yapmiyor; asil is YouTube.
+      - name: release
+        id: release
+        if: steps.render.outcome == 'success'
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }}
+          SCRIPT: ${{ steps.pick2.outputs.path || steps.pick.outputs.path }}
+        run: |
+          dir="$(python tools/pick_script.py --dir "$(basename "$SCRIPT")" | sed -n 's/^dir=//p')"
+          bash tools/release.sh "$dir"
+
+      # ── defter ────────────────────────────────────────────────────────
+      # Basarisiz kosuda da isler (always): yoksa ayni bozuk senaryo her
+      # kosuda yeniden secilir ve kuyruk sonsuza kadar tikanir. Reddedilen
+      # konular (content/rejected) da burada commit'leniyor: "Gemini bugun
+      # neden video uretmedi" sorusunun cevabi git gecmisinde.
+      - name: defteri isle
+        if: always()
+        env:
+          SCRIPT: ${{ steps.pick2.outputs.path || steps.pick.outputs.path }}
+        run: |
+          if [ -n "$SCRIPT" ]; then
+            python tools/pick_script.py --mark "$(basename "$SCRIPT")"
+          fi
           git config user.name  "byte-bot"
           git config user.email "byte-bot@users.noreply.github.com"
-          git add content/built.json content/scripts
-          git diff --cached --quiet || git commit -m "uretildi: $(basename "$SCRIPT")"
+          git add -A content
+          git diff --cached --quiet || git commit -m "daily: $(basename "${SCRIPT:-rejected}")"
           git pull --rebase --autostash
           git push
 
       # retention-days: ucretsiz hesapta artifact kotasi 500 MB. Video ~39 MB,
-      # gunde 2 tane. 2 gun tutmak ~160 MB demek, rahat.
+      # gunde 2 tane. Kalici kopya zaten release'te.
       - name: artifact
+        if: steps.render.outcome == 'success'
         uses: actions/upload-artifact@v4
         with:
           name: video-${{ github.run_number }}
           path: |
             out/**/*.mp4
             out/**/manifest.json
+            out/**/captions.md
           retention-days: 2
           if-no-files-found: error
+
+      # Kosunun rengi gercegi soylesin: video uretilmediyse ya da yukleme
+      # basarisizsa kirmizi. (continue-on-error adimlari tek basina kirmizi
+      # yakmaz; burada hepsini toplayip karar veriyoruz.)
+      - name: sonuc
+        if: always()
+        env:
+          RENDER: ${{ steps.render.outcome }}
+          UPLOAD: ${{ steps.upload.outcome }}
+          YTCHECK: ${{ steps.ytcheck.outcome }}
+          RELEASE: ${{ steps.release.outcome }}
+        run: |
+          fail=0
+          if [ "$RENDER" != "success" ]; then
+            echo "::error::video uretilemedi"; fail=1
+          fi
+          if [ "$YTCHECK" = "failure" ]; then
+            echo "::error::YouTube secrets gecersiz (check adimina bak); video yuklenmedi"; fail=1
+          fi
+          if [ "$UPLOAD" = "failure" ]; then
+            echo "::error::YouTube yuklemesi basarisiz"; fail=1
+          fi
+          if [ "$RELEASE" = "failure" ]; then
+            echo "::warning::release olusturulamadi (Instagram/TikTok icin kalici adres yok)"
+          fi
+          exit $fail

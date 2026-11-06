@@ -20,7 +20,10 @@ def _group(beats):
     """[(sahne_adi, data, [beat_id...])]"""
     groups = []
     for b in beats:
-        name = b.get("scene") or "title"
+        # Sahne adi YAZILMAMIS beat bir onceki sahnede kalir. Eskiden
+        # varsayilan "title"di: devam eden bir beat bos bir baslik sahnesi
+        # aciyor ve orta ekran, tablo varken bile bos kaliyordu.
+        name = b.get("scene") or (groups[-1][0] if groups else "title")
         if name not in CATALOG:
             raise ValueError(
                 f"bilinmeyen sahne: {name!r} (beat {b['id']}). "

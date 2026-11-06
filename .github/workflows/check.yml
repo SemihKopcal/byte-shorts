@@ -1,0 +1,36 @@
+name: check
+
+# Her push'ta: kod bozuk mu, workflow YAML'lari gecerli mi, testler geciyor mu.
+# Gece 04:15'te daily patlayinca ogrenmek yerine push'tan 1 dakika sonra
+# yesil/kirmizi tik goruyorsun. Ag yok, Gemini yok, secret yok.
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - run: pip install Pillow==11.0.0 numpy==2.1.3 pyyaml
+
+      - name: sozdizimi
+        run: python -m compileall -q worker editorial publish tools tests
+
+      - name: shell scriptleri
+        run: bash -n tools/setup_runner.sh tools/fetch_voice.sh tools/release.sh
+
+      # Workflow'a gomulu bir satir sifir sutundan baslarsa YAML sessizce
+      # bozuluyor ve Actions "Invalid workflow file" diyor; bunu burada yakala.
+      - name: workflow yaml
+        run: python -c "import glob, yaml; [yaml.safe_load(open(f)) for f in sorted(glob.glob('.github/workflows/*.yml'))]; print('yaml tamam')"
+
+      - name: testler
+        run: python -m unittest discover -s tests -v

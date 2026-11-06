@@ -116,6 +116,11 @@ def check(video: Path, tl: dict, spec: dict, published: Path) -> list[str]:
     if spec.get("series") == "G" and len(set(seen)) < 3:
         p.append(f"sadece {len(set(seen))} farkli sahne tipi -- en az 3 olmali")
 
+    # yayin metni (platform basina): Gemini yazdiysa kurallara uyuyor mu
+    if spec.get("copy"):
+        from publish.manifest import validate_copy
+        p += [f"metin: {x}" for x in validate_copy(spec["copy"], brand)]
+
     if not spec.get("sources"):
         p.append("kaynak listesi bos -- ekranda sayi varsa kaynak zorunlu")
 

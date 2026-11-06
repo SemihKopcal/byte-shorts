@@ -25,6 +25,12 @@ from .qc import check
 from .synth import synthesize
 
 ROOT = Path(__file__).resolve().parent.parent
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
+from publish.manifest import (build_manifest, captions_markdown,   # noqa: E402
+                              load_brand)
+
 VOICE = Path(os.environ.get("PIPER_VOICE", ROOT / "voices/en-us-ryan-high.onnx"))
 
 
@@ -123,26 +129,16 @@ def render(spec, tl, series_mod, out_path: Path, parallel: bool = False) -> None
         sys.exit("ffmpeg basarisiz:\n" + err)
 
 
-def manifest(spec, tl, video: Path) -> dict:
-    """Yayin adiminin okuyacagi metadata. Baslik/aciklama burada uretiliyor ki
-    panel ve YouTube ayni metni gorsun."""
-    brand = json.loads((ROOT / "brand.json").read_text())
-    tags = brand["tags_base"] + spec.get("tags", [])
-    src = "\n".join(f"- {s}" for s in spec.get("sources", []))
-    desc = (f"{spec.get('summary', spec['title'])}\n\n"
-            f"Sources / method:\n{src}\n\n"
-            f"{brand['description_footer']}")
-    return {
-        "id": spec["id"],
-        "series": spec["series"],
-        "title": spec["title"],
-        "description": desc,
-        "tags": tags[:15],
-        "duration": tl["duration"],
-        "video": str(video.name),
-        "theme": spec.get("_theme", ""),
-        "privacy": "private",
-    }
+def _inject_brand(spec: dict, brand: dict) -> None:
+    """Kapanis kartina GERCEK handle'i marka dosyasindan koy. Gemini handle
+    yazmiyor (uyduruyor); elle yazilmis senaryolardaki eskimis handle de
+    boylece brand.json degisince kendiliginden guncelleniyor."""
+    handle = brand.get("handle", "")
+    if not handle:
+        return
+    for b in spec.get("beats", []):
+        if b.get("scene") == "close":
+            b.setdefault("data", {})["handle"] = handle
 
 
 def main() -> None:
@@ -153,6 +149,7 @@ def main() -> None:
     args = ap.parse_args()
 
     spec = json.loads(Path(args.script).read_text())
+    _inject_brand(spec, load_brand(ROOT))
     out_dir = ROOT / args.out / spec["id"]
     out_dir.mkdir(parents=True, exist_ok=True)
 
@@ -170,8 +167,10 @@ def main() -> None:
     print("kare cizimi...")
     render(spec, tl, series_mod, video)
 
-    m = manifest(spec, tl, video)
+    m = build_manifest(spec, tl, video, ROOT)
     (out_dir / "manifest.json").write_text(json.dumps(m, indent=1, ensure_ascii=False))
+    # Instagram/TikTok'a elle yuklerken kopyalanacak metinler; release notu
+    (out_dir / "captions.md").write_text(captions_markdown(m))
 
     problems = check(video, tl, spec, ROOT / "content/published.json")
     if problems:

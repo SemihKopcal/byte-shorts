@@ -8,3 +8,8 @@ __pycache__/
 .env
 *.secret
 client_secret*.json
+
+# silinemeyen dosyalar buraya tasiniyor
+_to_delete/
+_jp_tmp.ttf
+/main

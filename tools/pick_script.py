@@ -16,6 +16,7 @@ bekledigin surece daily her gece AYNI videoyu uretiyordu.
 Kullanim:
     python tools/pick_script.py                 -> path=content/scripts/xxx.json
     python tools/pick_script.py xxx.json        -> o dosyayi secer
+    python tools/pick_script.py --newest        -> SIRADAKI en yeni olani secer
     python tools/pick_script.py --dir xxx.json  -> dir=out/<id>
     python tools/pick_script.py --mark xxx.json -> built.json'a isler
 """
@@ -47,6 +48,9 @@ def _spec_id(f: pathlib.Path) -> str:
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("name", nargs="?", default="")
+    ap.add_argument("--newest", action="store_true",
+                    help="en eski yerine en yeni islenmemis senaryoyu sec "
+                         "(az once Gemini'nin yazdigi senaryo icin)")
     ap.add_argument("--dir", action="store_true",
                     help="path= yerine dir=out/<id> yazar")
     ap.add_argument("--mark", action="store_true",
@@ -61,8 +65,9 @@ def main() -> None:
             sys.exit(f"script bulunamadi: {f}")
     else:
         done = _ids(PUBLISHED) | _ids(BUILT)
-        f = next((c for c in sorted(SCRIPTS.glob("*.json"))
-                  if _spec_id(c) not in done), None)
+        todo = [c for c in sorted(SCRIPTS.glob("*.json"))
+                if _spec_id(c) not in done]
+        f = (todo[-1] if a.newest else todo[0]) if todo else None
         if f is None:
             print("path=")
             return

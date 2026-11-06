@@ -6,6 +6,33 @@ sorduğumuzda cevap kodun içinde değil burada olsun.
 
 ---
 
+## Durum (6 Kasım 2026)
+
+**Çalışıyor:** Piper sesi, 9 sahneli katalog, 8 tema, kapalı döngü
+(Gemini yazar → editör yargılar → kod aritmetiği hesaplar → render → QC →
+YouTube → defter → release). Günde 2 video, `AUTO_PRIVACY` değişkeniyle tek
+düğmeli yayın kontrolü.
+
+**Sırada (öncelik sırasıyla):**
+
+1. BYTE anlatıcı (aşağıda madde 1): `draw_byte_pointing` yazıldı, sahnelere
+   bağlanmadı.
+2. Animasyonlu arka plan (madde 2): mesh/ızgara/halka animasyonları için bir
+   taslak yazıldı ama henüz repoda değil; önce BYTE anlatıcı bitecek.
+3. Instagram + TikTok: şimdilik release'ten elle; API otomasyonu 5-7 video
+   sonra (bkz. "BYTE Instagram ve TikTok" artifact'ı).
+4. Editör geri bildirim döngüsü: YouTube Analytics (`yt-analytics.readonly`)
+   verisini yapımcıya vermek; hangi konu/kanca tuttu.
+
+**Karar kaydı — neden her şey otomatik public:** kullanıcı kararı. Risk:
+YouTube Temmuz 2026 "sahte/şablon içerik" maddesi; savunma hattı üç katman:
+çeşitlilik (tema, sahne, konu), editör kapısı (puan ≥ 7, kod aritmetiği,
+arama doğrulaması), ve `AUTO_PRIVACY=off` kill-switch'i. İlk 10 videoda
+YouTube Studio'da "Content" sekmesinden uyarı/kısıtlama bildirimlerine
+bakılacak; biri gelirse önce `private`'a çekilip sebep okunacak.
+
+---
+
 ## Kitle kararı: 10–30 yaş
 
 Bu, sanılandan çok daha fazla şeyi değiştiriyor. Mevcut tasarım 30+ bir

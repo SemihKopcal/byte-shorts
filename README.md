@@ -1,134 +1,142 @@
 # byte-shorts
 
-BYTE kanalinin uretim hatti. Gunde 2 video, hepsi kodla ciziliyor.
-
-Kural: **hicbir video senin onayin olmadan yayina cikmaz.** `daily.yml`
-sadece uretir ve artifact birakir; `publish.yml` elle tetiklenir.
-
----
-
-## Nasil calisiyor
+BYTE kanalinin uretim hatti. Gunde 2 video, hepsi kodla ciziliyor, konuyu
+Gemini seciyor, YouTube'a kendiliginden yukleniyor.
 
 ```
-content/scripts/*.json          senaryo (beat'ler, veriler, kaynaklar)
-        |
-        v  worker/synth.py      Piper ile beat beat seslendirme
-                                -> her cumlenin baslangic/bitis saniyesi KESIN
-        |
-        v  worker/series_*.py   sahneler; kesmeler beat sinirlarina oturuyor
-        |
-        v  worker/build.py      Pillow -> ham RGB -> ffmpeg (ara dosya yok)
-        |
-        v  worker/qc.py         sure, en-boy, ses seviyesi, tekrar, kaynak
-        |
-        v  publish/youtube.py   varsayilan PRIVATE
+        ┌───────────────────────────── editorial/ (Gemini) ─────────────────────────────┐
+canli   │ yapimci → yazar → editor ⇄ yazar (en fazla 2 tur) → sanat yon. → metin yazari │
+sinyal ─┤   4 konu    senaryo   yargi + sayi iddialari   revize    tema     baslik +    │
+        │   kod eler  JSON      KOD aritmetigi hesaplar            secer    3 platform   │
+        │             arama destekli dogrulayici: formulsuz rakamlari canli kontrol eder │
+        └──────────────────────────────────┬────────────────────────────────────────────┘
+                                           ▼ content/scripts/<id>.json
+        worker/  synth (Piper) → sahneler → Pillow → ffmpeg → qc
+                                           ▼ out/<id>/<id>.mp4 + manifest.json + captions.md
+        publish/youtube.py  AUTO_PRIVACY ile yukle     tools/release.sh  Release'e koy
 ```
 
-Sahne kesmeleri sabit bir sayaca degil **seslendirme beat'lerine** bagli.
-Sabit sayac slideshow demek, slideshow da YouTube'un Temmuz 2026
-"sablon icerik" maddesinin tam tanimi.
+## Gunluk akis (`daily.yml`, 04:15 ve 13:15 UTC)
 
----
+1. Kuyruk bossa (ya da `topic` verildiyse) Gemini yeni senaryo yazar.
+2. Editor kapisindan gecemeyen konu **yazilmaz**; nedeni `content/rejected/`
+   altina duser. Hicbiri gecmezse kosu kirmizi biter: "bugun video yok",
+   kotu video yayinlamaktan iyidir.
+3. Video cizilir, `worker/qc.py` kontrol eder (sure, en-boy, ses, tekrar,
+   kaynak, yayin metni).
+4. `AUTO_PRIVACY` ne diyorsa o gizlilikle YouTube'a yuklenir.
+5. `content/built.json` ve `published.json` repoya geri yazilir.
+6. Video + Instagram/TikTok metinleri bir GitHub Release'e konur
+   (telefondan indirilebilir).
 
-## Lokal calistirma
+## Tek dugme: AUTO_PRIVACY
+
+GitHub > Settings > Secrets and variables > Actions > **Variables** >
+`AUTO_PRIVACY`
+
+| deger | ne olur |
+|---|---|
+| `public` (veya hic tanimlama) | uretilen her video herkese acik yuklenir |
+| `unlisted` | linki olan gorur, aramada/akista cikmaz |
+| `private` | sadece sen gorursun; sen secip Studio'dan acarsin |
+| `off` | YouTube'a hic yuklenmez; video yine uretilir, release'e konur |
+
+Bir sey ters giderse `off`. Kod degismiyor, bir sonraki kosudan itibaren gecerli.
+
+## Elle tetikleme
+
+Actions > daily > Run workflow:
+
+- `topic`: "Gemini su konuyu yazsin" (bos = kendi secer)
+- `script`: kuyruktaki belirli bir dosya
+- `mode`: bu kosu icin yayin modu (`auto` = AUTO_PRIVACY)
+
+`publish.yml` eski videoyu yeniden uretip yuklemek icin duruyor.
+
+## Gemini'nin rolleri (`editorial/roles.py`)
+
+| rol | is | kodun kontrolu |
+|---|---|---|
+| yapimci | 4 konu adayi + kendi puani (arama destekli) | olculebilirlik ve guvenlik < 7 elenir, tekrar elenir |
+| yazar | senaryo; hook→why→data→turn→resolve | `rules.validate_script`: sahne, pose, sure, rol sirasi, yasakli kalip |
+| editor | 5 puan + risk + her rakam icin formul | puan < 7 ya da risk orta/yuksek = revize/ret |
+| dogrulayici | formulsuz rakamlari canli aramayla kontrol | celisen = revize; dogrulanamayan en fazla 1 |
+| sanat yon. | 8 temadan birini secer | bilinmeyen/son 3'te kullanilan reddedilir |
+| metin yazari | 4 baslik + YouTube/Instagram/TikTok metni | `publish/manifest.py`: hashtag sayisi, link, emoji, kaynak bolumu |
+
+Model adi sabit degil: `editorial/llm.py` her kosuda `ListModels`'e sorup
+o anahtarla cagirilabilen en yeni kararli flash'i seciyor; calismayana
+(404/kota) siradakine geciyor.
+
+**Editor yetmez, kod da hesaplar.** Editorden her ekran rakami icin bir
+formul isteniyor (`0.40*60 = 24`); `safe_eval` onu hesaplayip Gemini'nin
+yazdigi sonuclarla karsilastiriyor. Gemini "yayinla" dese bile aritmetik
+tutmuyorsa yayinlanmaz.
+
+## Dosyalar
+
+```
+editorial/   Gemini: llm.py (istemci) roles.py (istemler) rules.py (kurallar)
+             pipeline.py (akis) signals.py (HN/GitHub/YouTube canli sinyal)
+worker/      cizim: synth, draw, scenes, themes, byte, series_*, qc, build
+publish/     youtube.py (yukleme) manifest.py (platform metinleri)
+tools/       setup_runner.sh, fetch_voice.sh, pick_script.py, release.sh,
+             check_token.py, get_refresh_token.py
+tests/       agsiz testler (sahte Gemini)
+content/     scripts/ rejected/ backlog.json built.json published.json
+ci/          .github/workflows'un kopyasi (asagiya bak)
+```
+
+## Testler
 
 ```bash
-sudo apt-get install -y ffmpeg fonts-inter    # macOS: brew install ffmpeg
+python -m unittest discover -s tests -v
+```
+
+Ag yok, Gemini yok, secret yok; saniyenin altinda biter. `check.yml` her
+push'ta calistiriyor ve workflow YAML'larini da dogruluyor.
+
+## Lokal render
+
+```bash
 pip install -r requirements.txt
 bash tools/fetch_voice.sh en-us-ryan-high     # ~120 MB, repoda yok
-
-python -m worker.build content/scripts/2026-10-27-cost-of-alphabets.json
-# -> out/<id>/<id>.mp4 + manifest.json
+python -m worker.build content/scripts/<id>.json
+GEMINI_API_KEY=... python -m editorial --dry-run
 ```
 
-`--skip-synth` seslendirmeyi atlar (timeline.json varsa) -- sadece cizimde
-oynarken kullan, her seferinde 40 saniye kazandiriyor.
+## Secrets ve degiskenler
 
-> **Font**: Inter kurulu degilse `draw.py` hata firlatiyor, sessizce baska
-> fonta dusmuyor. Bilerek boyle -- sessiz font degisimi videoyu gorunmeden
-> bozar, ve ancak izlerken fark edersin.
-
----
-
-## Seri ekleme
-
-`worker/series_c.py` ac, `draw.py`'dan import et, en altta `STAGES` tanimla:
-
-```python
-STAGES = [("b1", "b2", scene_hook),
-          ("b3", "b9", scene_table),
-          ("b15", None, scene_close)]   # None = videonun sonuna kadar
-```
-
-Senaryoda `"series": "C"` yazdigin an `build.py` modulu kendi buluyor.
-Seriler birbirini import etmiyor; ortak olan her sey `draw.py`'da.
-
----
-
-## Senaryo formati
-
-```jsonc
-{
- "id":     "2026-11-03-...",     // essiz; published.json buna bakiyor
- "series": "B",
- "title":  "...",                 // <= 60 karakter, clickbait yok
- "sources": ["..."],              // ekranda sayi varsa ZORUNLU
- "beats": [
-   {"id": "b1",
-    "say": "three dollars",       // TTS'in okuyacagi
-    "cap": "$3"}                  // ekranda gorunecek
- ]
-}
-```
-
-`say` ile `cap` ayri olmak zorunda: TTS'e `$3` yazarsan "dolar uc" der,
-ekrana `three dollars` yazarsan amator duruyor.
-
----
-
-## Workflow'lar
-
-| dosya | ne zaman | ne yapar |
+| ad | tur | nerede kullaniliyor |
 |---|---|---|
-| `daily.yml` | 04:15 ve 13:15 UTC + elle | siradaki scripti uretir, artifact birakir. **Yuklemez.** |
-| `publish.yml` | sadece elle | yeniden uretir, QC'den gecirir, YouTube'a yukler |
-
-Cizim deterministik oldugu icin `publish.yml` artifact'i indirmek yerine
-yeniden uretiyor: artifact suresi (2 gun) dolsa bile yayinlayabiliyoruz ve
-QC bir kez daha calisiyor.
-
-**Artifact kotasi**: ucretsiz hesapta 500 MB. Video ~39 MB, gunde 2 tane.
-`retention-days: 2` bu yuzden var; dusurursen eski kosulari kaybedersin,
-yukseltirsen kota dolar ve yeni kosular artifact birakamaz.
-
----
-
-## Secrets
-
-| isim | nereden | ne zaman |
-|---|---|---|
-| `YOUTUBE_CLIENT_ID` | Google Cloud -> Credentials | publish |
-| `YOUTUBE_CLIENT_SECRET` | ayni | publish |
-| `YOUTUBE_REFRESH_TOKEN` | `tools/get_refresh_token.py` | publish |
-
-`daily.yml` hicbirini istemiyor -- uretim tamamen offline. Secrets sadece
-yayin adiminda okunuyor.
+| `GEMINI_API_KEY` | secret | editorial (senaryo yazimi) |
+| `YOUTUBE_API_KEY` | secret | editorial/signals.py (YouTube trend aramasi) |
+| `YOUTUBE_CLIENT_ID` | secret | yukleme |
+| `YOUTUBE_CLIENT_SECRET` | secret | yukleme |
+| `YOUTUBE_REFRESH_TOKEN` | secret | yukleme |
+| `AUTO_PRIVACY` | **variable** | yayin modu (yukaridaki tablo) |
 
 **OAuth onay ekrani "In production" olmali.** "Testing" modunda Google
-refresh token'i 7 gunde bir gecersiz kiliyor: ilk hafta her sey calisir,
-sekizinci gun yuklemeler sessizce durur.
+refresh token'i 7 gunde iptal ediyor: ilk hafta calisir, sekizinci gun
+yuklemeler durur.
 
----
+## Workflow dosyalari neden iki yerde
 
-## Kota
+`.github/workflows/*.yml` asil dosyalar. `ci/` altindaki kopyalar, bazi
+araclarin `.github/` klasorune yazamamasi yuzunden duruyor; degisiklik
+yaparken ikisini de guncelle ya da `cp ci/*.yml .github/workflows/`.
 
-`videos.insert` ayri bir "Video Uploads" kovasindan **gunde 100 cagri**.
-Gunde 2 video icin fazlasiyla yeterli. Basarisiz denemeler de bu kovadan
-dustugu icin `publish/youtube.py` 4xx hatalarinda tekrar denemiyor.
+## Sorun giderme
 
----
+| belirti | sebep | cozum |
+|---|---|---|
+| kosu kirmizi, "BUGUN VIDEO YOK" | Gemini 3 konuda da editor kapisindan gecemedi | `content/rejected/` icindeki dosyada nedeni yazar |
+| "youtube secrets gecersiz" | token iptal / client uyusmuyor | `python tools/check_token.py`, sonra secrets'i guncelle |
+| "UYARI: public istendi, YouTube private yapti" | API projesi dogrulanmamis | videoyu Studio'dan elle public yap; Google'a API denetimi basvurusu |
+| Actions "startup failure" | GitHub faturalandirma kilidi | Settings > Billing > odeme yontemi ekle |
+| Gemini 404 | model adi emekli | kendiliginden siradakine gecer; `GEMINI_MODEL` ile zorlayabilirsin |
 
 ## brand.json
 
-Isim, handle, aciklama altbilgisi, hashtag'ler ve baslik kurallari tek
-dosyada. Handle degisirse burasi degisiyor, baska hicbir yer degil.
+Isim, handle, aciklama altbilgisi, hashtag'ler, baslik kurallari. Handle
+degisirse burasi degisiyor; kapanis kartina da buradan giriyor.

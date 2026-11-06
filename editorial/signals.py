@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """
 Canli sinyal: su an AI araclari dunyasinda ne konusuluyor.
 
