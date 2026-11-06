@@ -62,7 +62,8 @@ PUSH = 0.035          # sahne boyunca kamera yakinlasmasi
 # patliyoruz -- sessiz font fallback'i videoyu bozar ve fark edilmez.
 @lru_cache(maxsize=None)
 def _font_file(family: str, style: str, *names: str) -> str:
-    for d in ("/usr/share/fonts/opentype/inter", "/usr/share/fonts/truetype/inter",
+    for d in (str(Path.home() / ".local/share/fonts/inter"),   # tools/setup_runner.sh
+              "/usr/share/fonts/opentype/inter", "/usr/share/fonts/truetype/inter",
               "/usr/share/fonts/opentype/noto", "/usr/share/fonts/truetype/noto"):
         for n in names:
             p = Path(d) / n
