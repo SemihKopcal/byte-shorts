@@ -1,0 +1,200 @@
+{
+ "brief": {
+  "format": "measured",
+  "angle": "Streaming 60 seconds of uncompressed screen video to an AI model can consume over 1.8 million tokens if sent at 30 frames per second.",
+  "measure": "Comparing total tokens generated between streaming full 30 FPS video frames versus sending only frames with visual changes.",
+  "calc": "30 frames/sec * 60 sec * 1,000 tokens/frame = 1,800,000 tokens vs 1 frame/sec * 60 sec * 1,000 tokens/frame = 60,000 tokens.",
+  "sources": [
+   "Frame rate token consumption math",
+   "dsh-see-now repository README"
+  ],
+  "signal_url": "https://github.com/SAOS-3624/dsh-see-now",
+  "why_now": "dsh-see-now recently released a tool to filter idle frames and reduce vision token consumption.",
+  "scores": {
+   "timeliness": 9,
+   "verifiability": 10,
+   "curiosity": 9,
+   "audience_fit": 9,
+   "safety": 10
+  },
+  "_total": 54,
+  "search": false
+ },
+ "stage": "draft",
+ "problems": [
+  "9 beat -- 10..18 arasi olmali"
+ ],
+ "spec": {
+  "format": "measured",
+  "title": "one million tokens per video second",
+  "summary": "Comparing token consumption between streaming full video frames versus sending only visual changes.",
+  "tags": [
+   "tokens",
+   "video",
+   "frames",
+   "ai"
+  ],
+  "sources": [
+   "Frame rate token consumption math",
+   "dsh-see-now repository README"
+  ],
+  "beats": [
+   {
+    "id": "b1",
+    "role": "hook",
+    "scene": "contrast",
+    "say": "Sixty seconds of screen video can cost nearly two million tokens.",
+    "cap": "1.8M TOKENS",
+    "data": {
+     "left": {
+      "label": "DURATION",
+      "value": "60S"
+     },
+     "right": {
+      "label": "COST",
+      "value": "1.8M",
+      "tone": "bad"
+     },
+     "verdict": "FULL STREAM"
+    }
+   },
+   {
+    "id": "b2",
+    "role": "why",
+    "scene": "counter",
+    "say": "The math runs on thirty frames per second.",
+    "cap": "30 FPS",
+    "data": {
+     "from": 1,
+     "to": 30,
+     "suffix": " FPS",
+     "tone": "mid"
+    }
+   },
+   {
+    "id": "b3",
+    "role": "why",
+    "scene": "byte_says",
+    "say": "Every single frame costs one thousand tokens.",
+    "cap": "1000 TOKENS / FRAME",
+    "data": {
+     "line": "1000 tokens per frame",
+     "pose": "point_up",
+     "cursor": "amber"
+    }
+   },
+   {
+    "id": "b4",
+    "role": "data",
+    "scene": "bars",
+    "say": "Thirty frames multiplied by sixty seconds gives eighteen hundred frames.",
+    "cap": "1800 FRAMES",
+    "data": {
+     "rows": [
+      {
+       "name": "FPS",
+       "v": 30,
+       "label": "30"
+      },
+      {
+       "name": "SEC",
+       "v": 60,
+       "label": "60"
+      },
+      {
+       "name": "TOTAL",
+       "v": 1800,
+       "label": "1800",
+       "tone": "bad"
+      }
+     ]
+    }
+   },
+   {
+    "id": "b5",
+    "role": "data",
+    "scene": "counter",
+    "say": "Each frame adds one thousand tokens to the total count.",
+    "cap": "1,800,000",
+    "data": {
+     "from": 0,
+     "to": 1800000,
+     "suffix": " TOKENS",
+     "tone": "bad"
+    }
+   },
+   {
+    "id": "b6",
+    "role": "data",
+    "scene": "split",
+    "say": "That is the cost of sending every pixel without pause.",
+    "cap": "FULL SEND",
+    "data": {
+     "a": {
+      "label": "FRAMES",
+      "sub": "1800"
+     },
+     "b": {
+      "label": "TOKENS",
+      "sub": "1.8M",
+      "tone": "bad"
+     }
+    }
+   },
+   {
+    "id": "b7",
+    "role": "turn",
+    "scene": "bars",
+    "say": "Dropping the rate to one frame per second changes the scale.",
+    "cap": "1 FPS RATE",
+    "data": {
+     "rows": [
+      {
+       "name": "NEW FPS",
+       "v": 1,
+       "label": "1"
+      },
+      {
+       "name": "SEC",
+       "v": 60,
+       "label": "60"
+      },
+      {
+       "name": "TOTAL",
+       "v": 60,
+       "label": "60",
+       "tone": "good"
+      }
+     ]
+    }
+   },
+   {
+    "id": "b8",
+    "role": "turn",
+    "scene": "counter",
+    "say": "Sixty frames multiplied by one thousand tokens equals sixty thousand.",
+    "cap": "60,000",
+    "data": {
+     "from": 0,
+     "to": 60000,
+     "suffix": " TOKENS",
+     "tone": "good"
+    }
+   },
+   {
+    "id": "b9",
+    "role": "resolve",
+    "scene": "close",
+    "say": "Filtering visual changes drops the load.",
+    "cap": "SAVINGS MEASURED",
+    "data": {
+     "lines": [
+      "1.8M vs 60K",
+      "CHANGE DETECTED"
+     ],
+     "accent": "green"
+    }
+   }
+  ]
+ }
+}

@@ -1,0 +1,213 @@
+{
+ "brief": {
+  "format": "explain",
+  "angle": "A 100-page plain text document uses roughly the same context capacity as just 10 seconds of raw video frame grid patches.",
+  "measure": "Comparing text token count per page to image patch tokens across a short video sequence.",
+  "calc": "100 pages * 500 words * 1.33 tokens/word = 66,500 tokens vs 10 seconds * 24 frames * 256 tokens/frame = 61,440 tokens.",
+  "sources": [
+   "Text word-to-token ratio standard arithmetic",
+   "Vision grid patch tokenization formula"
+  ],
+  "signal_url": null,
+  "why_now": "Explains why multimodal AI chat runs out of context much faster when processing video input.",
+  "scores": {
+   "timeliness": 7,
+   "verifiability": 10,
+   "curiosity": 9,
+   "audience_fit": 9,
+   "safety": 10
+  },
+  "_total": 56,
+  "search": false
+ },
+ "stage": "editor",
+ "problems": [
+  "Link sources in the data structure explicitly to specific parameters rather than general standards.",
+  "Make the audience comparison more tangible to everyday digital media consumption.",
+  "ekranda 50000 var ama editor bunun icin iddia listelemedi",
+  "11 statements need a web check, but web search is unavailable right now, so nothing can be verified. Use only numbers you derive by arithmetic, or leave the statements out",
+  "'audience' puani 6, en az 7 olmali. A bit abstract for the younger end of the demographic, but interesting for tech-minded viewers."
+ ],
+ "spec": {
+  "format": "explain",
+  "title": "Text pages match ten seconds of video",
+  "summary": "Comparing text tokens to visual grid patches across identical capacity.",
+  "tags": [
+   "tokens",
+   "video",
+   "text",
+   "math"
+  ],
+  "sources": [
+   "Text word-to-token ratio standard arithmetic",
+   "Vision grid patch tokenization formula"
+  ],
+  "beats": [
+   {
+    "id": "b1",
+    "role": "hook",
+    "scene": "contrast",
+    "say": "One hundred pages of text equals ten seconds of video.",
+    "cap": "100 pages = 10s video",
+    "data": {
+     "left": {
+      "label": "text",
+      "value": "100 pages"
+     },
+     "right": {
+      "label": "video",
+      "value": "10 seconds",
+      "tone": "mid"
+     }
+    }
+   },
+   {
+    "id": "b2",
+    "role": "why",
+    "scene": "byte_says",
+    "say": "Both formats consume nearly identical token counts in models.",
+    "cap": "Equal token load",
+    "data": {
+     "line": "Same token load",
+     "pose": "point_r",
+     "cursor": "mint"
+    }
+   },
+   {
+    "id": "b3",
+    "role": "why",
+    "scene": "split",
+    "say": "Text uses words translated into numbers.",
+    "cap": "Text math",
+    "data": {
+     "a": {
+      "label": "Words",
+      "sub": "Text"
+     },
+     "b": {
+      "label": "Tokens",
+      "sub": "Numbers"
+     }
+    }
+   },
+   {
+    "id": "b4",
+    "role": "data",
+    "scene": "table",
+    "say": "One hundred pages hold fifty thousand words.",
+    "cap": "50k words",
+    "data": {
+     "unit": "count",
+     "rows": [
+      {
+       "name": "Pages",
+       "value": "100",
+       "ratio": 1
+      },
+      {
+       "name": "Words",
+       "value": "50,000",
+       "ratio": 5
+      }
+     ]
+    }
+   },
+   {
+    "id": "b5",
+    "role": "data",
+    "scene": "table",
+    "say": "Word math yields sixty six thousand tokens.",
+    "cap": "66k text tokens",
+    "data": {
+     "unit": "tokens",
+     "rows": [
+      {
+       "name": "Text tokens",
+       "value": "66,500",
+       "ratio": 6.6
+      }
+     ]
+    }
+   },
+   {
+    "id": "b6",
+    "role": "data",
+    "scene": "bars",
+    "say": "Video uses frames split into grid patches.",
+    "cap": "Video grid",
+    "data": {
+     "rows": [
+      {
+       "name": "Frames",
+       "v": 240,
+       "label": "10 seconds"
+      }
+     ]
+    }
+   },
+   {
+    "id": "b7",
+    "role": "data",
+    "scene": "table",
+    "say": "Patch math yields sixty one thousand tokens.",
+    "cap": "61k visual tokens",
+    "data": {
+     "unit": "tokens",
+     "rows": [
+      {
+       "name": "Video tokens",
+       "value": "61,440",
+       "ratio": 6.1
+      }
+     ]
+    }
+   },
+   {
+    "id": "b8",
+    "role": "turn",
+    "scene": "counter",
+    "say": "The totals land within ten percent of each other.",
+    "cap": "Near identical totals",
+    "data": {
+     "from": 61,
+     "to": 66,
+     "prefix": "k",
+     "tone": "good"
+    }
+   },
+   {
+    "id": "b9",
+    "role": "turn",
+    "scene": "byte_says",
+    "say": "Visual frames pack dense data faster than print.",
+    "cap": "Density shift",
+    "data": {
+     "line": "Dense visual data",
+     "pose": "shrug",
+     "cursor": "violet"
+    }
+   },
+   {
+    "id": "b10",
+    "role": "resolve",
+    "scene": "close",
+    "say": "Models process reading and seeing through identical math.",
+    "cap": "Same math",
+    "data": {
+     "lines": [
+      "Same token math",
+      "Text and video"
+     ],
+     "accent": "mint"
+    }
+   }
+  ]
+ },
+ "scores": {
+  "hook": 8,
+  "story": 7,
+  "clarity": 7,
+  "audience": 6,
+  "voice": 9
+ }
+}

@@ -1,0 +1,201 @@
+{
+ "brief": {
+  "format": "explain",
+  "angle": "Scaling an AI's input window from 1,000 tokens to 1,000,000 tokens increases the internal attention comparison steps by 1,000,000 times.",
+  "measure": "Calculating the quadratic growth of self-attention pair comparisons as sequence length increases.",
+  "calc": "(1,000)^2 = 1,000,000 operations vs (1,000,000)^2 = 1,000,000,000,000 operations.",
+  "sources": [
+   "Transformer self-attention mathematical formula",
+   "Sequence length scaling arithmetic"
+  ],
+  "signal_url": null,
+  "why_now": "Illustrates why long-context model processing becomes exponentially slower and more expensive.",
+  "scores": {
+   "timeliness": 7,
+   "verifiability": 10,
+   "curiosity": 9,
+   "audience_fit": 8,
+   "safety": 10
+  },
+  "_total": 55,
+  "search": false
+ },
+ "stage": "editor",
+ "problems": [
+  "Ground the 1 million token prompt in a real-world example like a textbook or repository so the abstract math feels tangible to a younger audience.",
+  "5 statements need a web check, but web search is unavailable right now, so nothing can be verified. Use only numbers you derive by arithmetic, or leave the statements out",
+  "'audience' puani 6, en az 7 olmali. A bit academic for the lower end of the age bracket, lacks immediate consumer application."
+ ],
+ "spec": {
+  "format": "explain",
+  "title": "the hidden cost of long text in tools",
+  "summary": "Scaling input length makes internal attention steps grow quadratically.",
+  "tags": [
+   "ai",
+   "math",
+   "attention",
+   "tokens"
+  ],
+  "sources": [
+   "Transformer self-attention mathematical formula",
+   "Sequence length scaling arithmetic"
+  ],
+  "beats": [
+   {
+    "id": "b1",
+    "role": "hook",
+    "scene": "contrast",
+    "say": "A thousand input tokens triggers one million internal pair comparisons.",
+    "cap": "1,000 tokens = 1M comparisons",
+    "data": {
+     "left": {
+      "label": "input",
+      "value": "1,000"
+     },
+     "right": {
+      "label": "checks",
+      "value": "1,000,000",
+      "tone": "bad"
+     }
+    }
+   },
+   {
+    "id": "b2",
+    "role": "why",
+    "scene": "bars",
+    "say": "Every single word must look at every other word.",
+    "cap": "All pairs checked",
+    "data": {
+     "rows": [
+      {
+       "name": "Word A",
+       "v": 1,
+       "tone": "base"
+      },
+      {
+       "name": "Word B",
+       "v": 1,
+       "tone": "base"
+      }
+     ]
+    }
+   },
+   {
+    "id": "b3",
+    "role": "why",
+    "scene": "byte_says",
+    "say": "That creates quadratic growth under the hood.",
+    "cap": "Quadratic growth",
+    "data": {
+     "line": "Multiplication scales hard",
+     "pose": "point_up",
+     "cursor": "amber"
+    }
+   },
+   {
+    "id": "b4",
+    "role": "data",
+    "scene": "counter",
+    "say": "Start with one thousand items squared.",
+    "cap": "1,000 squared",
+    "data": {
+     "from": 1000,
+     "to": 1000,
+     "suffix": " squared",
+     "tone": "mid"
+    }
+   },
+   {
+    "id": "b5",
+    "role": "data",
+    "scene": "counter",
+    "say": "The result is one million operations.",
+    "cap": "1,000,000 ops",
+    "data": {
+     "from": 0,
+     "to": 1000000,
+     "suffix": " ops",
+     "tone": "bad"
+    }
+   },
+   {
+    "id": "b6",
+    "role": "data",
+    "scene": "counter",
+    "say": "Multiply that input length by one thousand again.",
+    "cap": "1,000,000 tokens",
+    "data": {
+     "from": 1000,
+     "to": 1000000,
+     "suffix": " tokens",
+     "tone": "mid"
+    }
+   },
+   {
+    "id": "b7",
+    "role": "data",
+    "scene": "counter",
+    "say": "Now square one million items.",
+    "cap": "1,000,000 squared",
+    "data": {
+     "from": 1000000,
+     "to": 1000000,
+     "suffix": " squared",
+     "tone": "bad"
+    }
+   },
+   {
+    "id": "b8",
+    "role": "turn",
+    "scene": "contrast",
+    "say": "The total operations jump to one trillion.",
+    "cap": "1,000,000,000,000 ops",
+    "data": {
+     "left": {
+      "label": "Tokens",
+      "value": "1M"
+     },
+     "right": {
+      "label": "Checks",
+      "value": "1 Trillion",
+      "tone": "bad"
+     },
+     "verdict": "Massive jump"
+    }
+   },
+   {
+    "id": "b9",
+    "role": "turn",
+    "scene": "byte_says",
+    "say": "One thousand times more input needs one million times more work.",
+    "cap": "1,000x input = 1,000,000x work",
+    "data": {
+     "line": "Scale is brutal",
+     "pose": "shrug",
+     "cursor": "red"
+    }
+   },
+   {
+    "id": "b10",
+    "role": "resolve",
+    "scene": "close",
+    "say": "Math does not forgive large prompts.",
+    "cap": "Math is strict",
+    "data": {
+     "lines": [
+      "Input size has a cost",
+      "Check the math"
+     ],
+     "accent": "amber"
+    }
+   }
+  ]
+ },
+ "scores": {
+  "hook": 8,
+  "story": 7,
+  "clarity": 8,
+  "audience": 6,
+  "voice": 9
+ }
+}
