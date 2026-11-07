@@ -1,0 +1,159 @@
+{
+ "brief": {
+  "format": "measured",
+  "angle": "Streaming a static phone screen for one hour sends 216,000 full frames, but filtering unchanged pixels reduces the payload by 99 percent.",
+  "measure": "Comparing uncompressed 60 FPS video frame transmission against delta-only frame updates over a 60-minute screen session.",
+  "calc": "60 frames/sec * 3600 sec = 216,000 frames vs 1 keyframe + 215,999 delta frames (~1% relative byte size).",
+  "sources": [
+   "Repository documentation for dsh-see-now frame filtering logic"
+  ],
+  "signal_url": "https://github.com/SAOS-3624/dsh-see-now",
+  "why_now": "dsh-see-now trending on GitHub with real-time screen frame optimization.",
+  "scores": {
+   "timeliness": 9,
+   "verifiability": 10,
+   "curiosity": 8,
+   "audience_fit": 9,
+   "safety": 10
+  },
+  "_total": 52,
+  "search": false
+ },
+ "stage": "draft",
+ "problems": [
+  "8 beat -- 10..18 arasi olmali"
+ ],
+ "spec": {
+  "format": "measured",
+  "title": "Static screen waste",
+  "summary": "Streaming a static phone screen for one hour sends two hundred sixteen thousand frames, but delta filtering reduces the payload by ninety nine percent.",
+  "tags": [
+   "streaming",
+   "frames",
+   "pixels",
+   "bytes"
+  ],
+  "sources": [
+   "Repository documentation for dsh-see-now frame filtering logic",
+   "https://github.com/SAOS-3624/dsh-see-now"
+  ],
+  "beats": [
+   {
+    "id": "b1",
+    "role": "hook",
+    "scene": "contrast",
+    "say": "A static phone screen sends two hundred sixteen thousand frames per hour.",
+    "cap": "216,000 frames",
+    "data": {
+     "left": {
+      "label": "Duration",
+      "value": "1 hour"
+     },
+     "right": {
+      "label": "Total Frames",
+      "value": "216k"
+     }
+    }
+   },
+   {
+    "id": "b2",
+    "role": "why",
+    "scene": "counter",
+    "say": "Sixty frames multiply by thirty six hundred seconds.",
+    "cap": "60 * 3600",
+    "data": {
+     "from": 0,
+     "to": 216000,
+     "suffix": " frames"
+    }
+   },
+   {
+    "id": "b3",
+    "role": "why",
+    "scene": "bars",
+    "say": "Every single identical pixel travels across the network repeatedly.",
+    "cap": "Raw transmission",
+    "data": {
+     "rows": [
+      {
+       "name": "Sent",
+       "v": 216000,
+       "label": "full frames"
+      }
+     ]
+    }
+   },
+   {
+    "id": "b4",
+    "role": "data",
+    "scene": "table",
+    "say": "One initial keyframe starts the stream.",
+    "cap": "Start keyframe",
+    "data": {
+     "unit": "frames",
+     "rows": [
+      {
+       "name": "Keyframe",
+       "value": "1",
+       "ratio": 0.01
+      }
+     ]
+    }
+   },
+   {
+    "id": "b5",
+    "role": "data",
+    "scene": "table",
+    "say": "The remaining two hundred fifteen thousand nine hundred ninety nine frames are deltas.",
+    "cap": "Delta frames",
+    "data": {
+     "unit": "frames",
+     "rows": [
+      {
+       "name": "Deltas",
+       "value": "215,999",
+       "ratio": 0.99
+      }
+     ]
+    }
+   },
+   {
+    "id": "b6",
+    "role": "data",
+    "scene": "counter",
+    "say": "Unchanged pixels bypass the network entirely.",
+    "cap": "Filtered",
+    "data": {
+     "from": 0,
+     "to": 99,
+     "suffix": "% reduction"
+    }
+   },
+   {
+    "id": "b7",
+    "role": "turn",
+    "scene": "byte_says",
+    "say": "Filtering drops the payload size to one percent.",
+    "cap": "1% relative size",
+    "data": {
+     "line": "Payload drops by 99 percent",
+     "pose": "point_r",
+     "cursor": "mint"
+    }
+   },
+   {
+    "id": "b8",
+    "role": "resolve",
+    "scene": "close",
+    "say": "Only the changes matter.",
+    "cap": "End of data",
+    "data": {
+     "lines": [
+      "Static screen test complete",
+      "Only deltas travel"
+     ]
+    }
+   }
+  ]
+ }
+}

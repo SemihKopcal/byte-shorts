@@ -1,0 +1,198 @@
+{
+ "brief": {
+  "format": "explain",
+  "angle": "Maintaining a 20-turn chat history requires reprocessing the early messages 20 times, making the last reply 20 times more expensive than the first.",
+  "measure": "Cumulative prompt token processing cost in non-cached sequential chat sessions.",
+  "calc": "Turn 1 = 100 tokens processed; Turn 20 = 2,000 cumulative context tokens reprocessed; total processed = 21,000 token reads.",
+  "sources": [
+   "Transformer autoregressive context reprocessing arithmetic"
+  ],
+  "signal_url": null,
+  "why_now": "Longer context windows lead users to keep single chat threads open indefinitely.",
+  "scores": {
+   "timeliness": 8,
+   "verifiability": 10,
+   "curiosity": 9,
+   "audience_fit": 9,
+   "safety": 10
+  },
+  "_total": 57,
+  "search": false
+ },
+ "stage": "editor",
+ "problems": [
+  "9 statements need a web check, but web search is unavailable right now, so nothing can be verified. Use only numbers you derive by arithmetic, or leave the statements out"
+ ],
+ "spec": {
+  "format": "explain",
+  "title": "Why long chat history costs 20 times more per turn",
+  "summary": "Reprocessing context on every turn makes turn twenty take 20 times more token reads than turn one, totaling 21,000 reads across twenty turns.",
+  "tags": [
+   "ai",
+   "tokens",
+   "chatbots",
+   "llm",
+   "math"
+  ],
+  "sources": [
+   "Sequential token reprocessing arithmetic sum",
+   "Arithmetic progression sum formula n*(n+1)/2"
+  ],
+  "beats": [
+   {
+    "id": "b1",
+    "role": "hook",
+    "scene": "contrast",
+    "say": "Your twentieth reply costs twenty times more token reads than your first.",
+    "cap": "Message 20 takes 20x more work than message 1.",
+    "data": {
+     "left": {
+      "label": "Turn 1",
+      "value": "100"
+     },
+     "right": {
+      "label": "Turn 20",
+      "value": "2,000",
+      "tone": "bad"
+     },
+     "verdict": "20x higher token reads"
+    }
+   },
+   {
+    "id": "b2",
+    "role": "why",
+    "scene": "byte_says",
+    "say": "Each turn sends the full chat history back to the model.",
+    "cap": "Every turn re-reads the full past history.",
+    "data": {
+     "line": "No stored memory",
+     "pose": "alert",
+     "cursor": "amber"
+    }
+   },
+   {
+    "id": "b3",
+    "role": "why",
+    "say": "If each turn adds one hundred tokens, turn one reads one hundred.",
+    "cap": "Turn 1 reads 100 tokens."
+   },
+   {
+    "id": "b4",
+    "role": "data",
+    "scene": "timeline",
+    "say": "Turn two reads two hundred. Turn twenty reads two thousand.",
+    "cap": "Turn 2: 200 tokens. Turn 20: 2,000 tokens.",
+    "data": {
+     "steps": [
+      {
+       "at": "Turn 1",
+       "label": "100 tokens"
+      },
+      {
+       "at": "Turn 2",
+       "label": "200 tokens"
+      },
+      {
+       "at": "Turn 20",
+       "label": "2,000 tokens",
+       "tone": "bad"
+      }
+     ]
+    }
+   },
+   {
+    "id": "b5",
+    "role": "data",
+    "say": "Your first hundred tokens get re-read twenty separate times.",
+    "cap": "First 100 tokens get re-read 20 times."
+   },
+   {
+    "id": "b6",
+    "role": "data",
+    "scene": "counter",
+    "say": "Across twenty turns, total reads reach twenty-one thousand tokens.",
+    "cap": "Total reads: 21,000 tokens.",
+    "data": {
+     "prefix": "Total reads: ",
+     "suffix": " tokens",
+     "from": 100,
+     "to": 21000,
+     "tone": "bad"
+    }
+   },
+   {
+    "id": "b7",
+    "role": "turn",
+    "scene": "split",
+    "say": "Twenty-one thousand tokens equals re-reading eighty pages of homework.",
+    "cap": "21,000 tokens equals roughly 80 pages of homework.",
+    "data": {
+     "a": {
+      "label": "Single turn 20",
+      "sub": "2,000 tokens"
+     },
+     "b": {
+      "label": "Cumulative total",
+      "sub": "21,000 tokens read",
+      "tone": "bad"
+     }
+    }
+   },
+   {
+    "id": "b8",
+    "role": "turn",
+    "say": "The phone battery processes old context repeatedly instead of new answers.",
+    "cap": "Battery spent re-reading old context."
+   },
+   {
+    "id": "b9",
+    "role": "resolve",
+    "scene": "bars",
+    "say": "Turn twenty takes twenty times the token processing of turn one.",
+    "cap": "Turn 20 takes 20x the work of Turn 1.",
+    "data": {
+     "rows": [
+      {
+       "name": "Turn 1",
+       "v": 100,
+       "label": "100"
+      },
+      {
+       "name": "Turn 10",
+       "v": 1000,
+       "label": "1,000",
+       "tone": "mid"
+      },
+      {
+       "name": "Turn 20",
+       "v": 2000,
+       "label": "2,000",
+       "tone": "bad"
+      }
+     ]
+    }
+   },
+   {
+    "id": "b10",
+    "role": "resolve",
+    "scene": "close",
+    "say": "Starting a new chat resets the next turn back to one hundred tokens.",
+    "cap": "A new chat resets turn cost to 100 tokens.",
+    "data": {
+     "lines": [
+      "New chat resets reads to 100",
+      "20 turns total 21,000 reads"
+     ],
+     "accent": "amber"
+    }
+   }
+  ]
+ },
+ "scores": {
+  "hook": 8,
+  "story": 8,
+  "clarity": 9,
+  "audience": 8,
+  "voice": 9
+ }
+}

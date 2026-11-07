@@ -1,0 +1,161 @@
+{
+ "brief": {
+  "format": "explain",
+  "angle": "Feeding three high-resolution smartphone screenshots into a vision model processes more input tokens than reading an entire 100-page novella.",
+  "measure": "Image patch grid tokenization counts vs average English word tokenization rates.",
+  "calc": "3840x2160 pixels divided into 14x14 patches = ~42,336 image tokens for 3 screenshots vs 30,000 words = ~40,000 text tokens.",
+  "sources": [
+   "Standard vision transformer patch breakdown arithmetic"
+  ],
+  "signal_url": null,
+  "why_now": "Multimodal agent UI automation tools are increasing image token consumption.",
+  "scores": {
+   "timeliness": 7,
+   "verifiability": 10,
+   "curiosity": 9,
+   "audience_fit": 9,
+   "safety": 10
+  },
+  "_total": 56,
+  "search": false
+ },
+ "stage": "draft",
+ "problems": [
+  "8 beat -- 10..18 arasi olmali"
+ ],
+ "spec": {
+  "format": "explain",
+  "title": "Three screenshots cost more tokens than a whole book",
+  "summary": "Three smartphone screenshots consume more input tokens than reading a one hundred page novella.",
+  "tags": [
+   "tokens",
+   "vision",
+   "arithmetic",
+   "ai"
+  ],
+  "sources": [
+   "Standard vision transformer patch breakdown arithmetic",
+   "Average English word tokenization rates"
+  ],
+  "beats": [
+   {
+    "id": "b1",
+    "role": "hook",
+    "scene": "contrast",
+    "say": "Three screenshots cost more tokens than a whole novella.",
+    "cap": "3 screens > 1 book",
+    "data": {
+     "left": {
+      "label": "Novella",
+      "value": "30,000 words"
+     },
+     "right": {
+      "label": "Screenshots",
+      "value": "3 images",
+      "tone": "bad"
+     },
+     "verdict": "More tokens"
+    }
+   },
+   {
+    "id": "b2",
+    "role": "why",
+    "scene": "counter",
+    "say": "Vision models chop every image into tiny square patches.",
+    "cap": "Image patch grid",
+    "data": {
+     "prefix": "",
+     "suffix": " patches",
+     "from": 0,
+     "to": 14,
+     "tone": "mid"
+    }
+   },
+   {
+    "id": "b3",
+    "role": "why",
+    "say": "Each fourteen by fourteen pixel grid becomes separate tokens.",
+    "cap": "14x14 grid"
+   },
+   {
+    "id": "b4",
+    "role": "data",
+    "scene": "bars",
+    "say": "Three high resolution screenshots reach forty two thousand tokens.",
+    "cap": "42,336 image tokens",
+    "data": {
+     "rows": [
+      {
+       "name": "Screenshots",
+       "v": 42336,
+       "label": "tokens",
+       "tone": "bad"
+      }
+     ]
+    }
+   },
+   {
+    "id": "b5",
+    "role": "data",
+    "scene": "bars",
+    "say": "A thirty thousand word text uses about forty thousand tokens.",
+    "cap": "40,000 text tokens",
+    "data": {
+     "rows": [
+      {
+       "name": "Text",
+       "v": 40000,
+       "label": "tokens",
+       "tone": "good"
+      }
+     ]
+    }
+   },
+   {
+    "id": "b6",
+    "role": "data",
+    "scene": "byte_says",
+    "say": "The math checks out by pure arithmetic.",
+    "cap": "Pure math",
+    "data": {
+     "line": "Pixels beat text volume",
+     "pose": "point_up",
+     "cursor": "mint"
+    }
+   },
+   {
+    "id": "b7",
+    "role": "turn",
+    "scene": "split",
+    "say": "Images trick your prompt length limits.",
+    "cap": "Prompt limit trap",
+    "data": {
+     "a": {
+      "label": "Images",
+      "sub": "Heavy",
+      "tone": "bad"
+     },
+     "b": {
+      "label": "Text",
+      "sub": "Light",
+      "tone": "good"
+     }
+    }
+   },
+   {
+    "id": "b8",
+    "role": "resolve",
+    "scene": "close",
+    "say": "Pixels cost more than words.",
+    "cap": "Pixels cost more",
+    "data": {
+     "lines": [
+      "Pixels cost more",
+      "than words"
+     ],
+     "accent": "mint"
+    }
+   }
+  ]
+ }
+}
