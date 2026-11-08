@@ -52,6 +52,11 @@ hesaplarda 404. Hikaye/gündem için seçenekler: (a) AI Studio'da faturalandır
 çektiği birincil kaynak metniyle doğrulama (Wikipedia/HN/GitHub) yazmak.
 Karar bekliyor.
 
+**Panel (8 Kasım): yayında.** `byte.semihkopcal.com`, Access + tünel, sunucuda
+çalışıyor; `PANEL_MODE` henüz kapalı (video hâlâ doğrudan yayınlanıyor).
+Sıradaki panel işleri 6. bölümde: önce canlıya alma (6.0), sonra tasarım
+yenileme (6.1), sonra panelden hesap bağlama (6.2).
+
 **Sırada (öncelik sırasıyla):**
 
 1. BYTE anlatıcı (aşağıda madde 1): `draw_byte_pointing` yazıldı, sahnelere
@@ -197,15 +202,107 @@ sayfalarının değişim takibi.
 
 ---
 
-## 6. Panel  ·  ⬜
+## 6. Panel  ·  🟨 v1 yayında (8 Kasım 2026)
 
-GitHub arayüzü şu an panelin yerini tutuyor ama günlük iş için ağır.
+Panel `byte.semihkopcal.com` adresinde: Cloudflare Tunnel + Access (yalnız
+sahibinin e-postası), sunucuda `/srv/www/byte`, kurulum ve doğrulama
+`panel/deploy/README.md`. Video üretimi GitHub Actions'ta kalıyor; panel
+onay, takvim, duraklatma ve sağlık kontrolü yapıyor.
 
-- [ ] Onay kutusu: video oynat → "yayınla" / "atla" / "başlığı düzelt"
-- [ ] Kuyruk: sıradaki senaryolar, düzenlenebilir
-- [ ] Ölçüm: yayınlananların performansı
+**Sıra (kullanıcı kararı, 8 Kasım): önce canlıya alma, sonra tasarım, sonra
+hesap bağlama.**
 
-Bu en sona kalıyor — hat çalışmadan panel yapmak boş iş.
+### 6.0 Canlıya alma (açık işler)
+
+- [x] Sunucuya kuruldu, Access girişi çalışıyor, güvenlik doğrulaması geçti
+      (port yok, uid 10001, salt okunur, cap_drop ALL, bellek limiti)
+- [x] Hata: `Referrer-Policy: no-referrer` tarayıcıya form gönderirken
+      `Origin: null` yollattı, CSRF kontrolü her POST'u 403 yaptı. Düzeltme:
+      `same-origin` (commit `cae337d`). **Ders:** testler tarayıcıyı birebir
+      taklit etmiyordu → 6.1'de gerçek tarayıcı testi var
+- [ ] Sunucuda güncelle (`git pull --ff-only` + `docker compose up -d --build`),
+      Ayarlar'da bir düğmeyle "Ayar kaydedildi" mesajını gör
+- [ ] `PANEL_MODE=on` (GitHub **Variables**) + elle bir `daily` koşusu →
+      panelde onay bekleyen → onayla → `panel-publish` → YouTube. "Servisler"
+      sayfasındaki "Yayın (panel-publish)" satırı yeşile dönmeli
+- [ ] Günlük yedek cron'u (`README` bölüm 11) + haftalık sunucu dışı kopya
+- [ ] Yeni senaryo partisi `p011`+: kuyrukta ~9 senaryo var, günde 4 videoyla
+      ~2 günlük. Panelde "kuyruk kaç gün yeter" uyarısı 6.1'de
+
+### 6.1 Tasarım yenileme (detaylı)  ·  ⬜
+
+**Amaç:** panel telefondan, tek elle, 10 saniyede "izle → onayla" yapılacak
+kadar hızlı ve ilk bakışta "sistem sağlıklı mı" sorusuna cevap verecek kadar
+net olsun. Şu an işlevsel ama düz: menü metin, kartlar sade, her şey aynı
+ağırlıkta.
+
+**Kısıtlar (güvenlikten, değişmez):** CSP `script-src 'self'; style-src 'self'`
+→ satır içi script/stil yok, CSS/JS `static/` dosyası; harici font/CDN yok
+(sistem fontu ya da barındırılan Inter); `img-src 'self' data:`; video yalnız
+R2 sunucusundan. Tasarım bunların içinde kalacak.
+
+- [ ] **Mobil öncelikli yerleşim:** alt gezinme çubuğu (Panel · Videolar ·
+      Takvim · Servisler · Ayarlar), büyük dokunma hedefleri (≥ 44 px),
+      iPhone güvenli alan boşlukları, tek sütun
+- [ ] **Ana sayfa = durum özeti:** üstte tek satır "her şey yolunda / dikkat",
+      altında bugün: onay bekleyen, bugünkü planlı yayınlar, son sonuçlar,
+      **kuyruk kaç gün yeter** (≤ 4 senaryo kalınca sarı)
+- [ ] **Onay ekranı:** 9:16 oynatıcı (poster kare ile), başlık/açıklama/etiket
+      yan yana düzenlenebilir, üç net eylem: **Onayla ve planla · Hemen yayınla ·
+      Reddet**; sonraki bekleyene geçiş; klavye kısayolları (A / R / →);
+      toplu onay
+- [ ] **Takvim:** hafta ve ay görünümü, gün başına kutu, tıkla → saat seç,
+      duraklatılmış ve geciken yayınlar ayrı renkte
+- [ ] **Servisler:** her satırda durum rengi + kısa neden + "ne yapmalı"
+      (örn. "GitHub token süresi doluyor → yenile"); token bitiş tarihleri
+- [ ] **Açık/koyu tema** (`prefers-color-scheme`), tek tutarlı renk sistemi,
+      durum renkleri yalnız renge güvenmez (simge + metin)
+- [ ] **Boş / hata / bekleme durumları:** anlaşılır Türkçe metin, flash
+      mesajları toast olarak (ekrandan kendiliğinden kaybolur)
+- [ ] **Ölçüm sayfası:** yayınlananların izlenme/tutma verisi (bölüm 5 ile
+      ortak, `yt-analytics.readonly`)
+- [ ] **Erişilebilirlik:** kontrast WCAG AA, görünür odak halkası, klavye ile
+      tam kullanım
+- [ ] **Gerçek tarayıcı testi** (Playwright): giriş sonrası gerçek form POST'u,
+      mobil genişlik, CSP ihlali olmadığını konsoldan denetleme. Sebep:
+      `Origin: null` hatası birim testlerde görünmedi
+
+### 6.2 Panelden hesap bağlama  ·  ⬜
+
+**Amaç:** yeni hesap/kanal eklemek (YouTube, Instagram, TikTok; ileride ikinci
+kanal) terminal ve GitHub secret'ı ile uğraşmadan panelden "Bağla" ile
+yapılsın.
+
+- [ ] **Hesaplar sayfası:** platform, hesap adı, durum, token bitiş tarihi,
+      Bağla / Yenile / Kes; bağlama ve kesme eylemleri denetim kaydına yazılır
+- [ ] **OAuth akışı:** panelde Bağla → platformun izin ekranı → geri dönüş
+      `https://byte.semihkopcal.com/oauth/<platform>/callback` (her platformda
+      yönlendirme adresi olarak kayıtlı olmalı; adres Access arkasında) →
+      panel kodu token'a çevirir. `state` ve PKCE zorunlu
+- [ ] **Çoklu hesap:** yayın isteği hangi hesaba gideceğini taşır (`account`
+      alanı); `panel-publish.yml` buna göre token seçer
+- [ ] **Token uyarıları:** süre dolmadan Servisler'de sarı, dolunca kırmızı;
+      Instagram uzun ömürlü token ~60 gün yenilenir, TikTok erişim token'ı
+      kısa ömürlü (yenileme token'ı ile), Google OAuth uygulaması "Testing"
+      modundaysa yenileme token'ı 7 günde ölür → yayında olduğunu doğrula
+- [ ] **Geçiş:** bugün YouTube anahtarları GitHub secret'ında (`YT_*`),
+      Instagram/TikTok `tokens.yml` + `GH_PAT`'te. Panelden bağlama bunların
+      yerini alacaksa mevcut CI akışı bozulmadan geçilecek, eski yol silinmeden
+      önce yenisi bir gerçek yüklemeyle denenecek
+
+**Karar bekliyor (kod yazmadan önce konuşulacak): token nerede durur?**
+
+- **A — Panelde şifreli, yayın anında CI'ya kısa ömürlü verilir.** Panel
+  ele geçirilirse yalnız bağlı hesaplar risk altında; CI'nın diğer sırlarına
+  dokunulmaz. Dispatch girdileri Actions günlüğünde görünür → token girdi
+  olarak geçmez, maskeleme/geçici R2 paketi gerekir (iş biraz karmaşıklaşır).
+- **B — Panel GitHub secret'ını API ile yazar.** Basit; ama panelin GitHub
+  token'ına `Secrets: write` yetkisi gerekir → panel ele geçirilirse CI'daki
+  **bütün** sırlar tehlikeye girer. Mevcut tasarımın "panel en az yetkiyle
+  çalışır" ilkesine ters.
+- **Öneri:** A. Platform kısıtları (TikTok denetim başvurusu, Instagram
+  Professional hesap ve Meta uygulaması) 7. bölümdeki işlerle birlikte
+  değerlendirilecek.
 
 ---
 
