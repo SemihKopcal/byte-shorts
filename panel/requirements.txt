@@ -20,7 +20,7 @@ pycparser==3.12
 pydantic==2.14.3
 pydantic_core==2.50.4
 PyJWT==2.15.1
-python-dateutil==2.9.0.post0
+python-dateutil==4.0.0
 python-multipart==0.0.33
 s3transfer==0.19.3
 six==1.17.0
