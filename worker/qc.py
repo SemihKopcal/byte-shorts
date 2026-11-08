@@ -54,6 +54,35 @@ def _words(s: str) -> set:
     return {w for w in re.findall(r"[a-z0-9]+", s.lower()) if len(w) > 3}
 
 
+# Seri donusumu yalniz elle yazilmis A/B serileri icin. G kanalin TEK serisi ve
+# kendi icinde bir katalog (9 sahne, 4 bicim, 5 tema); "son 3 video da ayni seri"
+# kurali G'ye uygulaninca ucuncu G videosundan sonra her G senaryosu reddediliyordu
+# (8 Kasim, daily #18: p004 "son 3 video da seri G" diye uretilemedi). G icin
+# cesitlilik baslik benzerligi kontrolu ve sahne cesitliligi (en az 3 tip) ile
+# saglaniyor.
+SERIES_ROTATION_EXEMPT = {"G"}
+
+
+def repeat_problems(spec: dict, title: str, published: Path) -> list[str]:
+    """Daha once yayinlananlara gore tekrar: ayni id, cok benzer baslik, ayni seri."""
+    p: list[str] = []
+    if not published.exists():
+        return p
+    prev = json.loads(published.read_text())
+    tw = _words(title)
+    for old in prev[-40:]:
+        if old.get("id") == spec["id"]:
+            p.append(f"bu id zaten yayinlanmis: {spec['id']}")
+        ow = _words(old.get("title", ""))
+        if tw and ow and len(tw & ow) / len(tw | ow) > 0.6:
+            p.append(f"baslik onceki bir videoya cok benziyor: {old.get('title')!r}")
+    recent = [o.get("series") for o in prev[-3:]]
+    if (spec["series"] not in SERIES_ROTATION_EXEMPT and len(recent) == 3
+            and all(r == spec["series"] for r in recent)):
+        p.append(f"son 3 video da seri {spec['series']} -- seriyi degistir")
+    return p
+
+
 def check(video: Path, tl: dict, spec: dict, published: Path) -> list[str]:
     p: list[str] = []
 
@@ -130,17 +159,6 @@ def check(video: Path, tl: dict, spec: dict, published: Path) -> list[str]:
         p.append("ekranda sayi var ama kaynak yok")
 
     # ── tekrar (sablon icerik maddesi) ──
-    if published.exists():
-        prev = json.loads(published.read_text())
-        tw = _words(title)
-        for old in prev[-40:]:
-            if old.get("id") == spec["id"]:
-                p.append(f"bu id zaten yayinlanmis: {spec['id']}")
-            ow = _words(old.get("title", ""))
-            if tw and ow and len(tw & ow) / len(tw | ow) > 0.6:
-                p.append(f"baslik onceki bir videoya cok benziyor: {old.get('title')!r}")
-        recent = [o.get("series") for o in prev[-3:]]
-        if len(recent) == 3 and all(r == spec["series"] for r in recent):
-            p.append(f"son 3 video da seri {spec['series']} -- seriyi degistir")
+    p += repeat_problems(spec, title, published)
 
     return p
