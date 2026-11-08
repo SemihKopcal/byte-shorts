@@ -96,6 +96,80 @@ def _shape(scene: str, data: dict, who: str) -> list[str]:
     elif scene == "close":
         if not (data.get("lines") or data.get("line")):
             p.append(f"{who} (close): lines yok")
+    # ── ikinci tur sahneler (worker/scenes_more.py) ──
+    elif scene == "steps":
+        for r in lst("steps", 1, 4):
+            if not isinstance(r, dict) or not r.get("label"):
+                p.append(f"{who} (steps): adimda label yok")
+    elif scene == "flow":
+        for r in lst("nodes", 2, 4):
+            if not isinstance(r, dict) or not r.get("label"):
+                p.append(f"{who} (flow): kutuda label yok")
+    elif scene == "equation":
+        for r in lst("terms", 1, 4):
+            if not isinstance(r, dict) or not r.get("value"):
+                p.append(f"{who} (equation): terimde value yok")
+        res = data.get("result")
+        if not isinstance(res, dict) or not res.get("value"):
+            p.append(f"{who} (equation): result.value yok")
+    elif scene == "ring":
+        if not isinstance(data.get("value"), (int, float)):
+            p.append(f"{who} (ring): value sayi olmali")
+        if not data.get("label"):
+            p.append(f"{who} (ring): label yok")
+    elif scene == "dots":
+        if not isinstance(data.get("hit"), int):
+            p.append(f"{who} (dots): hit tam sayi olmali")
+        elif isinstance(data.get("total", 100), int) and data["hit"] > data.get("total", 100):
+            p.append(f"{who} (dots): hit total'den buyuk")
+    elif scene == "chat":
+        for r in lst("messages", 1, 4):
+            if not isinstance(r, dict) or not r.get("text"):
+                p.append(f"{who} (chat): mesajda text yok")
+            elif r.get("who", "bot") not in ("user", "bot"):
+                p.append(f"{who} (chat): who 'user' ya da 'bot' olmali")
+    elif scene == "terminal":
+        for r in lst("lines", 1, 7):
+            ok = (isinstance(r, str) and r) or (isinstance(r, dict) and r.get("text"))
+            if not ok:
+                p.append(f"{who} (terminal): bos satir")
+    elif scene == "tokens":
+        for r in lst("tokens", 1, 24):
+            if not isinstance(r, str) or not r.strip():
+                p.append(f"{who} (tokens): token bos ya da metin degil")
+    elif scene == "probs":
+        for r in lst("rows", 1, 5):
+            if not isinstance(r, dict) or not r.get("word") or not isinstance(r.get("p"), (int, float)):
+                p.append(f"{who} (probs): satirda word ve sayisal p olmali")
+    elif scene == "layers":
+        for r in lst("layers", 1, 5):
+            if not isinstance(r, dict) or not r.get("label"):
+                p.append(f"{who} (layers): katmanda label yok")
+    elif scene == "checklist":
+        for r in lst("rows", 1, 5):
+            if not isinstance(r, dict) or not r.get("text"):
+                p.append(f"{who} (checklist): satirda text yok")
+    elif scene == "headline":
+        if not data.get("headline") or not data.get("source"):
+            p.append(f"{who} (headline): headline ve source olmali")
+    elif scene == "scale":
+        for r in lst("items", 1, 4):
+            v = r.get("value") if isinstance(r, dict) else None
+            e = r.get("exp") if isinstance(r, dict) else None
+            if not isinstance(r, dict) or not r.get("label") or not (
+                    isinstance(e, (int, float)) or (isinstance(v, (int, float)) and v > 0)):
+                p.append(f"{who} (scale): ogede label ve exp (ya da value > 0) olmali")
+    elif scene == "cycle":
+        for r in lst("nodes", 3, 4):
+            if not isinstance(r, dict) or not r.get("label"):
+                p.append(f"{who} (cycle): dugumde label yok")
+    elif scene == "bits":
+        b = re.sub(r"\s", "", str(data.get("bits", "")))
+        if not b or set(b) - set("01") or len(b) > 32:
+            p.append(f"{who} (bits): bits yalniz 0/1 olmali, en cok 32 bit")
+        f = re.sub(r"\s", "", str(data.get("flip_to", "")))
+        if f and (set(f) - set("01") or len(f) != len(b)):
+            p.append(f"{who} (bits): flip_to bits ile ayni uzunlukta 0/1 olmali")
     return p
 
 

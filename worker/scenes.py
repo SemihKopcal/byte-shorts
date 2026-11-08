@@ -36,7 +36,8 @@ _CURSOR = {"mint": B_MINT, "amber": B_AMBER, "red": B_RED, "violet": B_VIOLET}
 
 
 def _tone(name):
-    return D.TONE.get(name, D.INK)
+    # Bozuk ya da liste/sozluk gelen ton adi patlatmasin (unhashable): notr renk
+    return D.TONE.get(name, D.INK) if isinstance(name, str) else D.INK
 
 
 def _fit(d, text, mk, size, max_w, min_size=28):
@@ -348,6 +349,11 @@ CATALOG = {
     "byte_says": byte_says,
     "close": close,
 }
+
+# Ikinci tur sahneler (scenes_more.py). Import EN SONDA: scenes_more yardimcilari
+# (_fit, _tone, TOP...) bu dosyadan aliyor, hepsi yukarida tanimli.
+from . import scenes_more as _more          # noqa: E402
+CATALOG.update(_more.CATALOG)
 
 # Senaryo yazarina verilen liste. qc.py bunu dogrulamada kullaniyor.
 NAMES = tuple(CATALOG)

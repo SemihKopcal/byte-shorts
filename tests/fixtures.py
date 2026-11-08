@@ -3,7 +3,9 @@ import copy
 import itertools
 
 SCENES = ("title", "contrast", "table", "bars", "counter", "split",
-          "timeline", "byte_says", "close")
+          "timeline", "byte_says", "close",
+          "steps", "flow", "equation", "ring", "dots", "chat", "terminal", "tokens",
+          "probs", "layers", "checklist", "headline", "scale", "cycle", "bits")
 THEMES = ("midnight", "ember", "deep", "moss", "slate", "plum", "rust", "ice")
 
 

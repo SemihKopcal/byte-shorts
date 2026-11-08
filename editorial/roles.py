@@ -81,6 +81,22 @@ byte_says  BYTE large, one line. data: {line?, pose?, cursor?}
 close      closing card. data: {lines:[1-2 short lines], accent?}
            (never put a handle in it; the pipeline adds the real one)
 
+steps      numbered steps, stacked. data: {steps:[{label, sub?, tone?}] (max 4)}
+flow       boxes joined by arrows. data: {nodes:[{label, sub?, tone?}] (2-4), arrows?:[short text beside each arrow]}
+equation   column arithmetic. data: {terms:[{value, label?}] (max 4), op?:"×", result:{value, label?, tone?}}
+ring       percentage ring. data: {value, of?:100, label, sub?, tone?, dp?}
+dots       a grid of dots, some light up. data: {total?:100, hit, label?, sub?, tone?}
+chat       chat bubbles. data: {messages:[{who:"user"|"bot", text, name?, tone?}] (max 4)}
+terminal   command window. data: {title?, lines:["$ cmd" | "output" | {text, kind:"hl"|"err", tone?}] (max 7)}
+tokens     text split into chips. data: {tokens:[str] (max 24), note?}
+probs      next-word odds. data: {prompt?, rows:[{word, p}] (max 5)}  p: 0..1
+layers     stack built bottom to top. data: {layers:[{label, sub?}] (max 5, bottom first), total?}
+checklist  true/false rows. data: {rows:[{text, ok}] (max 5)}
+headline   news card. data: {source, date?, headline, kicker?}
+scale      log ruler. data: {items:[{label, exp | value, text?}] (max 4)}
+cycle      loop of 3-4 nodes. data: {nodes:[{label}] (3-4), center?}
+bits       0/1 grid with an overflow. data: {bits:"0111...", flip_to?:"1000...", label?, flip_label?}
+
 tone values: base (neutral) | good (green) | mid (purple) | bad (amber/warning)
 """
 
