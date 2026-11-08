@@ -1,0 +1,13 @@
+{% extends "base.html" %}{% import "_m.html" as m %}
+{% block body %}
+<h1>Videolar</h1>
+<div class="card tbl">
+{% if rows %}<table><tr><th>Baslik</th><th>Durum</th><th>Sure</th><th>Uretildi</th><th>Platformlar</th></tr>
+{% for r in rows %}<tr>
+<td><a href="/videos/{{ r.v.script_id }}">{{ r.v.title }}</a>{% if r.v.files_deleted_at %}<div class="small mut">dosya silindi (100'luk dongu)</div>{% endif %}</td>
+<td>{{ m.badge(r.v.approval) }}</td><td>{{ '%.0f'|format(r.v.duration) }} sn</td><td class="small">{{ r.v.rendered_at|ts }}</td>
+<td>{% for p in platforms %}{% if r.pubs.get(p) %}<div class="small">{{ p }} {{ m.badge(r.pubs[p].status) }}</div>{% endif %}{% endfor %}</td>
+</tr>{% endfor %}</table>
+{% else %}<span class="mut">Henuz video yok. Uretim R2'ye yazinca burada gorunur.</span>{% endif %}
+</div>
+{% endblock %}

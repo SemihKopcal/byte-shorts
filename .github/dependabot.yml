@@ -1,0 +1,17 @@
+# Bagimlilik guncellemeleri PR olarak gelir; hicbiri kendiliginden birlesmez.
+version: 2
+updates:
+  - package-ecosystem: pip
+    directory: /panel
+    schedule: {interval: weekly}
+    open-pull-requests-limit: 5
+  - package-ecosystem: pip
+    directory: /
+    schedule: {interval: weekly}
+    open-pull-requests-limit: 5
+  - package-ecosystem: docker
+    directory: /panel
+    schedule: {interval: weekly}
+  - package-ecosystem: github-actions
+    directory: /
+    schedule: {interval: weekly}

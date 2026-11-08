@@ -288,3 +288,10 @@ yaparken ikisini de guncelle ya da `cp ci/*.yml .github/workflows/`.
 
 Isim, handle, aciklama altbilgisi, hashtag'ler, baslik kurallari. Handle
 degisirse burasi degisiyor; kapanis kartina da buradan giriyor.
+
+## Panel (byte.semihkopcal.com)
+
+Videoları görmek, onaylamak, takvime koymak ve servislerin sağlığını izlemek için bir
+panel var. Kod `panel/`, kurulum ve işletme rehberi `panel/deploy/README.md`. Video üretimi
+yine GitHub Actions'ta; `PANEL_MODE=on` değişkeniyle `daily` videoyu yayınlamak yerine R2'ye
+koyar, yayını panel `panel-publish` workflow'uyla yönetir.

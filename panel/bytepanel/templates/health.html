@@ -1,0 +1,9 @@
+{% extends "base.html" %}{% import "_m.html" as m %}
+{% block body %}
+<h1>Servisler</h1>
+{% if status == 'ok' %}<div class="banner ok">Her sey yolunda</div>{% elif status == 'warn' %}<div class="banner warn">Dikkat edilecek seyler var</div>{% else %}<div class="banner fail">Sorun var</div>{% endif %}
+<div class="card tbl"><table>
+{% for c in checks %}<tr><td>{{ c.name }}</td><td>{{ m.badge(c.status) }}</td><td class="small">{{ c.detail }}</td></tr>{% endfor %}
+</table></div>
+<p class="mut small">Son kontrol: {{ updated|ts }}. Sayfayi yenileyince en fazla 60 sn eski olabilir.</p>
+{% endblock %}

@@ -1,0 +1,7 @@
+{% extends "base.html" %}
+{% block body %}
+<h1>Kayit</h1>
+<div class="card tbl"><table><tr><th>Zaman</th><th>Kim</th><th>Islem</th><th>Ayrinti</th></tr>
+{% for r in rows %}<tr><td class="small">{{ r.at|ts }}</td><td class="small">{{ r.actor }}{% if r.ip %}<div class="mut">{{ r.ip }}</div>{% endif %}</td><td>{{ r.action }}</td><td class="small">{{ r.detail }}</td></tr>{% endfor %}
+</table></div>
+{% endblock %}

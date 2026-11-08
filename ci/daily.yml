@@ -18,6 +18,10 @@ name: daily
 # Bir sey ters giderse tek yapacagin: AUTO_PRIVACY=off. Kod degismiyor.
 # AUTO_INSTAGRAM / AUTO_TIKTOK: `off` yaparsan o platforma gonderilmez
 # (secret'lar da yoksa zaten gonderilmez). Yalnizca mod `public` iken calisirlar.
+# PANEL MODU: depo degiskeni PANEL_MODE=on ise video YouTube/Instagram/TikTok'a burada
+# GITMEZ. R2'ye konur, panelde (byte.semihkopcal.com) onay bekler; onaylaninca ve saati
+# gelince panel-publish workflow'u yayinlar. Bu modda AUTO_PRIVACY yok sayilir.
+# Kapatmak icin PANEL_MODE degiskenini sil (ya da off yap): eski dogrudan yayin geri gelir.
 on:
   schedule:
     - cron: "15 1 * * *"
@@ -132,7 +136,7 @@ jobs:
       # (continue-on-error); sadece yukleme atlanir ve kosu sonda kirmizi yanar.
       - name: youtube secrets kontrol
         id: ytcheck
-        if: steps.mode.outputs.value != 'off'
+        if: steps.mode.outputs.value != 'off' && vars.PANEL_MODE != 'on'
         continue-on-error: true
         env:
           YOUTUBE_CLIENT_ID: ${{ secrets.YOUTUBE_CLIENT_ID }}
@@ -154,7 +158,8 @@ jobs:
         if: >-
           steps.render.outcome == 'success' &&
           steps.mode.outputs.value != 'off' &&
-          steps.ytcheck.outcome == 'success'
+          steps.ytcheck.outcome == 'success' &&
+          vars.PANEL_MODE != 'on'
         continue-on-error: true
         env:
           YOUTUBE_CLIENT_ID: ${{ secrets.YOUTUBE_CLIENT_ID }}
@@ -166,6 +171,24 @@ jobs:
           dir="$(python tools/pick_script.py --dir "$(basename "$SCRIPT")" | sed -n 's/^dir=//p')"
           python publish/youtube.py "$dir/manifest.json" --privacy "$MODE"
 
+      # ── panel ─────────────────────────────────────────────────────────
+      # PANEL_MODE=on iken: video R2'ye konur, panel onayini bekler. Basarisiz olursa
+      # senaryo defterde ISARETLENMEZ (sonraki kosu yeniden dener: video kaybolmaz).
+      - name: panele gonder
+        id: panel
+        if: steps.render.outcome == 'success' && vars.PANEL_MODE == 'on'
+        continue-on-error: true
+        timeout-minutes: 15
+        env:
+          R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
+          R2_BUCKET: ${{ secrets.R2_BUCKET }}
+          R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          SCRIPT: ${{ steps.pick.outputs.path }}
+        run: |
+          dir="$(python tools/pick_script.py --dir "$(basename "$SCRIPT")" | sed -n 's/^dir=//p')"
+          python tools/r2_push.py "$dir"
+
       # ── Instagram / TikTok ────────────────────────────────────────────
       # Sadece mod PUBLIC iken (private/unlisted test kosusu Instagram'a gitmez).
       # Her biri depo degiskeniyle kapatilir: AUTO_INSTAGRAM=off, AUTO_TIKTOK=off.
@@ -176,7 +199,8 @@ jobs:
         if: >-
           steps.render.outcome == 'success' &&
           steps.mode.outputs.value == 'public' &&
-          vars.AUTO_INSTAGRAM != 'off' && env.HAS_IG == 'true'
+          vars.AUTO_INSTAGRAM != 'off' && env.HAS_IG == 'true' &&
+          vars.PANEL_MODE != 'on'
         continue-on-error: true
         timeout-minutes: 20
         env:
@@ -194,7 +218,8 @@ jobs:
         if: >-
           steps.render.outcome == 'success' &&
           steps.mode.outputs.value == 'public' &&
-          vars.AUTO_TIKTOK != 'off' && env.HAS_TT == 'true'
+          vars.AUTO_TIKTOK != 'off' && env.HAS_TT == 'true' &&
+          vars.PANEL_MODE != 'on'
         continue-on-error: true
         timeout-minutes: 15
         env:
@@ -240,9 +265,16 @@ jobs:
         if: always() && steps.pick.outputs.path != ''
         env:
           SCRIPT: ${{ steps.pick.outputs.path }}
+          PANEL_MODE: ${{ vars.PANEL_MODE }}
+          RENDER: ${{ steps.render.outcome }}
+          PANEL: ${{ steps.panel.outcome }}
         run: |
           if [ -n "$SCRIPT" ]; then
-            python tools/pick_script.py --mark "$(basename "$SCRIPT")"
+            if [ "$PANEL_MODE" = "on" ] && [ "$RENDER" = "success" ] && [ "$PANEL" != "success" ]; then
+              echo "::warning title=Panele gonderilemedi::senaryo defterde isaretlenmedi; sonraki kosu yeniden dener"
+            else
+              python tools/pick_script.py --mark "$(basename "$SCRIPT")"
+            fi
           fi
           git config user.name  "byte-bot"
           git config user.email "byte-bot@users.noreply.github.com"
@@ -277,8 +309,13 @@ jobs:
           RELEASE: ${{ steps.release.outcome }}
           INSTAGRAM: ${{ steps.instagram.outcome }}
           TIKTOK: ${{ steps.tiktok.outcome }}
+          PANEL: ${{ steps.panel.outcome }}
+          PANEL_MODE: ${{ vars.PANEL_MODE }}
         run: |
           fail=0
+          if [ "$PANEL_MODE" = "on" ] && [ "$RENDER" = "success" ] && [ "$PANEL" = "failure" ]; then
+            echo "::error::panele gonderilemedi (panele gonder adimina bak); senaryo defterde isaretlenmedi, sonraki kosu yeniden dener"; fail=1
+          fi
           if [ "$RENDER" != "success" ]; then
             echo "::error::video uretilemedi"; fail=1
           fi

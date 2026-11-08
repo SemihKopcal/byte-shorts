@@ -1,0 +1,123 @@
+name: panel-publish
+
+# Panelin (byte.semihkopcal.com) yayin emri. YALNIZ workflow_dispatch; panel
+# onaylanmis bir videoyu, takvimdeki saati gelince, tek bir platforma gonderir.
+#
+# Guvenlik:
+#   - Girdiler yalniz ENV uzerinden okunur, hicbir zaman run: icine ${{ }} ile
+#     gomulmez (script enjeksiyonu). tools/panel_publish.py yine de her girdiyi
+#     katı bicimle dogrular.
+#   - Her platformun token'lari yalniz KENDI adimina verilir.
+#   - Depoya YAZMAZ (permissions: contents: read). Cift yukleme korumasi R2'deki
+#     ledger/ kaydidir; sonuc results/ altina yazilir ve panel oradan okur.
+#   - Ayni video + ayni platform ayni anda iki kez calismaz (concurrency).
+on:
+  workflow_dispatch:
+    inputs:
+      script_id:
+        description: "video kimligi (p001-...)"
+        required: true
+        type: string
+      platform:
+        description: "hedef platform"
+        required: true
+        type: choice
+        options: [youtube, instagram, tiktok]
+      privacy:
+        description: "YouTube gizliligi"
+        type: choice
+        options: [public, unlisted, private]
+        default: public
+      request_id:
+        description: "panelin istek kimligi (32 hex)"
+        required: true
+        type: string
+
+concurrency:
+  group: panel-publish-${{ inputs.script_id }}-${{ inputs.platform }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: requirements-publish.txt
+
+      - run: pip install -r requirements-publish.txt
+
+      - name: youtube
+        if: inputs.platform == 'youtube'
+        env:
+          SCRIPT_ID: ${{ inputs.script_id }}
+          PLATFORM: ${{ inputs.platform }}
+          PRIVACY: ${{ inputs.privacy }}
+          REQUEST_ID: ${{ inputs.request_id }}
+          R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
+          R2_BUCKET: ${{ secrets.R2_BUCKET }}
+          R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          YOUTUBE_CLIENT_ID: ${{ secrets.YOUTUBE_CLIENT_ID }}
+          YOUTUBE_CLIENT_SECRET: ${{ secrets.YOUTUBE_CLIENT_SECRET }}
+          YOUTUBE_REFRESH_TOKEN: ${{ secrets.YOUTUBE_REFRESH_TOKEN }}
+        run: python tools/panel_publish.py
+
+      - name: instagram
+        if: inputs.platform == 'instagram'
+        env:
+          SCRIPT_ID: ${{ inputs.script_id }}
+          PLATFORM: ${{ inputs.platform }}
+          PRIVACY: ${{ inputs.privacy }}
+          REQUEST_ID: ${{ inputs.request_id }}
+          R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
+          R2_BUCKET: ${{ secrets.R2_BUCKET }}
+          R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          INSTAGRAM_USER_ID: ${{ secrets.INSTAGRAM_USER_ID }}
+          INSTAGRAM_TOKEN: ${{ secrets.INSTAGRAM_TOKEN }}
+        run: python tools/panel_publish.py
+
+      - name: tiktok
+        id: tiktok
+        if: inputs.platform == 'tiktok'
+        env:
+          SCRIPT_ID: ${{ inputs.script_id }}
+          PLATFORM: ${{ inputs.platform }}
+          PRIVACY: ${{ inputs.privacy }}
+          REQUEST_ID: ${{ inputs.request_id }}
+          R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
+          R2_BUCKET: ${{ secrets.R2_BUCKET }}
+          R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          TIKTOK_CLIENT_KEY: ${{ secrets.TIKTOK_CLIENT_KEY }}
+          TIKTOK_CLIENT_SECRET: ${{ secrets.TIKTOK_CLIENT_SECRET }}
+          TIKTOK_REFRESH_TOKEN: ${{ secrets.TIKTOK_REFRESH_TOKEN }}
+          TIKTOK_NEW_REFRESH_FILE: ${{ runner.temp }}/tiktok-new-refresh
+        run: python tools/panel_publish.py
+
+      # TikTok yeni bir refresh token dondurduyse eskisi gecersiz olabilir:
+      # secret'i guncelle (daily ile ayni yol; GH_PAT gerekir).
+      - name: tiktok yeni token
+        if: always() && inputs.platform == 'tiktok'
+        env:
+          GH_PAT: ${{ secrets.GH_PAT }}
+          TIKTOK_NEW_REFRESH_FILE: ${{ runner.temp }}/tiktok-new-refresh
+        run: |
+          if [ -s "$TIKTOK_NEW_REFRESH_FILE" ]; then
+            if [ -n "$GH_PAT" ]; then
+              GH_TOKEN="$GH_PAT" gh secret set TIKTOK_REFRESH_TOKEN \
+                --repo "$GITHUB_REPOSITORY" < "$TIKTOK_NEW_REFRESH_FILE"
+              echo "TIKTOK_REFRESH_TOKEN guncellendi"
+            else
+              echo "::warning::TikTok yeni refresh token verdi ama GH_PAT yok, kaydedilemedi"
+            fi
+          fi

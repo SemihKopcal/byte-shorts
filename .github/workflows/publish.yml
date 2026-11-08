@@ -70,11 +70,15 @@ jobs:
         if: steps.voice.outputs.cache-hit != 'true'
         run: bash tools/fetch_voice.sh en-us-ryan-high
       - name: yeniden uret + QC
-        run: python -m worker.build "content/scripts/${{ inputs.script }}"
+        env:
+          SCRIPT_INPUT: ${{ inputs.script }}
+        run: python -m worker.build "content/scripts/$SCRIPT_INPUT"
 
       - name: cikti dizini
         id: m
-        run: python tools/pick_script.py --dir "${{ inputs.script }}" >> "$GITHUB_OUTPUT"
+        env:
+          SCRIPT_INPUT: ${{ inputs.script }}
+        run: python tools/pick_script.py --dir "$SCRIPT_INPUT" >> "$GITHUB_OUTPUT"
 
       - name: YouTube
         env:
@@ -82,19 +86,22 @@ jobs:
           YOUTUBE_CLIENT_SECRET: ${{ secrets.YOUTUBE_CLIENT_SECRET }}
           YOUTUBE_REFRESH_TOKEN: ${{ secrets.YOUTUBE_REFRESH_TOKEN }}
           PUBLIC: ${{ inputs.public }}
+          MAN_DIR: ${{ steps.m.outputs.dir }}
         run: |
           if [ "$PUBLIC" = "true" ]; then
-            python publish/youtube.py "${{ steps.m.outputs.dir }}/manifest.json" --publish
+            python publish/youtube.py "$MAN_DIR/manifest.json" --publish
           else
-            python publish/youtube.py "${{ steps.m.outputs.dir }}/manifest.json"
+            python publish/youtube.py "$MAN_DIR/manifest.json"
           fi
 
       - name: kaydi isle
+        env:
+          SCRIPT_INPUT: ${{ inputs.script }}
         run: |
           git config user.name  "byte-bot"
           git config user.email "byte-bot@users.noreply.github.com"
           git add content/published.json
-          git diff --cached --quiet || git commit -m "publish: ${{ inputs.script }}"
+          git diff --cached --quiet || git commit -m "publish: $SCRIPT_INPUT"
           # Kosu surerken baska bir push olmus olabilir; rebase etmeden
           # push reddediliyor ve video yuklendigi halde adim kirmizi yaniyor.
           git pull --rebase --autostash

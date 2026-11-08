@@ -1,0 +1,9 @@
+{% macro post(action, label, csrf, confirm='', cls='', fields={}) -%}
+<form class="inline" method="post" action="{{ action }}"{% if confirm %} data-confirm="{{ confirm }}"{% endif %}>
+<input type="hidden" name="csrf" value="{{ csrf }}">
+{% for k, v in fields.items() %}<input type="hidden" name="{{ k }}" value="{{ v }}">{% endfor %}
+<button class="{{ cls }}" type="submit">{{ label }}</button>
+</form>
+{%- endmacro %}
+{% set STATUS = {'pending':'onay bekliyor','approved':'onayli','rejected':'reddedildi','planned':'planli','dispatched':'gonderildi','published':'yayinda','failed':'basarisiz','canceled':'iptal','ok':'tamam','warn':'dikkat','fail':'sorun'} %}
+{% macro badge(s) -%}<span class="badge {{ s }}">{{ STATUS.get(s, s) }}</span>{%- endmacro %}

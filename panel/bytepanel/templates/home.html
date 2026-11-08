@@ -1,0 +1,61 @@
+{% extends "base.html" %}{% import "_m.html" as m %}
+{% block body %}
+<h1>Panel</h1>
+{% if status == 'ok' %}<div class="banner ok">Her sey yolunda</div>
+{% elif status == 'warn' %}<div class="banner warn">Dikkat edilecek seyler var. <a href="/health">Servisler</a></div>
+{% elif status == 'fail' %}<div class="banner fail">Bir servis sorunlu. <a href="/health">Servisler</a></div>
+{% else %}<div class="banner unknown">Henuz kontrol edilmedi. <a href="/health">Servisleri ac</a></div>{% endif %}
+
+<div class="grid">
+<div class="card stat"><b>{{ counts.pending }}</b><span>onay bekleyen</span></div>
+<div class="card stat"><b>{{ counts.planned }}</b><span>planli yayin</span></div>
+<div class="card stat"><b>{{ counts.published }}</b><span>yayinlanan</span></div>
+<div class="card stat"><b>{{ counts.failed }}</b><span>basarisiz</span></div>
+<div class="card stat"><b>{{ counts.stored }}</b><span>depoda ({{ counts.total }} toplam)</span></div>
+</div>
+
+<div class="card">
+<div class="toggle"><div><b>Otomatik onay</b><div class="mut small">Aciksa yeni videolar onay beklemeden takvime girer ve yuklenir.</div></div>
+{% if settings.auto_approve == '1' %}
+{{ m.post('/settings', 'ACIK: kapat', csrf, cls='pri', fields={'key':'auto_approve','value':'0','back':'home'}) }}
+{% else %}
+{{ m.post('/settings', 'Kapali: ac', csrf, 'Otomatik onay acilsin mi? Yeni videolar sen bakmadan yayina gider.', fields={'key':'auto_approve','value':'1','back':'home'}) }}
+{% endif %}</div>
+<hr style="border:0;border-top:1px solid var(--line)">
+<div class="toggle"><div><b>Yayini duraklat</b><div class="mut small">Aciksa hicbir sey platformlara gonderilmez (acil durdurma).</div></div>
+{% if settings.paused == '1' %}
+{{ m.post('/settings', 'DURAKLATILDI: surdur', csrf, cls='dng', fields={'key':'paused','value':'0','back':'home'}) }}
+{% else %}
+{{ m.post('/settings', 'Duraklat', csrf, 'Yayin duraklatilsin mi?', fields={'key':'paused','value':'1','back':'home'}) }}
+{% endif %}</div>
+</div>
+
+{% if pending %}
+<h2>Onayini bekleyenler</h2>
+<div class="card">
+{% for v in pending %}
+<div class="row" style="justify-content:space-between;padding:6px 0">
+<a href="/videos/{{ v.script_id }}">{{ v.title }}</a>
+<span>{{ m.post('/videos/' ~ v.script_id ~ '/approve', 'Onayla', csrf, cls='pri') }}{{ m.post('/videos/' ~ v.script_id ~ '/reject', 'Reddet', csrf, 'Bu video reddedilsin mi?', cls='dng') }}</span>
+</div>{% endfor %}
+{% if counts.pending > 1 %}<div style="margin-top:8px">{{ m.post('/approve-all', 'Hepsini onayla (' ~ counts.pending ~ ')', csrf, 'Bekleyen tum videolar onaylansin mi?') }}</div>{% endif %}
+</div>
+{% endif %}
+
+<h2>Siradaki yayinlar</h2>
+<div class="card tbl">
+{% if upcoming %}<table><tr><th>Video</th><th>Platform</th><th>Zaman</th><th></th></tr>
+{% for p in upcoming %}<tr><td><a href="/videos/{{ p.script_id }}">{{ p.title }}</a></td><td>{{ p.platform }}</td><td>{{ p.scheduled_at|ts }}</td><td>{{ m.badge(p.status) }}</td></tr>{% endfor %}</table>
+{% else %}<span class="mut">Planli yayin yok.</span>{% endif %}
+</div>
+
+<h2>Son sonuclar</h2>
+<div class="card tbl">
+{% if recent %}<table><tr><th>Video</th><th>Platform</th><th>Sonuc</th><th>Link</th></tr>
+{% for p in recent %}<tr><td><a href="/videos/{{ p.script_id }}">{{ p.title }}</a></td><td>{{ p.platform }}</td>
+<td>{{ m.badge(p.status) }}{% if p.error %}<div class="small mut">{{ p.error }}</div>{% endif %}</td>
+<td>{% if p.remote_url %}<a href="{{ p.remote_url }}" rel="noopener noreferrer" target="_blank">ac</a>{% endif %}</td></tr>{% endfor %}</table>
+{% else %}<span class="mut">Henuz yayin yok.</span>{% endif %}
+</div>
+{% if errors %}<h2>Arka plan hatalari</h2><div class="card">{% for k, v in errors.items() %}<div class="small"><b>{{ k }}</b>: {{ v }}</div>{% endfor %}</div>{% endif %}
+{% endblock %}

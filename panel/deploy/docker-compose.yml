@@ -1,0 +1,73 @@
+# BYTE paneli. HICBIR servis ports: yayinlamaz: disaridan gelen baglanti yolu yok.
+# Panele tek giris: cloudflared tuneli (cikis baglantisi) -> Cloudflare Access girisi.
+name: byte-panel
+
+services:
+  panel:
+    build:
+      context: ..
+      dockerfile: Dockerfile
+    image: byte-panel:local
+    restart: unless-stopped
+    env_file: .env                       # sir OLMAYAN ayarlar (adresler, bucket adi, e-posta)
+    environment:
+      PANEL_ENV: prod
+      PANEL_DB: /data/panel.db
+      R2_ACCESS_KEY_ID_FILE: /run/secrets/r2_access_key_id
+      R2_SECRET_ACCESS_KEY_FILE: /run/secrets/r2_secret_access_key
+      GITHUB_TOKEN_FILE: /run/secrets/github_token
+      PANEL_CSRF_SECRET_FILE: /run/secrets/csrf_secret
+    secrets: [r2_access_key_id, r2_secret_access_key, github_token, csrf_secret]
+    volumes:
+      - panel-data:/data
+    user: "10001:10001"
+    read_only: true                      # kok dosya sistemi salt okunur
+    tmpfs:
+      - /tmp:size=16m,noexec,nosuid,nodev
+    cap_drop: [ALL]
+    security_opt:
+      - no-new-privileges:true
+    pids_limit: 128
+    mem_limit: 512m
+    cpus: 1.0
+    networks: [internal]
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://127.0.0.1:8000/healthz', timeout=3).status == 200 else 1)"]
+      interval: 30s
+      timeout: 4s
+      retries: 3
+      start_period: 15s
+
+  cloudflared:
+    # Surumu SEN secersin (.env: CLOUDFLARED_TAG). 'latest' kullanma: neyin calistigi belli olsun.
+    image: "cloudflare/cloudflared:${CLOUDFLARED_TAG:?CLOUDFLARED_TAG tanimli degil, .env dosyasina cloudflared surum etiketini yaz}"
+    restart: unless-stopped
+    command: tunnel --no-autoupdate run
+    env_file: secrets/tunnel.env         # TUNNEL_TOKEN=... (dosya izni 600)
+    user: "65532:65532"
+    read_only: true
+    cap_drop: [ALL]
+    security_opt:
+      - no-new-privileges:true
+    pids_limit: 128
+    mem_limit: 256m
+    networks: [internal]
+    depends_on:
+      panel:
+        condition: service_healthy
+
+networks:
+  internal: {}                           # ozel kopru; icindeki servisler disaridan erisilemez
+
+volumes:
+  panel-data: {}
+
+secrets:
+  r2_access_key_id:
+    file: ./secrets/r2_access_key_id
+  r2_secret_access_key:
+    file: ./secrets/r2_secret_access_key
+  github_token:
+    file: ./secrets/github_token
+  csrf_secret:
+    file: ./secrets/csrf_secret

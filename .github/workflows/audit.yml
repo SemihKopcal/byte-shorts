@@ -1,0 +1,36 @@
+name: audit
+
+# Haftada bir: sabitlenmis bagimliliklarda bilinen guvenlik acigi var mi.
+# Acik varsa kosu KIRMIZI olur; kimse bakmasa da GitHub sana bildirir.
+on:
+  schedule:
+    - cron: "41 5 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  panel:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - run: pip install pip-audit
+      # requirements.txt tum bagimliliklari (dolayli olanlar dahil) sabitlediginden
+      # cozumleme yapmadan dogrudan denetlenir.
+      - run: pip-audit --no-deps --disable-pip -r panel/requirements.txt
+
+  root:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: pip install pip-audit
+      - run: pip-audit --no-deps --disable-pip -r requirements.txt -r requirements-publish.txt

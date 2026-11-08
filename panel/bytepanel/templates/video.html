@@ -1,0 +1,36 @@
+{% extends "base.html" %}{% import "_m.html" as m %}
+{% block title %}{{ v.title }}{% endblock %}
+{% block body %}
+<h1>{{ v.title }}</h1>
+<div class="card">
+<div class="row">{{ m.badge(v.approval) }}<span class="mut small">{{ v.script_id }} · {{ '%.1f'|format(v.duration) }} sn · {{ (v.size_bytes / 1048576)|round(1) }} MB</span></div>
+{% if not v.files_deleted_at %}
+<button type="button" data-preview="/videos/{{ v.script_id }}/preview" style="margin-top:8px">Onizle</button>
+<video id="player" controls playsinline preload="none" hidden></video>
+{% else %}<p class="mut">Dosyalar 100'luk dongude silindi; kayit arsivde.</p>{% endif %}
+<div style="margin-top:8px">
+{% if v.approval == 'pending' %}
+{{ m.post('/videos/' ~ v.script_id ~ '/approve', 'Onayla', csrf, cls='pri') }}
+{{ m.post('/videos/' ~ v.script_id ~ '/reject', 'Reddet', csrf, 'Bu video reddedilsin mi?', cls='dng') }}
+{% elif v.approval == 'approved' %}
+{{ m.post('/videos/' ~ v.script_id ~ '/unapprove', 'Onayi geri al', csrf, 'Onay geri alinsin, planli yayinlar iptal olsun mu?') }}
+{% else %}
+{{ m.post('/videos/' ~ v.script_id ~ '/approve', 'Yine de onayla', csrf) }}
+{% endif %}
+</div>
+</div>
+
+<h2>Yayinlar</h2>
+<div class="card tbl">
+<table><tr><th>Platform</th><th>Durum</th><th>Zaman</th><th>Sonuc</th></tr>
+{% for p in platforms %}{% set x = pubs.get(p) %}<tr>
+<td>{{ p }}</td>
+<td>{% if x %}{{ m.badge(x.status) }}{% else %}<span class="mut">yok</span>{% endif %}</td>
+<td class="small">{% if x %}{{ x.scheduled_at|ts }}{% endif %}</td>
+<td class="small">{% if x and x.remote_url %}<a href="{{ x.remote_url }}" rel="noopener noreferrer" target="_blank">ac</a>{% endif %}{% if x and x.error %}<div class="mut">{{ x.error }}</div>{% endif %}
+{% if v.approval == 'approved' and not v.files_deleted_at and (not x or x.status in ['canceled', 'failed']) %}
+{{ m.post('/videos/' ~ v.script_id ~ '/plan', 'Planla', csrf, fields={'platform': p}) }}{% endif %}</td>
+</tr>{% endfor %}</table>
+</div>
+<div class="small mut">Depo anahtari: <code>{{ v.video_key }}</code>{% if v.run_url %} · <a href="{{ v.run_url }}" rel="noopener noreferrer" target="_blank">uretim kosusu</a>{% endif %}</div>
+{% endblock %}
