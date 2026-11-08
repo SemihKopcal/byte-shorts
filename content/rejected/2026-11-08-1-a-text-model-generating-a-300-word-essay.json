@@ -1,0 +1,185 @@
+{
+ "brief": {
+  "format": "explain",
+  "angle": "A text model generating a 300-word essay at 30 words per second takes ten seconds, during which a phone screen renders 600 full video frames.",
+  "measure": "Comparing word-by-word streaming speed to phone display refresh frames over the same duration.",
+  "calc": "300 words / 30 words per sec = 10 seconds; 10 seconds * 60 frames per sec = 600 frames.",
+  "sources": [
+   "Assumed text generation speed of 30 words per second",
+   "Standard mobile display refresh rate of 60 frames per second"
+  ],
+  "signal_url": null,
+  "why_now": "Direct comparison between local screen rendering speeds and text generation delays.",
+  "scores": {
+   "timeliness": 8,
+   "verifiability": 10,
+   "curiosity": 9,
+   "audience_fit": 9,
+   "safety": 10
+  },
+  "_total": 57,
+  "search": false
+ },
+ "stage": "editor",
+ "problems": [
+  "8 statements need a web check, but web search is unavailable right now, so nothing can be verified. Use only numbers you derive by arithmetic, or leave the statements out"
+ ],
+ "spec": {
+  "format": "explain",
+  "title": "A phone screen draws 600 frames for a 300 word essay",
+  "summary": "Comparing text streaming rates to display refresh frames over a ten second generation window.",
+  "tags": [
+   "hardware",
+   "text",
+   "rendering",
+   "display",
+   "gpu"
+  ],
+  "sources": [
+   "Text generation speed of 30 words per second",
+   "Display refresh rate of 60 frames per second",
+   "Calculated frame redundancy over a 300-word generation window"
+  ],
+  "beats": [
+   {
+    "id": "b1",
+    "role": "hook",
+    "scene": "contrast",
+    "say": "Your screen draws six hundred frames for one short essay.",
+    "cap": "600 frames vs 1 essay",
+    "data": {
+     "left": {
+      "label": "essay text",
+      "value": "1"
+     },
+     "right": {
+      "label": "screen frames",
+      "value": "600",
+      "tone": "mid"
+     }
+    }
+   },
+   {
+    "id": "b2",
+    "role": "why",
+    "scene": "split",
+    "say": "AI text streams thirty words every second.",
+    "cap": "30 words/s output",
+    "data": {
+     "a": {
+      "label": "Text Stream",
+      "sub": "30 words/s"
+     },
+     "b": {
+      "label": "Display Rate",
+      "sub": "60 Hz"
+     }
+    }
+   },
+   {
+    "id": "b3",
+    "role": "why",
+    "say": "A phone display refreshes sixty times per second.",
+    "cap": "60 Hz refresh rate"
+   },
+   {
+    "id": "b4",
+    "role": "why",
+    "say": "The display timing runs double the speed of incoming words.",
+    "cap": "Pacing mismatch"
+   },
+   {
+    "id": "b5",
+    "role": "data",
+    "scene": "counter",
+    "say": "A three-hundred-word answer takes ten seconds to finish.",
+    "cap": "300 words in 10s",
+    "data": {
+     "prefix": "",
+     "suffix": " words",
+     "from": 0,
+     "to": 300,
+     "dp": 0
+    }
+   },
+   {
+    "id": "b6",
+    "role": "data",
+    "scene": "bars",
+    "say": "Over those ten seconds, the GPU renders six hundred frames.",
+    "cap": "600 frames drawn",
+    "data": {
+     "rows": [
+      {
+       "name": "Words generated",
+       "v": 300,
+       "label": "300"
+      },
+      {
+       "name": "Frames drawn",
+       "v": 600,
+       "label": "600",
+       "tone": "bad"
+      }
+     ]
+    }
+   },
+   {
+    "id": "b7",
+    "role": "turn",
+    "scene": "byte_says",
+    "say": "Three hundred of those frames contained zero new text.",
+    "cap": "300 duplicate frames",
+    "data": {
+     "line": "300 frames paint zero new text",
+     "pose": "point_r",
+     "cursor": "mint"
+    }
+   },
+   {
+    "id": "b8",
+    "role": "turn",
+    "say": "The GPU redrew identical pixels three hundred times waiting for tokens.",
+    "cap": "Wasted GPU redraws"
+   },
+   {
+    "id": "b9",
+    "role": "resolve",
+    "scene": "split",
+    "say": "Half of the visual renders produced no screen change.",
+    "cap": "50% redundant frames",
+    "data": {
+     "a": {
+      "label": "Updated Frames",
+      "sub": "300 frames"
+     },
+     "b": {
+      "label": "Duplicate Frames",
+      "sub": "300 frames"
+     }
+    }
+   },
+   {
+    "id": "b10",
+    "role": "resolve",
+    "scene": "close",
+    "say": "Your phone battery wastes half its rendering power repainting a static cursor during your homework.",
+    "cap": "Wasted screen energy",
+    "data": {
+     "lines": [
+      "300 frames updated text",
+      "300 frames repainted static pixels"
+     ],
+     "accent": "mid"
+    }
+   }
+  ]
+ },
+ "scores": {
+  "hook": 8,
+  "story": 8,
+  "clarity": 9,
+  "audience": 8,
+  "voice": 9
+ }
+}

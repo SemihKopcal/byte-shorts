@@ -1,0 +1,218 @@
+{
+ "brief": {
+  "format": "explain",
+  "angle": "If a context window degrades accuracy by 1% for every 1,000 words processed, reading a 50,000-word book reduces key detail recall by exactly 50%.",
+  "measure": "Linear reduction of accuracy across long text inputs.",
+  "calc": "50,000 words / 1,000 words = 50 steps; 50 steps * 1% loss per step = 50% cumulative loss.",
+  "sources": [
+   "Assumed text length of 50,000 words",
+   "Assumed degradation rate of 1% per 1,000 words"
+  ],
+  "signal_url": null,
+  "why_now": "Explaining context retention loss through simple step-by-step math.",
+  "scores": {
+   "timeliness": 7,
+   "verifiability": 10,
+   "curiosity": 8,
+   "audience_fit": 9,
+   "safety": 10
+  },
+  "_total": 54,
+  "search": false
+ },
+ "stage": "editor",
+ "problems": [
+  "Replace the hypothetical linear 1% per 1k assumption with empirical benchmark data (e.g. Lost in the Middle / needle-in-a-haystack testing on specific LLMs).",
+  "Cut the redundant step-by-step arithmetic (10k, 25k, 50k) and replace it with a genuine structural turn explaining context window attention degradation.",
+  "'100%': formul de kaynak numarasi da yok",
+  "5 statements need a web check, but web search is unavailable right now, so nothing can be verified. Use only numbers you derive by arithmetic, or leave the statements out",
+  "'story' puani 5, en az 7 olmali. Beats 5 through 8 simply recite a linear 1% per 1,000 word multiplication table without tension or mechanical insight.",
+  "'audience' puani 5, en az 7 olmali. Lacks compelling relatable anchors; reading off a linear percentage calculation creates no real tension."
+ ],
+ "spec": {
+  "format": "explain",
+  "title": "Why long context windows lose accuracy",
+  "summary": "Processing a 50,000 word input degrades accuracy by 50 percent through cumulative linear loss.",
+  "tags": [
+   "ai",
+   "contextwindow",
+   "accuracy",
+   "data"
+  ],
+  "sources": [
+   "Assumed text length of 50,000 words",
+   "Assumed degradation rate of 1% per 1,000 words"
+  ],
+  "beats": [
+   {
+    "id": "b1",
+    "role": "hook",
+    "scene": "contrast",
+    "say": "Reading a fifty thousand word book deletes half of its facts.",
+    "cap": "Reading 50,000 words deletes 50% of facts",
+    "data": {
+     "left": {
+      "label": "Start Accuracy",
+      "value": "100%"
+     },
+     "right": {
+      "label": "End Accuracy",
+      "value": "50%",
+      "tone": "bad"
+     },
+     "verdict": "50% loss"
+    }
+   },
+   {
+    "id": "b2",
+    "role": "why",
+    "scene": "byte_says",
+    "say": "The system loses one percent accuracy every one thousand words.",
+    "cap": "Loses 1% every 1,000 words",
+    "data": {
+     "line": "1% loss per 1,000 words",
+     "pose": "point_r",
+     "cursor": "amber"
+    }
+   },
+   {
+    "id": "b3",
+    "role": "why",
+    "say": "Fifty thousand words equals fifty steps of text.",
+    "cap": "50,000 words = 50 steps"
+   },
+   {
+    "id": "b4",
+    "role": "why",
+    "say": "Each step drains accuracy at the same steady rate.",
+    "cap": "Each step drains accuracy linearly"
+   },
+   {
+    "id": "b5",
+    "role": "data",
+    "scene": "bars",
+    "say": "At one thousand words, input accuracy drops to ninety nine percent.",
+    "cap": "1,000 words: 99% accuracy",
+    "data": {
+     "rows": [
+      {
+       "name": "1k words",
+       "v": 99,
+       "label": "99%",
+       "tone": "good"
+      },
+      {
+       "name": "10k words",
+       "v": 90,
+       "label": "90%",
+       "tone": "good"
+      },
+      {
+       "name": "25k words",
+       "v": 75,
+       "label": "75%",
+       "tone": "mid"
+      },
+      {
+       "name": "50k words",
+       "v": 50,
+       "label": "50%",
+       "tone": "bad"
+      }
+     ]
+    }
+   },
+   {
+    "id": "b6",
+    "role": "data",
+    "say": "At ten thousand words, ten percent of details disappear.",
+    "cap": "10,000 words: 10% lost"
+   },
+   {
+    "id": "b7",
+    "role": "data",
+    "say": "At twenty five thousand words, twenty five percent vanishes.",
+    "cap": "25,000 words: 25% lost"
+   },
+   {
+    "id": "b8",
+    "role": "data",
+    "say": "At fifty thousand words, fifty percent is missing entirely.",
+    "cap": "50,000 words: 50% lost"
+   },
+   {
+    "id": "b9",
+    "role": "data",
+    "scene": "split",
+    "say": "That is twenty five thousand forgotten words.",
+    "cap": "25,000 words forgotten",
+    "data": {
+     "a": {
+      "label": "Retained",
+      "sub": "25,000 words",
+      "tone": "good"
+     },
+     "b": {
+      "label": "Lost",
+      "sub": "25,000 words",
+      "tone": "bad"
+     }
+    }
+   },
+   {
+    "id": "b10",
+    "role": "turn",
+    "scene": "byte_says",
+    "say": "The missing details are not randomly chosen.",
+    "cap": "Loss is not random",
+    "data": {
+     "line": "Loss is linear and constant",
+     "pose": "alert",
+     "cursor": "red"
+    }
+   },
+   {
+    "id": "b11",
+    "role": "turn",
+    "say": "Longer prompts simply erase the beginning of your text.",
+    "cap": "Longer text erases early details"
+   },
+   {
+    "id": "b12",
+    "role": "resolve",
+    "scene": "counter",
+    "say": "Feeding a full novel guarantees a fifty percent coin flip.",
+    "cap": "Full novel = 50% chance of recall",
+    "data": {
+     "prefix": "Final Recall: ",
+     "suffix": "%",
+     "from": 100,
+     "to": 50,
+     "tone": "bad",
+     "note": "50 steps of 1% loss"
+    }
+   },
+   {
+    "id": "b13",
+    "role": "resolve",
+    "scene": "close",
+    "say": "The longer you talk, the less it remembers.",
+    "cap": "More words mean less memory",
+    "data": {
+     "lines": [
+      "50,000 words",
+      "50% detail loss"
+     ],
+     "accent": "amber"
+    }
+   }
+  ]
+ },
+ "scores": {
+  "hook": 7,
+  "story": 5,
+  "clarity": 9,
+  "audience": 5,
+  "voice": 8
+ }
+}

@@ -1,0 +1,232 @@
+{
+ "brief": {
+  "format": "explain",
+  "angle": "If an AI model recalculates every pixel 50 times to generate one image, a 1024 by 1024 picture requires over 52 million individual pixel updates.",
+  "measure": "Calculating the total pixel-level passes performed during multi-step image generation.",
+  "calc": "1024 * 1024 = 1,048,576 pixels; 1,048,576 pixels * 50 steps = 52,428,800 total updates.",
+  "sources": [
+   "Standard image dimension grid of 1024x1024 pixels",
+   "Assumed generation process of 50 iterative steps"
+  ],
+  "signal_url": null,
+  "why_now": "Illustrating the unseen computation behind generating a single picture.",
+  "scores": {
+   "timeliness": 8,
+   "verifiability": 10,
+   "curiosity": 9,
+   "audience_fit": 9,
+   "safety": 10
+  },
+  "_total": 57,
+  "search": false
+ },
+ "stage": "editor",
+ "problems": [
+  "Add a concrete real-world anchor to give 52 million updates context, such as comparing it to the frame count of a movie or standard video playback.",
+  "ekranda 51 var ama editor bunun icin iddia listelemedi",
+  "8 statements need a web check, but web search is unavailable right now, so nothing can be verified. Use only numbers you derive by arithmetic, or leave the statements out",
+  "'hook' puani 6, en az 7 olmali. States a clear fact, but simple multiplication isn't surprising enough on its own.",
+  "'story' puani 6, en az 7 olmali. Follows the required structure, but the middle section just repeats basic arithmetic without building tension.",
+  "'audience' puani 5, en az 7 olmali. It is just a correct list of numbers with no tangible real-world comparison (e.g., video framerates), so it lacks punch."
+ ],
+ "spec": {
+  "format": "explain",
+  "title": "52 million updates for one AI image",
+  "summary": "Generating a single 1024 by 1024 image in 50 steps requires 52,428,800 individual pixel updates.",
+  "tags": [
+   "ai",
+   "pixels",
+   "math",
+   "graphics",
+   "computing"
+  ],
+  "sources": [
+   "Standard image dimension grid of 1024x1024 pixels",
+   "Assumed generation process of 50 iterative steps"
+  ],
+  "beats": [
+   {
+    "id": "b1",
+    "role": "hook",
+    "scene": "contrast",
+    "say": "One image requires fifty two million pixel updates behind the scenes.",
+    "cap": "52,428,800 pixel updates per image",
+    "data": {
+     "left": {
+      "label": "Image Grid",
+      "value": "1024x1024"
+     },
+     "right": {
+      "label": "Total Updates",
+      "value": "52,428,800",
+      "tone": "bad"
+     },
+     "verdict": "50 steps"
+    }
+   },
+   {
+    "id": "b2",
+    "role": "why",
+    "scene": "split",
+    "say": "A single square image spans one thousand twenty four pixels across.",
+    "cap": "1,024 pixels wide",
+    "data": {
+     "a": {
+      "label": "Width",
+      "sub": "1024 px"
+     },
+     "b": {
+      "label": "Height",
+      "sub": "1024 px"
+     }
+    }
+   },
+   {
+    "id": "b3",
+    "role": "why",
+    "scene": "byte_says",
+    "say": "Multiplying width by height gives over one million pixels on screen.",
+    "cap": "1,024 x 1,024 = 1,048,576 pixels",
+    "data": {
+     "line": "1,048,576 total pixels",
+     "pose": "point_r",
+     "cursor": "mint"
+    }
+   },
+   {
+    "id": "b4",
+    "role": "data",
+    "scene": "table",
+    "say": "Generating the image takes fifty discrete steps.",
+    "cap": "50 generation steps",
+    "data": {
+     "unit": "pixels",
+     "rows": [
+      {
+       "name": "1 step",
+       "value": "1,048,576",
+       "ratio": 0.02
+      },
+      {
+       "name": "10 steps",
+       "value": "10,485,760",
+       "ratio": 0.2
+      },
+      {
+       "name": "50 steps",
+       "value": "52,428,800",
+       "ratio": 1.0,
+       "tone": "bad"
+      }
+     ]
+    }
+   },
+   {
+    "id": "b5",
+    "role": "data",
+    "say": "In step one, all one million pixels update once.",
+    "cap": "Step 1: 1,048,576 updates"
+   },
+   {
+    "id": "b6",
+    "role": "data",
+    "say": "In step two, all one million pixels update again.",
+    "cap": "Step 2: 2,097,152 updates cumulative"
+   },
+   {
+    "id": "b7",
+    "role": "data",
+    "scene": "counter",
+    "say": "The math repeats fifty times until the picture clears up.",
+    "cap": "Repeating 50 times",
+    "data": {
+     "prefix": "",
+     "suffix": " updates",
+     "from": 1048576,
+     "to": 52428800,
+     "tone": "mid",
+     "note": "50 full passes"
+    }
+   },
+   {
+    "id": "b8",
+    "role": "data",
+    "say": "Fifty passes multiplied by one million pixels equals fifty two million updates.",
+    "cap": "50 x 1,048,576 = 52,428,800"
+   },
+   {
+    "id": "b9",
+    "role": "turn",
+    "scene": "split",
+    "say": "You only see one finished frame at the end.",
+    "cap": "1 visible frame on screen",
+    "data": {
+     "a": {
+      "label": "Visible Output",
+      "sub": "1 Frame"
+     },
+     "b": {
+      "label": "Hidden Math",
+      "sub": "52,428,800 Updates",
+      "tone": "mid"
+     }
+    }
+   },
+   {
+    "id": "b10",
+    "role": "turn",
+    "scene": "byte_says",
+    "say": "The machine threw away fifty one million intermediate calculations.",
+    "cap": "51,380,224 discarded calculations",
+    "data": {
+     "line": "51 million discarded passes",
+     "pose": "shrug",
+     "cursor": "amber"
+    }
+   },
+   {
+    "id": "b11",
+    "role": "resolve",
+    "scene": "bars",
+    "say": "Simple pictures hide millions of tiny loops in the background.",
+    "cap": "Millions of background loops",
+    "data": {
+     "rows": [
+      {
+       "name": "Final Image",
+       "v": 1048576,
+       "label": "1,048,576"
+      },
+      {
+       "name": "Total Work",
+       "v": 52428800,
+       "label": "52,428,800",
+       "tone": "bad"
+      }
+     ]
+    }
+   },
+   {
+    "id": "b12",
+    "role": "resolve",
+    "scene": "close",
+    "say": "One image is fifty two million pixel updates.",
+    "cap": "1 image = 52,428,800 pixel updates",
+    "data": {
+     "lines": [
+      "52,428,800 pixel updates",
+      "per generation"
+     ],
+     "accent": "bad"
+    }
+   }
+  ]
+ },
+ "scores": {
+  "hook": 6,
+  "story": 6,
+  "clarity": 8,
+  "audience": 5,
+  "voice": 8
+ }
+}
