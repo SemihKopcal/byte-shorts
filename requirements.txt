@@ -4,7 +4,7 @@ numpy==2.1.3
 
 # YouTube yukleme (publish.yml)
 google-api-python-client==2.151.0
-google-auth==2.36.0
+google-auth==2.62.1
 google-auth-oauthlib==1.2.1
 
 # Panel koprusu (tools/r2_push.py): Cloudflare R2, S3 uyumlu
