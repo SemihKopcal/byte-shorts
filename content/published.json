@@ -7,5 +7,14 @@
   "theme": "plum",
   "privacy": "public",
   "date": "2026-11-08"
+ },
+ {
+  "id": "p002-gpt3-on-one-gpu",
+  "series": "G",
+  "title": "Training GPT-3 on one GPU takes 288 years",
+  "youtube_id": "LfBxZEkNRHA",
+  "theme": "deep",
+  "privacy": "public",
+  "date": "2026-11-08"
  }
 ]
