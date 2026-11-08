@@ -120,9 +120,30 @@ Bu adımlar sunucu ayarı olduğu için **sen yaparsın**; Claude sunucuna eriş
 
 ## 8. Panelin kurulumu
 
+Her şey sunucuda `/srv/www/byte` altında durur:
+
+```
+/srv/www/byte/
+├── app/        git deposu (kod). .env ve secrets/ app/panel/deploy/ içinde durur, git'e girmez
+└── backups/    panel yedeklerinin kopyaları
+```
+
+Kod GitHub'dan gelir. Kurulumdan önce panelin kodunun `main`'e push edilmiş olması gerekir.
+
+### Kolay yol: kurulum scripti
+
 ```bash
-git clone https://github.com/SemihKopcal/byte-shorts.git
-cd byte-shorts/panel/deploy
+sudo mkdir -p /srv/www/byte && sudo chown "$USER": /srv/www/byte
+git clone https://github.com/SemihKopcal/byte-shorts.git /srv/www/byte/app
+bash /srv/www/byte/app/panel/deploy/server-setup.sh
+```
+
+Script önce sır olmayan ayarları sorar (R2 adresi, bucket, Access takım alan adı ve AUD etiketi, e-posta, cloudflared sürümü) ve `.env` dosyasını yazar. Sonra sırları ekranda görünmeden sorar ve doğrudan dosyaya yazar, `secrets/` izinlerini ayarlar, `docker compose config` ile doğrular ve onay verirsen paneli başlatır. Tekrar çalıştırmak güvenlidir: var olan `.env` ve secret dosyalarına dokunmaz, yalnız eksikleri sorar. Bir sırrı yenilemek için ilgili dosyayı sil ve scripti yeniden çalıştır.
+
+### Elle kurmak istersen
+
+```bash
+cd /srv/www/byte/app/panel/deploy
 cp .env.example .env
 nano .env        # adresleri doldur. CLOUDFLARED_TAG: github.com/cloudflare/cloudflared/releases'tan güncel etiketi seç
 ```
@@ -138,9 +159,10 @@ openssl rand -hex 32 | tr -d '\n' > secrets/csrf_secret
 read -rs -p "Tünel token'ı: " v; echo; printf 'TUNNEL_TOKEN=%s\n' "$v" > secrets/tunnel.env
 unset v
 
-# panel konteyneri 10001 kullanıcısıyla okur: yalnız o ve root okuyabilsin
-sudo chown 10001:10001 secrets/r2_access_key_id secrets/r2_secret_access_key secrets/github_token secrets/csrf_secret
+# panel konteyneri 10001 kullanıcısıyla okur: yalnız o ve root okuyabilsin.
+# Sıra önemli: önce chmod (dosya hâlâ senin), sonra chown. Ters yaparsan chmod izin hatası verir.
 chmod 400 secrets/r2_access_key_id secrets/r2_secret_access_key secrets/github_token secrets/csrf_secret
+sudo chown 10001:10001 secrets/r2_access_key_id secrets/r2_secret_access_key secrets/github_token secrets/csrf_secret
 chmod 700 secrets
 chmod 600 secrets/tunnel.env
 ```
@@ -185,16 +207,16 @@ curl -sI https://byte.semihkopcal.com | head -5      # 302 ve cloudflareaccess.c
 **Yedek:** kayıtlar (videoların kendisi değil) SQLite'tadır. Günlük yedek için sunucunun crontab'ına:
 
 ```cron
-0 3 * * * cd /home/KULLANICI/byte-shorts/panel/deploy && docker compose exec -T panel python -m bytepanel.backup
+0 3 * * * cd /srv/www/byte/app/panel/deploy && docker compose exec -T panel python -m bytepanel.backup
 ```
 
-Son 14 yedek konteynerin `/data/backups` klasöründe (`panel-data` volume'u) tutulur. Haftada bir başka yere kopyala:
-`docker compose cp panel:/data/backups ./yedek-$(date +%F)`. Panel kaybolsa bile videolar R2'de, yayınlar platformlarda durur; kayıt kaybı yalnız onay geçmişini ve takvimi etkiler.
+Son 14 yedek konteynerin `/data/backups` klasöründe (`panel-data` volume'u) tutulur. Haftada bir sunucudan çıkar: önce
+`docker compose cp panel:/data/backups /srv/www/byte/backups/yedek-$(date +%F)` ile `/srv/www/byte/backups` altına al, sonra o klasörü sunucunun **dışına** (kendi bilgisayarına ya da başka bir depolamaya) taşı; aynı sunucudaki kopya sunucuyla birlikte kaybolur. Panel kaybolsa bile videolar R2'de, yayınlar platformlarda durur; kayıt kaybı yalnız onay geçmişini ve takvimi etkiler.
 
 **Güncelleme:**
 
 ```bash
-cd ~/byte-shorts && git pull && cd panel/deploy && docker compose up -d --build
+cd /srv/www/byte/app && git pull --ff-only && cd panel/deploy && docker compose up -d --build
 ```
 
 Dependabot haftalık PR açar (hiçbiri kendiliğinden birleşmez); `audit` workflow'u her pazartesi bilinen güvenlik açıklarına bakar ve açık varsa kırmızı yanar.
