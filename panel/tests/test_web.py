@@ -210,7 +210,7 @@ class Csrf(Base):
 
     def test_a_post_from_another_origin_is_refused(self):
         self.add()
-        for o in ("https://evil.example", "http://panel.test", ORIGIN + ".evil.example"):
+        for o in ("https://evil.example", "http://panel.test", ORIGIN + ".evil.example", "null"):
             self.assertEqual(self.post(f"/videos/{A}/approve", origin=o).status_code, 403, o)
         self.assertEqual(self.svc.video(A)["approval"], "pending")
 
@@ -255,7 +255,8 @@ class Headers(Base):
             self.assertNotIn("unsafe-inline", h["content-security-policy"])
             self.assertIn("frame-ancestors 'none'", h["content-security-policy"])
             self.assertEqual(h["x-content-type-options"], "nosniff")
-            self.assertEqual(h["referrer-policy"], "no-referrer")
+            # no-referrer olursa tarayici ayni site formunda "Origin: null" yollar ve her POST 403 olur
+            self.assertEqual(h["referrer-policy"], "same-origin")
             self.assertEqual(h["cache-control"], "no-store")
             self.assertIn("max-age", h["strict-transport-security"])
 

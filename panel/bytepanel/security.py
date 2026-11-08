@@ -5,7 +5,7 @@ gecerli bir Access JWT'si yoksa 403.
 
   - JWT: yalniz RS256, imza + exp/iat + aud + iss zorunlu, e-posta izin listesinde
   - CSRF: Origin tam eslesmeli + form belirteci (HMAC, gunluk)
-  - Basliklar: sert CSP, nosniff, no-referrer, frame yasak, HSTS
+  - Basliklar: sert CSP, nosniff, Referrer-Policy same-origin, frame yasak, HSTS
   - Hiz siniri: yazma islemleri icin kisi basina dakikada N
 """
 from __future__ import annotations
@@ -126,7 +126,10 @@ def security_headers(media_host: str, https: bool = True) -> dict:
             f"media-src {media_host}; connect-src 'self'; form-action 'self'; "
             "base-uri 'none'; frame-ancestors 'none'; object-src 'none'"),
         "X-Content-Type-Options": "nosniff",
-        "Referrer-Policy": "no-referrer",
+        # no-referrer OLMAZ: tarayici ayni siteye form gonderirken bile "Origin: null" yollar,
+        # origin_ok bunu (dogru olarak) reddeder ve panelde hicbir dugme calismaz.
+        # same-origin: ayni siteye Origin/Referer gider, baska siteye hicbir sey gitmez.
+        "Referrer-Policy": "same-origin",
         "X-Frame-Options": "DENY",
         "Cross-Origin-Opener-Policy": "same-origin",
         "Cross-Origin-Resource-Policy": "same-origin",
