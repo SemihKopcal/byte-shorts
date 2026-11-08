@@ -93,6 +93,16 @@ class Compose(unittest.TestCase):
             self.assertEqual(svc["networks"], ["internal"])
         self.assertIn("healthcheck", self.s["panel"])
 
+    def test_every_container_has_hard_resource_log_and_restart_limits(self):
+        for name, svc in self.s.items():
+            for k in ("mem_limit", "memswap_limit", "pids_limit", "cpus", "logging", "restart"):
+                self.assertIn(k, svc, f"{name}: {k} yok")
+            self.assertEqual(svc["memswap_limit"], svc["mem_limit"], f"{name}: takas kullanmamali")
+            self.assertEqual(svc["logging"]["driver"], "json-file")
+            for o in ("max-size", "max-file"):
+                self.assertIn(o, svc["logging"]["options"], f"{name}: gunluk rotasyonu yok")
+            self.assertEqual(svc["restart"], "unless-stopped", name)
+
     def test_compose_plus_example_env_satisfy_the_prod_config_and_nothing_else_is_needed(self):
         example = {**env_example(), "CF_ACCESS_TEAM_DOMAIN": "takim.cloudflareaccess.com",
                    "R2_ENDPOINT": "https://abc.r2.cloudflarestorage.com",

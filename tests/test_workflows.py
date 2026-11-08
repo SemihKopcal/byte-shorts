@@ -149,6 +149,11 @@ class DailyPanelMode(unittest.TestCase):
         for name in ("youtube secrets kontrol", "youtube'a yukle", "instagram'a yukle", "tiktok taslagi"):
             self.assertIn("vars.PANEL_MODE != 'on'", self.cond(name), name)
 
+    def test_nothing_is_made_public_before_approval_in_panel_mode(self):
+        """Depo public: Release ve artifact herkese acik. Onay bekleyen video oraya konmamali."""
+        for name in ("release", "artifact"):
+            self.assertIn("vars.PANEL_MODE != 'on'", self.cond(name), name)
+
     def test_the_panel_step_pushes_to_r2_only_in_panel_mode(self):
         s = step(self.d, "panele gonder")
         self.assertIn("vars.PANEL_MODE == 'on'", s["if"])

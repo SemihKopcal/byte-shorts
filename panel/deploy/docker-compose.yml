@@ -29,7 +29,11 @@ services:
       - no-new-privileges:true
     pids_limit: 128
     mem_limit: 512m
+    memswap_limit: 512m                  # takas (swap) yok: sinir asilirsa konteyner oldurulur, sunucu yavaslamaz
     cpus: 1.0
+    logging:
+      driver: json-file
+      options: {max-size: "10m", max-file: "3"}   # gunluk dosyalari sinirsiz buyuyup diski doldurmasin
     networks: [internal]
     healthcheck:
       test: ["CMD", "python", "-c", "import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://127.0.0.1:8000/healthz', timeout=3).status == 200 else 1)"]
@@ -51,6 +55,11 @@ services:
       - no-new-privileges:true
     pids_limit: 128
     mem_limit: 256m
+    memswap_limit: 256m
+    cpus: 0.5
+    logging:
+      driver: json-file
+      options: {max-size: "10m", max-file: "3"}   # gunluk dosyalari sinirsiz buyuyup diski doldurmasin
     networks: [internal]
     depends_on:
       panel:

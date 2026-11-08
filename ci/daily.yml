@@ -21,6 +21,8 @@ name: daily
 # PANEL MODU: depo degiskeni PANEL_MODE=on ise video YouTube/Instagram/TikTok'a burada
 # GITMEZ. R2'ye konur, panelde (byte.semihkopcal.com) onay bekler; onaylaninca ve saati
 # gelince panel-publish workflow'u yayinlar. Bu modda AUTO_PRIVACY yok sayilir.
+# Bu modda video GitHub Release'e ve Actions artifact'ine de KONMAZ: depo public, onay
+# bekleyen video onaydan once herkese acik indirilebilir olurdu. Video yalniz R2'de (ozel).
 # Kapatmak icin PANEL_MODE degiskenini sil (ya da off yap): eski dogrudan yayin geri gelir.
 on:
   schedule:
@@ -247,9 +249,10 @@ jobs:
 
       # Instagram/TikTok'u elle yuklemek icin: video + metinler kalici bir adreste. Basarisiz
       # olursa kosuyu kirmizi yapmiyor; asil is YouTube.
+      # PANEL MODUNDA ACIK DEGIL: depo public, release herkese acik indirilebilir.
       - name: release
         id: release
-        if: steps.render.outcome == 'success'
+        if: steps.render.outcome == 'success' && vars.PANEL_MODE != 'on'
         continue-on-error: true
         env:
           GH_TOKEN: ${{ github.token }}
@@ -285,8 +288,9 @@ jobs:
 
       # retention-days: ucretsiz hesapta artifact kotasi 500 MB. Video ~39 MB,
       # gunde 4 tane, 2 gun saklaniyor (~312 MB). Kalici kopya zaten release'te.
+      # Panel modunda yuklenmez: public depoda artifact'i de herhangi bir GitHub hesabi indirebilir.
       - name: artifact
-        if: steps.render.outcome == 'success'
+        if: steps.render.outcome == 'success' && vars.PANEL_MODE != 'on'
         uses: actions/upload-artifact@v4
         with:
           name: video-${{ github.run_number }}
