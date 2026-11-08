@@ -92,6 +92,8 @@ YouTube, Instagram ve TikTok secret'ların zaten orada; aynen kalıyor.
 
 Bu adımlar sunucu ayarı olduğu için **sen yaparsın**; Claude sunucuna erişemez.
 
+> **Sunucun başka siteleri de barındırıyorsa** 3. adımdaki `ufw default deny incoming` kuralını uygulamadan önce `ufw status numbered` ile mevcut kuralları gör ve 80/443'ü (nginx vb.) açık tut; yoksa o siteleri kesersin. Panelin kendisi hiçbir gelen port istemez. **Headscale** kullanıyorsan aşağıdaki ACL örneği Tailscale biçimindedir; Headscale'in kendi ACL dosyasına (`/etc/headscale/acl.hujson`) uyarlaman gerekir.
+
 1. Sunucuya Tailscale kur, `sudo tailscale up` ile tarayıcıdan giriş yap (anahtar yapıştırma yok).
 2. Sunucu etiketi ver, erişimi yalnız kendi cihazlarına aç. Tailnet politika dosyası için örnek (sözdizimi için Tailscale dokümanına bak):
 
@@ -133,7 +135,7 @@ Kod GitHub'dan gelir. Kurulumdan önce panelin kodunun `main`'e push edilmiş ol
 ### Kolay yol: kurulum scripti
 
 ```bash
-sudo mkdir -p /srv/www/byte && sudo chown "$USER": /srv/www/byte
+sudo mkdir -p /srv/www/byte && sudo chown "$USER": /srv/www/byte && sudo chmod 700 /srv/www/byte
 git clone https://github.com/SemihKopcal/byte-shorts.git /srv/www/byte/app
 bash /srv/www/byte/app/panel/deploy/server-setup.sh
 ```

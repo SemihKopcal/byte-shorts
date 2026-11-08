@@ -7,7 +7,7 @@
 #     backups/   panel yedeklerinin kopyalari
 #
 # Kullanim:
-#   sudo mkdir -p /srv/www/byte && sudo chown "$USER": /srv/www/byte
+#   sudo mkdir -p /srv/www/byte && sudo chown "$USER": /srv/www/byte && sudo chmod 700 /srv/www/byte
 #   git clone https://github.com/SemihKopcal/byte-shorts.git /srv/www/byte/app
 #   bash /srv/www/byte/app/panel/deploy/server-setup.sh
 #
