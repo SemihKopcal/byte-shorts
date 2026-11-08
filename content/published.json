@@ -16,5 +16,14 @@
   "theme": "deep",
   "privacy": "public",
   "date": "2026-11-08"
+ },
+ {
+  "id": "p003-air-canada-chatbot",
+  "series": "G",
+  "title": "A chatbot's bad advice cost Air Canada",
+  "youtube_id": "03FRZ8a4TgI",
+  "theme": "rust",
+  "privacy": "public",
+  "date": "2026-11-08"
  }
 ]
