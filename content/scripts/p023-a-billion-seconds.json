@@ -1,0 +1,254 @@
+{
+ "id": "p023-a-billion-seconds",
+ "series": "G",
+ "lang": "en",
+ "format": "measured",
+ "theme": "ice",
+ "title": "A billion seconds is almost 32 years",
+ "summary": "One billion seconds is about 31.7 years and one trillion seconds is about 31,700 years, using the 365.25 day year of 31,557,600 seconds.",
+ "tags": [
+  "time",
+  "units",
+  "scale",
+  "explained"
+ ],
+ "sources": [
+  "https://www.bipm.org/en/si-base-units/second",
+  "https://www.britannica.com/science/time/Lengths-of-years-and-months",
+  "https://itc.gov.hk/en/quality/scl/teachers_students/si/second.html"
+ ],
+ "beats": [
+  {
+   "id": "b1",
+   "role": "hook",
+   "say": "A billion seconds is almost thirty two years.",
+   "cap": "1 billion seconds ≈ 31.7 years",
+   "scene": "contrast",
+   "data": {
+    "left": {
+     "label": "one billion seconds",
+     "value": "31.7 years"
+    },
+    "right": {
+     "label": "one trillion seconds",
+     "value": "31,700 years",
+     "tone": "mid"
+    },
+    "verdict": "Three zeros, a thousand times longer"
+   }
+  },
+  {
+   "id": "b2",
+   "role": "why",
+   "say": "A second is defined by counting cycles of light from a caesium atom.",
+   "cap": "9,192,631,770 cycles of caesium"
+  },
+  {
+   "id": "b3",
+   "role": "why",
+   "say": "A day holds eighty six thousand four hundred of them.",
+   "cap": "1 day = 24 × 60 × 60 = 86,400 s"
+  },
+  {
+   "id": "b4",
+   "role": "data",
+   "say": "The astronomers' year is three hundred sixty five and a quarter days.",
+   "cap": "Julian year = 365.25 days"
+  },
+  {
+   "id": "b5",
+   "role": "data",
+   "say": "That year is about thirty one and a half million seconds.",
+   "cap": "365.25 × 86,400 = 31,557,600 s",
+   "scene": "equation",
+   "data": {
+    "terms": [
+     {
+      "value": "365.25",
+      "label": "days"
+     },
+     {
+      "value": "86,400",
+      "label": "seconds a day"
+     }
+    ],
+    "op": "×",
+    "result": {
+     "value": "31,557,600",
+     "label": "seconds a year",
+     "tone": "mid"
+    }
+   }
+  },
+  {
+   "id": "b6",
+   "role": "data",
+   "say": "A billion seconds divided by that is thirty one point seven years.",
+   "cap": "1,000,000,000 ÷ 31,557,600 = 31.7 years",
+   "scene": "counter",
+   "data": {
+    "from": 0,
+    "to": 31.7,
+    "dp": 1,
+    "suffix": " years",
+    "note": "one billion seconds",
+    "tone": "mid"
+   }
+  },
+  {
+   "id": "b7",
+   "role": "turn",
+   "say": "A trillion seconds is a thousand times longer.",
+   "cap": "1,000 × longer"
+  },
+  {
+   "id": "b8",
+   "role": "turn",
+   "say": "That is about thirty one thousand seven hundred years.",
+   "cap": "31,700 years",
+   "scene": "scale",
+   "data": {
+    "items": [
+     {
+      "label": "1 billion seconds",
+      "value": 31.7,
+      "text": "31.7 years"
+     },
+     {
+      "label": "1 trillion seconds",
+      "value": 31700,
+      "text": "31,700 years",
+      "tone": "mid"
+     }
+    ]
+   }
+  },
+  {
+   "id": "b9",
+   "role": "resolve",
+   "say": "Each extra three zeros multiplies the time by a thousand.",
+   "cap": "+3 zeros = × 1,000"
+  },
+  {
+   "id": "b10",
+   "role": "resolve",
+   "say": "A billion is a human lifetime. A trillion is a geological one.",
+   "cap": "Billion: decades. Trillion: millennia.",
+   "scene": "close",
+   "data": {
+    "lines": [
+     "1 billion s = 31.7 years",
+     "1 trillion s = 31,700 years"
+    ],
+    "accent": "mid"
+   }
+  }
+ ],
+ "claims": [
+  {
+   "shown": "31.7",
+   "expr": "10**9/31557600",
+   "value": 31.6881,
+   "source": null
+  },
+  {
+   "shown": "31,700",
+   "expr": "10**12/31557600",
+   "value": 31688.0878,
+   "source": null
+  },
+  {
+   "shown": "9,192,631,770",
+   "expr": null,
+   "value": null,
+   "source": 0,
+   "note": "BIPM: the second is 9 192 631 770 periods of the caesium-133 hyperfine transition radiation"
+  },
+  {
+   "shown": "86,400",
+   "expr": "24*60*60",
+   "value": 86400.0,
+   "source": null
+  },
+  {
+   "shown": "24 × 60 × 60",
+   "expr": "24*60*60",
+   "value": 86400.0,
+   "source": null
+  },
+  {
+   "shown": "365.25",
+   "expr": null,
+   "value": null,
+   "source": 1,
+   "note": "Britannica: the Julian year is exactly 365.25 days, or 31,557,600 s"
+  },
+  {
+   "shown": "31,557,600",
+   "expr": "365.25*86400",
+   "value": 31557600.0,
+   "source": null
+  },
+  {
+   "shown": "1,000,000,000",
+   "expr": "10**9",
+   "value": 1000000000.0,
+   "source": null
+  },
+  {
+   "shown": "1,000",
+   "expr": "10**12/10**9",
+   "value": 1000.0,
+   "source": null
+  }
+ ],
+ "facts": [
+  {
+   "claim": "The SI second is the duration of 9,192,631,770 periods of the radiation from the caesium-133 hyperfine transition",
+   "source": 0,
+   "note": "BIPM, SI base unit second: caesium frequency fixed at 9 192 631 770 Hz; one second is 9 192 631 770 periods"
+  },
+  {
+   "claim": "The Julian year is exactly 365.25 days, or 31,557,600 seconds",
+   "source": 1,
+   "note": "Britannica, Lengths of years and months: Julian year is 365.25 d, or 31,557,600 s"
+  },
+  {
+   "claim": "Before 1960 the second was defined as 1/86,400 of the mean solar day",
+   "source": 2,
+   "note": "Hong Kong ITC SI page, history table: before 1960, the fraction 1/86 400 of the mean solar day"
+  }
+ ],
+ "copy_parts": {
+  "youtube": {
+   "hook": "One billion seconds is about 31.7 years. One trillion seconds is about 31,700 years. Both use the 365.25 day year of 31,557,600 seconds."
+  },
+  "instagram": {
+   "caption": "A billion seconds is almost 32 years. A trillion seconds is about 31,700 years. Three zeros make it a thousand times longer."
+  },
+  "tiktok": {
+   "caption": "A billion seconds is almost 32 years."
+  },
+  "hashtags": {
+   "youtube": [
+    "#tech",
+    "#math",
+    "#time",
+    "#explained"
+   ],
+   "instagram": [
+    "#tech",
+    "#math",
+    "#time"
+   ],
+   "tiktok": [
+    "#tech",
+    "#math"
+   ]
+  }
+ },
+ "authored": {
+  "by": "claude",
+  "date": "2026-11-08"
+ }
+}

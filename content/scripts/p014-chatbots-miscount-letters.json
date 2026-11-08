@@ -1,0 +1,191 @@
+{
+ "id": "p014-chatbots-miscount-letters",
+ "series": "G",
+ "lang": "en",
+ "format": "explain",
+ "theme": "rust",
+ "title": "Why chatbots miscount letters in a word",
+ "summary": "Models read tokens, not spelled-out letters. A 2024 study found they can tell which letters are present but fail at counting repeats.",
+ "tags": [
+  "tokenizer",
+  "llm limits",
+  "counting",
+  "explained"
+ ],
+ "sources": [
+  "https://huggingface.co/docs/transformers/v5.0.0rc0/tokenizer_summary",
+  "https://arxiv.org/abs/2412.18626"
+ ],
+ "beats": [
+  {
+   "id": "b1",
+   "role": "hook",
+   "say": "Language models write essays, yet struggle to count letters in a word.",
+   "cap": "Essays: easy. Letter counts: hard.",
+   "scene": "title",
+   "data": {
+    "kicker": "Language models",
+    "lines": [
+     "Can write an essay.",
+     "Can't count letters."
+    ],
+    "accent": "bad"
+   }
+  },
+  {
+   "id": "b2",
+   "role": "why",
+   "say": "Most models do not read text as letters. They read tokens.",
+   "cap": "Models read tokens"
+  },
+  {
+   "id": "b3",
+   "role": "why",
+   "say": "A tokenizer cuts text into pieces before the model sees it.",
+   "cap": "Tokenizer: text → pieces"
+  },
+  {
+   "id": "b4",
+   "role": "data",
+   "say": "Here is one real tokenizer, Bert base uncased, from the Hugging Face docs.",
+   "cap": "bert-base-uncased"
+  },
+  {
+   "id": "b5",
+   "role": "data",
+   "say": "It splits the word G.P.U. into two pieces.",
+   "cap": "\"gpu\" → \"gp\" + \"##u\"",
+   "scene": "tokens",
+   "data": {
+    "tokens": [
+     "i",
+     "have",
+     "a",
+     "new",
+     "gp",
+     "##u",
+     "!"
+    ],
+    "note": "bert-base-uncased: \"GPU\" becomes gp + ##u",
+    "tone": "mid"
+   }
+  },
+  {
+   "id": "b6",
+   "role": "data",
+   "say": "Another tokenizer splits Transformers into Transform and ers.",
+   "cap": "\"Transformers\" → \"Transform\" + \"ers\"",
+   "scene": "tokens",
+   "data": {
+    "tokens": [
+     "Transform",
+     "ers"
+    ],
+    "note": "xlnet-base-cased",
+    "tone": "mid"
+   }
+  },
+  {
+   "id": "b7",
+   "role": "turn",
+   "say": "Pieces hide spelling, but a twenty twenty four study found a stronger pattern.",
+   "cap": "Study, December 2024"
+  },
+  {
+   "id": "b8",
+   "role": "turn",
+   "say": "Models could tell which letters were present. They failed at counting them.",
+   "cap": "Recognize letters: yes. Count them: no.",
+   "scene": "checklist",
+   "data": {
+    "rows": [
+     {
+      "text": "Which letters are in the word",
+      "ok": true,
+      "tone": "good"
+     },
+     {
+      "text": "How many of each",
+      "ok": false,
+      "tone": "bad"
+     }
+    ]
+   }
+  },
+  {
+   "id": "b9",
+   "role": "resolve",
+   "say": "Most models failed once a letter appeared more than twice.",
+   "cap": "More than two repeats: most models fail"
+  },
+  {
+   "id": "b10",
+   "role": "resolve",
+   "say": "Tokens hide letters, and counting is the harder part.",
+   "cap": "Counting is the hard part",
+   "scene": "close",
+   "data": {
+    "lines": [
+     "Tokens hide letters.",
+     "Counting is the hard part."
+    ],
+    "accent": "mid"
+   }
+  }
+ ],
+ "claims": [],
+ "facts": [
+  {
+   "claim": "Hugging Face's tokenizer documentation shows bert-base-uncased splitting the word 'GPU' into the pieces 'gp' and '##u'",
+   "source": 0,
+   "note": "HF Transformers docs, Summary of the tokenizers: BertTokenizer google-bert/bert-base-uncased tokenizes 'I have a new GPU!' into i, have, a, new, gp, ##u, !"
+  },
+  {
+   "claim": "The same documentation shows xlnet-base-cased splitting 'Transformers' into 'Transform' and 'ers'",
+   "source": 0,
+   "note": "HF docs: XLNetTokenizer xlnet/xlnet-base-cased splits the rare word 'Transformers' into 'Transform' and 'ers'"
+  },
+  {
+   "claim": "A December 2024 arXiv study found models can recognize the letters in a word but not count them",
+   "source": 1,
+   "note": "arXiv 2412.18626 abstract: 'models are capable of recognizing the letters but not counting them'; first version posted 19 December 2024"
+  },
+  {
+   "claim": "The study found most models fail on words where a letter appears more than twice, and attributes the problem to the complexity of counting",
+   "source": 1,
+   "note": "arXiv 2412.18626 abstract: strongest correlation with letters appearing more than once; most models fail when letters appear more than twice; authors conclude the problem stems from counting complexity"
+  }
+ ],
+ "copy_parts": {
+  "youtube": {
+   "hook": "Models read tokens, not spelled-out letters. A 2024 study found they can tell which letters are present but fail at counting repeats."
+  },
+  "instagram": {
+   "caption": "Why chatbots miscount letters: they read tokens, not letters. And counting repeats is the part that breaks."
+  },
+  "tiktok": {
+   "caption": "Why chatbots miscount letters in a word."
+  },
+  "hashtags": {
+   "youtube": [
+    "#tech",
+    "#ai",
+    "#tokenizer",
+    "#explained"
+   ],
+   "instagram": [
+    "#tech",
+    "#ai",
+    "#tokenizer"
+   ],
+   "tiktok": [
+    "#tech",
+    "#ai"
+   ]
+  }
+ },
+ "authored": {
+  "by": "claude",
+  "date": "2026-11-08"
+ }
+}

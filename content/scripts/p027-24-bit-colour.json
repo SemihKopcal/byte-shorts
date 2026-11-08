@@ -1,0 +1,253 @@
+{
+ "id": "p027-24-bit-colour",
+ "series": "G",
+ "lang": "en",
+ "format": "measured",
+ "theme": "moss",
+ "title": "Why 24-bit colour means 16.7 million colours",
+ "summary": "24 bits split into 8 each for red, green and blue. 256 × 256 × 256 is 16,777,216 colours, the same as 2 to the power 24.",
+ "tags": [
+  "color depth",
+  "pixels",
+  "rgb",
+  "explained"
+ ],
+ "sources": [
+  "https://en.wikipedia.org/wiki/Color_depth",
+  "https://cdn.cambridgeincolour.com/tutorials/bit-depth.htm"
+ ],
+ "beats": [
+  {
+   "id": "b1",
+   "role": "hook",
+   "say": "A twenty four bit pixel can show sixteen million colors.",
+   "cap": "24 bits → 16,777,216 colors",
+   "scene": "contrast",
+   "data": {
+    "left": {
+     "label": "bits per pixel",
+     "value": "24"
+    },
+    "right": {
+     "label": "colors",
+     "value": "16,777,216",
+     "tone": "mid"
+    },
+    "verdict": "Where the number comes from"
+   }
+  },
+  {
+   "id": "b2",
+   "role": "why",
+   "say": "Twenty four bits split evenly into red, green and blue.",
+   "cap": "24 = 8 + 8 + 8",
+   "scene": "equation",
+   "data": {
+    "terms": [
+     {
+      "value": "8",
+      "label": "red bits"
+     },
+     {
+      "value": "8",
+      "label": "green bits"
+     },
+     {
+      "value": "8",
+      "label": "blue bits"
+     }
+    ],
+    "op": "+",
+    "result": {
+     "value": "24",
+     "label": "bits per pixel",
+     "tone": "mid"
+    }
+   }
+  },
+  {
+   "id": "b3",
+   "role": "why",
+   "say": "That is eight bits for each color channel.",
+   "cap": "8 bits per channel"
+  },
+  {
+   "id": "b4",
+   "role": "data",
+   "say": "Eight bits can hold two hundred fifty six different values.",
+   "cap": "2^8 = 256 values"
+  },
+  {
+   "id": "b5",
+   "role": "data",
+   "say": "So each channel runs from zero to two fifty five.",
+   "cap": "Each channel: 0 to 255"
+  },
+  {
+   "id": "b6",
+   "role": "data",
+   "say": "Red, green and blue each pick one of those values.",
+   "cap": "256 × 256 × 256",
+   "scene": "equation",
+   "data": {
+    "terms": [
+     {
+      "value": "256",
+      "label": "red"
+     },
+     {
+      "value": "256",
+      "label": "green"
+     },
+     {
+      "value": "256",
+      "label": "blue"
+     }
+    ],
+    "op": "×",
+    "result": {
+     "value": "16,777,216",
+     "label": "colors",
+     "tone": "mid"
+    }
+   }
+  },
+  {
+   "id": "b7",
+   "role": "turn",
+   "say": "Same number as two to the power of twenty four.",
+   "cap": "2^24 = 16,777,216"
+  },
+  {
+   "id": "b8",
+   "role": "turn",
+   "say": "Thirty two bit color usually adds eight bits for transparency, not more colors.",
+   "cap": "32-bit = 24 color + 8 alpha",
+   "scene": "layers",
+   "data": {
+    "layers": [
+     {
+      "label": "Blue",
+      "sub": "8 bits"
+     },
+     {
+      "label": "Green",
+      "sub": "8 bits"
+     },
+     {
+      "label": "Red",
+      "sub": "8 bits"
+     },
+     {
+      "label": "Alpha",
+      "sub": "8 bits, transparency",
+      "tone": "mid"
+     }
+    ],
+    "total": "32 bits per pixel"
+   }
+  },
+  {
+   "id": "b9",
+   "role": "resolve",
+   "say": "Sixteen million colors is arithmetic on bits.",
+   "cap": "Bits in, colors out"
+  },
+  {
+   "id": "b10",
+   "role": "resolve",
+   "say": "Add bits, and the count of colors multiplies.",
+   "cap": "More bits, more colors",
+   "scene": "close",
+   "data": {
+    "lines": [
+     "24 bits",
+     "16,777,216 colors"
+    ],
+    "accent": "mid"
+   }
+  }
+ ],
+ "claims": [
+  {
+   "shown": "24",
+   "expr": "8*3",
+   "value": 24.0,
+   "source": null
+  },
+  {
+   "shown": "256",
+   "expr": "2**8",
+   "value": 256.0,
+   "source": null
+  },
+  {
+   "shown": "255",
+   "expr": "2**8-1",
+   "value": 255.0,
+   "source": null
+  },
+  {
+   "shown": "16,777,216",
+   "expr": "256**3",
+   "value": 16777216.0,
+   "source": null
+  },
+  {
+   "shown": "32",
+   "expr": null,
+   "value": null,
+   "source": 0,
+   "note": "Wikipedia, Color depth: almost all cases of 32 bits per pixel assign 24 bits to the color and the remaining 8 to alpha or leave them unused"
+  }
+ ],
+ "facts": [
+  {
+   "claim": "24-bit color almost always uses 8 bits each for red, green and blue, giving 2^24 = 16,777,216 color variations",
+   "source": 0,
+   "note": "Wikipedia, Color depth: '24 bits almost always use 8 bits each of R, G, and B'; 2^24 gives 16,777,216 color variations"
+  },
+  {
+   "claim": "32 bits per pixel usually assigns 24 bits to color and 8 to the alpha channel (transparency) or leaves them unused",
+   "source": 0,
+   "note": "Wikipedia, Color depth: 32-bit case"
+  },
+  {
+   "claim": "8 bits allow 2^8 = 256 combinations per channel, and three 8-bit channels give 16,777,216 colors",
+   "source": 1,
+   "note": "Cambridge in Colour, Bit depth tutorial: 8 bits give 256 values per primary; three channels give as many as 16,777,216 colors, called true color"
+  }
+ ],
+ "copy_parts": {
+  "youtube": {
+   "hook": "24-bit color is 8 bits each for red, green and blue. 256 times 256 times 256 is 16,777,216 colors, the same as 2 to the power 24."
+  },
+  "instagram": {
+   "caption": "Why 24-bit color means 16.7 million colors: 8 bits per channel, 256 values each, 256 × 256 × 256 = 16,777,216."
+  },
+  "tiktok": {
+   "caption": "Why 24-bit color means 16.7 million colors."
+  },
+  "hashtags": {
+   "youtube": [
+    "#tech",
+    "#color",
+    "#pixels",
+    "#explained"
+   ],
+   "instagram": [
+    "#tech",
+    "#color",
+    "#pixels"
+   ],
+   "tiktok": [
+    "#tech",
+    "#color"
+   ]
+  }
+ },
+ "authored": {
+  "by": "claude",
+  "date": "2026-11-08"
+ }
+}

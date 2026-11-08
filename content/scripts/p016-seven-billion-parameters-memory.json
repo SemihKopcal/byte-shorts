@@ -1,0 +1,256 @@
+{
+ "id": "p016-seven-billion-parameters-memory",
+ "series": "G",
+ "lang": "en",
+ "format": "measured",
+ "theme": "moss",
+ "title": "How much memory a 7B model needs",
+ "summary": "Seven billion parameters take 28 GB as 32-bit numbers, 14 GB as 16-bit and 3.5 GB as 4-bit. That counts the weights only.",
+ "tags": [
+  "memory",
+  "quantization",
+  "llm basics",
+  "explained"
+ ],
+ "sources": [
+  "https://uw-madison-datascience.github.io/ML-X-Nexus/Learn/Notebooks/Quantization-and-Precision.html",
+  "https://docs.nvidia.com/deeplearning/performance/mixed-precision-training/index.html",
+  "https://en.wikipedia.org/wiki/Single-precision_floating-point_format"
+ ],
+ "beats": [
+  {
+   "id": "b1",
+   "role": "hook",
+   "say": "One model can weigh twenty eight gigabytes or three and a half.",
+   "cap": "28 GB or 3.5 GB",
+   "scene": "contrast",
+   "data": {
+    "left": {
+     "label": "32-bit numbers",
+     "value": "28 GB"
+    },
+    "right": {
+     "label": "4-bit numbers",
+     "value": "3.5 GB",
+     "tone": "good"
+    },
+    "verdict": "7B parameters, weights only"
+   }
+  },
+  {
+   "id": "b2",
+   "role": "why",
+   "say": "A seven billion parameter model stores seven billion numbers.",
+   "cap": "7B parameters = 7B numbers"
+  },
+  {
+   "id": "b3",
+   "role": "why",
+   "say": "How much space each number takes depends on its format.",
+   "cap": "Space per number depends on format"
+  },
+  {
+   "id": "b4",
+   "role": "data",
+   "say": "A thirty two bit number takes four bytes. A sixteen bit number takes two.",
+   "cap": "32-bit = 4 bytes · 16-bit = 2 bytes",
+   "scene": "table",
+   "data": {
+    "unit": "per number",
+    "rows": [
+     {
+      "name": "32-bit",
+      "value": "4 bytes",
+      "ratio": 4,
+      "tone": "bad"
+     },
+     {
+      "name": "16-bit",
+      "value": "2 bytes",
+      "ratio": 2,
+      "tone": "mid"
+     },
+     {
+      "name": "8-bit",
+      "value": "1 byte",
+      "ratio": 1
+     },
+     {
+      "name": "4-bit",
+      "value": "0.5 bytes",
+      "ratio": 0.5,
+      "tone": "good"
+     }
+    ]
+   }
+  },
+  {
+   "id": "b5",
+   "role": "data",
+   "say": "Seven billion times four bytes is twenty eight gigabytes.",
+   "cap": "7B × 4 bytes = 28 GB",
+   "scene": "equation",
+   "data": {
+    "terms": [
+     {
+      "value": "7B",
+      "label": "numbers"
+     },
+     {
+      "value": "4 bytes",
+      "label": "each"
+     }
+    ],
+    "op": "×",
+    "result": {
+     "value": "28 GB",
+     "label": "32-bit weights",
+     "tone": "bad"
+    }
+   }
+  },
+  {
+   "id": "b6",
+   "role": "data",
+   "say": "At sixteen bits, that halves to fourteen gigabytes.",
+   "cap": "16-bit: 7B × 2 bytes = 14 GB"
+  },
+  {
+   "id": "b7",
+   "role": "turn",
+   "say": "At four bits, it drops to three and a half.",
+   "cap": "4-bit: 7B × 0.5 bytes = 3.5 GB"
+  },
+  {
+   "id": "b8",
+   "role": "turn",
+   "say": "Same count of numbers. One eighth of the space.",
+   "cap": "28 GB → 3.5 GB",
+   "scene": "bars",
+   "data": {
+    "rows": [
+     {
+      "name": "32-bit",
+      "v": 28,
+      "label": "28 GB",
+      "tone": "bad"
+     },
+     {
+      "name": "16-bit",
+      "v": 14,
+      "label": "14 GB",
+      "tone": "mid"
+     },
+     {
+      "name": "4-bit",
+      "v": 3.5,
+      "label": "3.5 GB",
+      "tone": "good"
+     }
+    ]
+   }
+  },
+  {
+   "id": "b9",
+   "role": "resolve",
+   "say": "This counts only the stored weights, not the working memory.",
+   "cap": "Weights only"
+  },
+  {
+   "id": "b10",
+   "role": "resolve",
+   "say": "Fewer bits per number trade precision for space.",
+   "cap": "Fewer bits: less space, less precision",
+   "scene": "close",
+   "data": {
+    "lines": [
+     "7B × 4 = 28 GB",
+     "7B × 0.5 = 3.5 GB"
+    ],
+    "accent": "good"
+   }
+  }
+ ],
+ "claims": [
+  {
+   "shown": "16 bits vs 32 bits",
+   "expr": null,
+   "value": null,
+   "source": 1,
+   "note": "NVIDIA mixed precision guide: FP16 uses 16 bits, compared to 32 bits for single precision (FP32)"
+  },
+  {
+   "shown": "0.5",
+   "expr": "4/8",
+   "value": 0.5,
+   "source": null
+  },
+  {
+   "shown": "28",
+   "expr": "7*4",
+   "value": 28.0,
+   "source": null
+  },
+  {
+   "shown": "14",
+   "expr": "7*2",
+   "value": 14.0,
+   "source": null
+  },
+  {
+   "shown": "3.5",
+   "expr": "7*0.5",
+   "value": 3.5,
+   "source": null
+  }
+ ],
+ "facts": [
+  {
+   "claim": "A single-precision (binary32) number uses 32 bits, which is 4 bytes",
+   "source": 2,
+   "note": "Wikipedia, Single-precision floating-point format: binary32 under IEEE 754 occupies 32 bits; 8 bits per byte gives 4 bytes"
+  },
+  {
+   "claim": "Half precision (FP16) uses 16 bits, compared to 32 bits for single precision",
+   "source": 1,
+   "note": "NVIDIA, Train With Mixed Precision: 'Half-precision floating point format (FP16) uses 16 bits, compared to 32 bits for single precision (FP32)'"
+  },
+  {
+   "claim": "A 1B-parameter model needs about 4 GB at FP32, 2 GB at FP16 and about 0.5 GB at 4-bit, and a 7B model at FP16 is about 14 GB",
+   "source": 0,
+   "note": "UW-Madison ML-X Nexus, Quantization and Precision: table FP32 32 bits / 4 bytes / 4 GB per 1B; FP16 16 / 2 / 2 GB; INT8 8 / 1 / 1 GB; 4-bit 4 / 0.5 / ~0.5 GB; a 7B model at FP16 is ~14 GB"
+  }
+ ],
+ "copy_parts": {
+  "youtube": {
+   "hook": "A 7B model needs 28 GB as 32-bit numbers, 14 GB as 16-bit and 3.5 GB as 4-bit. That counts the stored weights only."
+  },
+  "instagram": {
+   "caption": "Seven billion parameters: 28 GB at 32-bit, 14 GB at 16-bit, 3.5 GB at 4-bit. Weights only, not working memory."
+  },
+  "tiktok": {
+   "caption": "How much memory a 7B model needs."
+  },
+  "hashtags": {
+   "youtube": [
+    "#tech",
+    "#ai",
+    "#llm",
+    "#explained"
+   ],
+   "instagram": [
+    "#tech",
+    "#ai",
+    "#llm"
+   ],
+   "tiktok": [
+    "#tech",
+    "#ai"
+   ]
+  }
+ },
+ "authored": {
+  "by": "claude",
+  "date": "2026-11-08"
+ }
+}

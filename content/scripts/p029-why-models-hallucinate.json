@@ -1,0 +1,180 @@
+{
+ "id": "p029-why-models-hallucinate",
+ "series": "G",
+ "lang": "en",
+ "format": "explain",
+ "theme": "rust",
+ "title": "Why language models hallucinate",
+ "summary": "Surveys split hallucination into factuality and faithfulness types and list causes in data, training and generation, including sampling for diversity.",
+ "tags": [
+  "hallucination",
+  "llm limits",
+  "factuality",
+  "explained"
+ ],
+ "sources": [
+  "https://arxiv.org/pdf/2311.05232",
+  "https://arxiv.org/pdf/2202.03629"
+ ],
+ "beats": [
+  {
+   "id": "b1",
+   "role": "hook",
+   "say": "A language model can state a false fact in a confident tone.",
+   "cap": "Confident. Fluent. Wrong.",
+   "scene": "title",
+   "data": {
+    "kicker": "Hallucination",
+    "lines": [
+     "Confident.",
+     "Fluent.",
+     "Wrong."
+    ],
+    "accent": "bad"
+   }
+  },
+  {
+   "id": "b2",
+   "role": "why",
+   "say": "Researchers call this hallucination, and split it into two types.",
+   "cap": "Two types"
+  },
+  {
+   "id": "b3",
+   "role": "why",
+   "say": "Factuality hallucination: the output diverges from verifiable real world facts.",
+   "cap": "Factuality: wrong about the world",
+   "scene": "split",
+   "data": {
+    "a": {
+     "label": "Factuality",
+     "sub": "wrong about the world",
+     "tone": "bad"
+    },
+    "b": {
+     "label": "Faithfulness",
+     "sub": "wrong about the input",
+     "tone": "mid"
+    }
+   }
+  },
+  {
+   "id": "b4",
+   "role": "data",
+   "say": "Faithfulness hallucination: the output diverges from the user's input, or from itself.",
+   "cap": "Faithfulness: wrong about the input"
+  },
+  {
+   "id": "b5",
+   "role": "data",
+   "say": "The survey lists causes in the data, in training, and at generation time.",
+   "cap": "Data · Training · Inference",
+   "scene": "layers",
+   "data": {
+    "layers": [
+     {
+      "label": "Data",
+      "sub": "misinformation, bias, knowledge limits"
+     },
+     {
+      "label": "Training",
+      "sub": "objectives, tuning, sycophancy"
+     },
+     {
+      "label": "Inference",
+      "sub": "decoding, over-confidence",
+      "tone": "mid"
+     }
+    ]
+   }
+  },
+  {
+   "id": "b6",
+   "role": "data",
+   "say": "In the data: misinformation and biases in the pretraining text.",
+   "cap": "Data: misinformation and bias"
+  },
+  {
+   "id": "b7",
+   "role": "turn",
+   "say": "In training, tuning on knowledge the model does not have is a listed cause.",
+   "cap": "Training: tuning past its knowledge"
+  },
+  {
+   "id": "b8",
+   "role": "turn",
+   "say": "At generation time, decoding choices and over-confidence add to it.",
+   "cap": "Inference: decoding, over-confidence"
+  },
+  {
+   "id": "b9",
+   "role": "resolve",
+   "say": "An earlier survey adds that sampling for diversity can raise hallucination rates.",
+   "cap": "Diverse sampling can raise it"
+  },
+  {
+   "id": "b10",
+   "role": "resolve",
+   "say": "Fluent is not the same as checked.",
+   "cap": "Fluent is not checked.",
+   "scene": "close",
+   "data": {
+    "lines": [
+     "Fluent",
+     "is not checked."
+    ],
+    "accent": "bad"
+   }
+  }
+ ],
+ "claims": [],
+ "facts": [
+  {
+   "claim": "A 2023 survey splits LLM hallucination into factuality hallucination (output diverges from verifiable real-world facts) and faithfulness hallucination (output diverges from the user's input or is internally inconsistent)",
+   "source": 0,
+   "note": "arXiv 2311.05232: factuality (factual contradiction, fabrication) vs faithfulness (instruction, context, logical inconsistency)"
+  },
+  {
+   "claim": "The same survey lists causes in data (misinformation, biases, knowledge boundaries), training (objectives, fine-tuning on knowledge the model lacks, sycophancy) and inference (decoding, over-confidence)",
+   "source": 0,
+   "note": "arXiv 2311.05232: stated causes by stage"
+  },
+  {
+   "claim": "An earlier survey notes that sampling strategies that increase diversity can raise hallucination rates",
+   "source": 1,
+   "note": "arXiv 2202.03629 (Survey of Hallucination in Natural Language Generation): decoders and diversity-increasing sampling strategies can raise hallucination rates"
+  }
+ ],
+ "copy_parts": {
+  "youtube": {
+   "hook": "Surveys split hallucination into factuality and faithfulness types and list causes in data, training and generation, including sampling for diversity."
+  },
+  "instagram": {
+   "caption": "Why language models hallucinate: two types, three stages of causes, and why a fluent answer is not a checked one."
+  },
+  "tiktok": {
+   "caption": "Why language models hallucinate."
+  },
+  "hashtags": {
+   "youtube": [
+    "#tech",
+    "#ai",
+    "#hallucination",
+    "#explained"
+   ],
+   "instagram": [
+    "#tech",
+    "#ai",
+    "#hallucination"
+   ],
+   "tiktok": [
+    "#tech",
+    "#ai"
+   ]
+  }
+ },
+ "authored": {
+  "by": "claude",
+  "date": "2026-11-08"
+ }
+}

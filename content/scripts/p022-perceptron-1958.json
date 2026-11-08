@@ -1,0 +1,242 @@
+{
+ "id": "p022-perceptron-1958",
+ "series": "G",
+ "lang": "en",
+ "format": "story",
+ "theme": "plum",
+ "title": "The perceptron, 1958: promise before hardware",
+ "summary": "In 1958 the press suggested a Navy-funded perceptron might one day walk and talk. A 1969 book showed single-layer perceptrons cannot learn XOR.",
+ "tags": [
+  "perceptron",
+  "rosenblatt",
+  "ai history",
+  "neural networks"
+ ],
+ "sources": [
+  "https://en.wikipedia.org/wiki/Perceptron",
+  "https://www.guinnessworldrecords.com/world-records/760225-first-artificial-neural-network"
+ ],
+ "beats": [
+  {
+   "id": "b1",
+   "role": "hook",
+   "say": "In nineteen fifty eight, a newspaper suggested a machine might walk.",
+   "cap": "The perceptron, 1958",
+   "scene": "title",
+   "data": {
+    "kicker": "The perceptron, 1958",
+    "lines": [
+     "A machine that",
+     "might walk and talk"
+    ],
+    "accent": "mid"
+   }
+  },
+  {
+   "id": "b2",
+   "role": "why",
+   "say": "Frank Rosenblatt built the perceptron at the Cornell Aeronautical Laboratory.",
+   "cap": "Frank Rosenblatt, Cornell Aeronautical Lab"
+  },
+  {
+   "id": "b3",
+   "role": "why",
+   "say": "The U.S. Office of Naval Research funded the project.",
+   "cap": "Funded by the Office of Naval Research"
+  },
+  {
+   "id": "b4",
+   "role": "data",
+   "say": "The Mark one machine had four hundred photocells in a twenty by twenty grid.",
+   "cap": "20 × 20 grid = 400 photocells",
+   "scene": "equation",
+   "data": {
+    "terms": [
+     {
+      "value": "20",
+      "label": "rows"
+     },
+     {
+      "value": "20",
+      "label": "columns"
+     }
+    ],
+    "op": "×",
+    "result": {
+     "value": "400",
+     "label": "photocells",
+     "tone": "mid"
+    }
+   }
+  },
+  {
+   "id": "b5",
+   "role": "data",
+   "say": "Its first public demonstration, in July nineteen fifty eight, ran on an I.B.M. seven oh four.",
+   "cap": "7 July 1958: IBM 704 simulation",
+   "scene": "timeline",
+   "data": {
+    "steps": [
+     {
+      "at": "1957",
+      "label": "IBM 704 simulation"
+     },
+     {
+      "at": "7 Jul 1958",
+      "label": "First public demo",
+      "tone": "mid"
+     },
+     {
+      "at": "1969",
+      "label": "Perceptrons book",
+      "tone": "bad"
+     }
+    ]
+   }
+  },
+  {
+   "id": "b6",
+   "role": "data",
+   "say": "It learned to tell whether a dot was on the left or right.",
+   "cap": "Task: dot on the left or right"
+  },
+  {
+   "id": "b7",
+   "role": "turn",
+   "say": "The New York Times suggested the Navy expected it to walk, talk and see.",
+   "cap": "1958 press: walk, talk, see",
+   "scene": "checklist",
+   "data": {
+    "rows": [
+     {
+      "text": "Tell a dot's side",
+      "ok": true,
+      "tone": "good"
+     },
+     {
+      "text": "Walk",
+      "ok": false,
+      "tone": "bad"
+     },
+     {
+      "text": "Talk",
+      "ok": false,
+      "tone": "bad"
+     },
+     {
+      "text": "See",
+      "ok": false,
+      "tone": "bad"
+     }
+    ]
+   }
+  },
+  {
+   "id": "b8",
+   "role": "turn",
+   "say": "In nineteen sixty nine, a book showed single layer perceptrons cannot learn X.O.R.",
+   "cap": "1969: Perceptrons. XOR."
+  },
+  {
+   "id": "b9",
+   "role": "resolve",
+   "say": "The book contributed to a sharp drop in neural network funding.",
+   "cap": "Funding fell"
+  },
+  {
+   "id": "b10",
+   "role": "resolve",
+   "say": "Big promises first. A hard limit came later.",
+   "cap": "Promises first. Limits later.",
+   "scene": "close",
+   "data": {
+    "lines": [
+     "1958: big promises.",
+     "1969: a hard limit."
+    ],
+    "accent": "mid"
+   }
+  }
+ ],
+ "claims": [
+  {
+   "shown": "20",
+   "expr": null,
+   "value": null,
+   "source": 0,
+   "note": "Wikipedia, Perceptron: Mark I had 400 photocells in a 20x20 grid"
+  },
+  {
+   "shown": "400",
+   "expr": "20*20",
+   "value": 400.0,
+   "source": null
+  },
+  {
+   "shown": "704",
+   "expr": null,
+   "value": null,
+   "source": 1,
+   "note": "Guinness: first public demonstration on 7 July 1958 on a 5-ton IBM 704 that simulated the hardware"
+  }
+ ],
+ "facts": [
+  {
+   "claim": "Frank Rosenblatt developed the perceptron at the Cornell Aeronautical Laboratory, funded by the US Office of Naval Research",
+   "source": 0,
+   "note": "Wikipedia, Perceptron: Rosenblatt, Cornell Aeronautical Laboratory; Office of Naval Research funded the project"
+  },
+  {
+   "claim": "The Mark I Perceptron had 400 photocells in a 20x20 grid",
+   "source": 0,
+   "note": "Wikipedia, Perceptron: 400 photocells in a 20x20 grid as sensory units"
+  },
+  {
+   "claim": "The first public demonstration was on 7 July 1958 on an IBM 704 that simulated the hardware, and the task was telling whether a dot was on the left or right of a card",
+   "source": 1,
+   "note": "Guinness World Records: first demonstrated 7 July 1958; IBM 704; read 20x20 photocell scans of cards with a dot and told left from right"
+  },
+  {
+   "claim": "The New York Times suggested the Navy expected the perceptron could eventually walk, talk, see and reproduce itself",
+   "source": 0,
+   "note": "Wikipedia, Perceptron: 1958 NYT report based on Rosenblatt's statements at a Navy press conference"
+  },
+  {
+   "claim": "The 1969 book Perceptrons by Minsky and Papert showed single-layer perceptrons cannot learn XOR and contributed to a sharp decline in neural network funding",
+   "source": 0,
+   "note": "Wikipedia, Perceptron: 1969 book; single-layer limitation (XOR); contributed to decline in funding and interest until the 1980s"
+  }
+ ],
+ "copy_parts": {
+  "youtube": {
+   "hook": "In 1958 a newspaper suggested a Navy-funded perceptron might walk and talk. A 1969 book showed single-layer perceptrons cannot learn XOR, and funding fell."
+  },
+  "instagram": {
+   "caption": "The perceptron, 1958: big promises first, a hard limit later. 400 photocells, an IBM 704 demo, and a 1969 book about XOR."
+  },
+  "tiktok": {
+   "caption": "The perceptron, 1958: promise before hardware."
+  },
+  "hashtags": {
+   "youtube": [
+    "#tech",
+    "#ai",
+    "#perceptron",
+    "#aihistory"
+   ],
+   "instagram": [
+    "#tech",
+    "#ai",
+    "#perceptron"
+   ],
+   "tiktok": [
+    "#tech",
+    "#ai"
+   ]
+  }
+ },
+ "authored": {
+  "by": "claude",
+  "date": "2026-11-08"
+ }
+}

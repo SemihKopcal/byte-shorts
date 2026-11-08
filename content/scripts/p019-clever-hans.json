@@ -1,0 +1,232 @@
+{
+ "id": "p019-clever-hans",
+ "series": "G",
+ "lang": "en",
+ "format": "story",
+ "theme": "plum",
+ "title": "Clever Hans: the horse that read faces",
+ "summary": "A horse seemed to do arithmetic. A student found he was reading cues from the questioner. Researchers use the same label for models that are right for the wrong reason.",
+ "tags": [
+  "clever hans",
+  "ai history",
+  "bias",
+  "explained"
+ ],
+ "sources": [
+  "https://www.britannica.com/topic/Clever-Hans",
+  "https://en.wikipedia.org/wiki/Clever_Hans"
+ ],
+ "beats": [
+  {
+   "id": "b1",
+   "role": "hook",
+   "say": "A horse seemed to do arithmetic. He was reading the humans.",
+   "cap": "Clever Hans, Berlin",
+   "scene": "title",
+   "data": {
+    "kicker": "Clever Hans",
+    "lines": [
+     "The horse that",
+     "could count",
+     "(he couldn't)"
+    ],
+    "accent": "mid"
+   }
+  },
+  {
+   "id": "b2",
+   "role": "why",
+   "say": "His trainer, Wilhelm von Osten, asked questions. Hans answered by tapping a hoof.",
+   "cap": "Questions in. Taps out."
+  },
+  {
+   "id": "b3",
+   "role": "why",
+   "say": "In nineteen oh four, a panel of thirteen found no trick.",
+   "cap": "1904: 13-member panel, no trick"
+  },
+  {
+   "id": "b4",
+   "role": "data",
+   "say": "Then a student, Oskar Pfungst, ran controlled tests.",
+   "cap": "Oskar Pfungst, 1907 report"
+  },
+  {
+   "id": "b5",
+   "role": "data",
+   "say": "With the questioner in view, Hans got fifty of fifty six right.",
+   "cap": "Questioner visible: 50 of 56"
+  },
+  {
+   "id": "b6",
+   "role": "data",
+   "say": "With his view blocked, he got two of thirty five.",
+   "cap": "Questioner hidden: 2 of 35",
+   "scene": "bars",
+   "data": {
+    "rows": [
+     {
+      "name": "Could see questioner",
+      "v": 89,
+      "label": "50 of 56",
+      "tone": "good"
+     },
+     {
+      "name": "Could not see",
+      "v": 6,
+      "label": "2 of 35",
+      "tone": "bad"
+     }
+    ]
+   }
+  },
+  {
+   "id": "b7",
+   "role": "turn",
+   "say": "The questioner tensed as taps neared the answer, then relaxed at the last tap.",
+   "cap": "Tense, then relax: stop",
+   "scene": "flow",
+   "data": {
+    "nodes": [
+     {
+      "label": "Taps near the answer",
+      "sub": "questioner tenses"
+     },
+     {
+      "label": "Final tap",
+      "sub": "questioner relaxes"
+     },
+     {
+      "label": "Hans stops",
+      "tone": "mid"
+     }
+    ]
+   }
+  },
+  {
+   "id": "b8",
+   "role": "turn",
+   "say": "Hans was never counting. He was reading when to stop.",
+   "cap": "Not counting. Reading.",
+   "scene": "byte_says",
+   "data": {
+    "pose": "shrug",
+    "cursor": "amber",
+    "line": "Not counting. Reading."
+   }
+  },
+  {
+   "id": "b9",
+   "role": "resolve",
+   "say": "Researchers use the same label for models that are right for the wrong reason.",
+   "cap": "The Clever Hans effect, in AI"
+  },
+  {
+   "id": "b10",
+   "role": "resolve",
+   "say": "Right answer. Wrong reason.",
+   "cap": "Right answer. Wrong reason.",
+   "scene": "close",
+   "data": {
+    "lines": [
+     "Right answer.",
+     "Wrong reason."
+    ],
+    "accent": "mid"
+   }
+  }
+ ],
+ "claims": [
+  {
+   "shown": "13",
+   "expr": null,
+   "value": null,
+   "source": 1,
+   "note": "Wikipedia, Clever Hans: the 1904 commission led by Carl Stumpf had 13 members"
+  },
+  {
+   "shown": "89%",
+   "expr": "50/56*100",
+   "value": 89.2857,
+   "source": null
+  },
+  {
+   "shown": "50 of 56",
+   "expr": null,
+   "value": null,
+   "source": 1,
+   "note": "Wikipedia, Clever Hans: with the questioner visible Hans was right 50 of 56 times (89%)"
+  },
+  {
+   "shown": "2 of 35",
+   "expr": null,
+   "value": null,
+   "source": 1,
+   "note": "Wikipedia, Clever Hans: with the questioner not visible Hans was right 2 of 35 times (6%)"
+  }
+ ],
+ "facts": [
+  {
+   "claim": "Wilhelm von Osten trained Hans in Berlin, and Hans appeared to answer questions with hoof taps",
+   "source": 0,
+   "note": "Britannica, Clever Hans: trainer Wilhelm von Osten; Berlin; exhibitions from 1891; answered by hoof taps"
+  },
+  {
+   "claim": "A 13-member panel led by Carl Stumpf concluded in September 1904 that no tricks were involved",
+   "source": 1,
+   "note": "Wikipedia, Clever Hans: 13-member commission, September 1904, no tricks"
+  },
+  {
+   "claim": "Oskar Pfungst published a report in 1907 finding Hans responded to subtle, probably involuntary cues from the questioner",
+   "source": 0,
+   "note": "Britannica: Pfungst, student at the Psychological Institute, University of Berlin; report 1907; 'very subtle, probably involuntary, cues'"
+  },
+  {
+   "claim": "Hans got 50 of 56 right when he could see the questioner and 2 of 35 when he could not",
+   "source": 1,
+   "note": "Wikipedia, Clever Hans: Pfungst's blinder tests; visible 50 of 56 (89%); not visible 2 of 35 (6%)"
+  },
+  {
+   "claim": "The questioner's posture and expression tensed as the taps approached the right answer and relaxed at the last tap",
+   "source": 1,
+   "note": "Wikipedia, Clever Hans: cause of the effect"
+  },
+  {
+   "claim": "The term Clever Hans effect is also used for AI models that appear to predict correctly for the wrong reasons",
+   "source": 1,
+   "note": "Wikipedia, Clever Hans, Machine learning / AI section"
+  }
+ ],
+ "copy_parts": {
+  "youtube": {
+   "hook": "A horse seemed to do arithmetic. A student found he was reading cues from the questioner. The same label now describes models that are right for the wrong reason."
+  },
+  "instagram": {
+   "caption": "Clever Hans seemed to do arithmetic. With the questioner hidden he got 2 of 35 right. The same effect shows up in AI models."
+  },
+  "tiktok": {
+   "caption": "Clever Hans: the horse that read faces."
+  },
+  "hashtags": {
+   "youtube": [
+    "#tech",
+    "#ai",
+    "#cleverhans",
+    "#aihistory"
+   ],
+   "instagram": [
+    "#tech",
+    "#ai",
+    "#cleverhans"
+   ],
+   "tiktok": [
+    "#tech",
+    "#ai"
+   ]
+  }
+ },
+ "authored": {
+  "by": "claude",
+  "date": "2026-11-08"
+ }
+}

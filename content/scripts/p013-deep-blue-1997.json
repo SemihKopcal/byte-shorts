@@ -1,0 +1,248 @@
+{
+ "id": "p013-deep-blue-1997",
+ "series": "G",
+ "lang": "en",
+ "format": "story",
+ "theme": "midnight",
+ "title": "Deep Blue lost in 1996, then won in 1997",
+ "summary": "IBM's chess machine lost a match in 1996. An upgraded Deep Blue won the 1997 rematch 3.5 to 2.5.",
+ "tags": [
+  "deep blue",
+  "chess",
+  "ibm",
+  "ai history"
+ ],
+ "sources": [
+  "https://www.britannica.com/EBchecked/topic/155485/Deep-Blue",
+  "https://www.cefns.nau.edu/~edo/Classes/CS470-570_WWW/Readings/Campbell2002.pdf"
+ ],
+ "beats": [
+  {
+   "id": "b1",
+   "role": "hook",
+   "say": "A chess machine lost in nineteen ninety six, then won the rematch.",
+   "cap": "1996: lost. 1997: won.",
+   "scene": "contrast",
+   "data": {
+    "left": {
+     "label": "1996 match",
+     "value": "2 – 4"
+    },
+    "right": {
+     "label": "1997 rematch",
+     "value": "3.5 – 2.5",
+     "tone": "good"
+    },
+    "verdict": "Deep Blue's score, first number"
+   }
+  },
+  {
+   "id": "b2",
+   "role": "why",
+   "say": "IBM designed Deep Blue to play chess.",
+   "cap": "IBM's Deep Blue"
+  },
+  {
+   "id": "b3",
+   "role": "why",
+   "say": "In nineteen ninety six, Deep Blue one lost the match four to two.",
+   "cap": "1996: lost 2 – 4"
+  },
+  {
+   "id": "b4",
+   "role": "data",
+   "say": "The nineteen ninety seven machine used four hundred eighty chess chips.",
+   "cap": "30 nodes × 16 chips = 480",
+   "scene": "equation",
+   "data": {
+    "terms": [
+     {
+      "value": "30",
+      "label": "nodes"
+     },
+     {
+      "value": "16",
+      "label": "chips each"
+     }
+    ],
+    "op": "×",
+    "result": {
+     "value": "480",
+     "label": "chess chips",
+     "tone": "mid"
+    }
+   }
+  },
+  {
+   "id": "b5",
+   "role": "data",
+   "say": "It could evaluate about two hundred million positions every second.",
+   "cap": "~200 million positions a second",
+   "scene": "counter",
+   "data": {
+    "from": 0,
+    "to": 200,
+    "suffix": " million",
+    "note": "positions per second",
+    "tone": "mid"
+   }
+  },
+  {
+   "id": "b6",
+   "role": "data",
+   "say": "In May nineteen ninety seven, the rematch ran six games.",
+   "cap": "May 1997: six games"
+  },
+  {
+   "id": "b7",
+   "role": "data",
+   "say": "It won two, drew three, and lost one.",
+   "cap": "2 wins · 3 draws · 1 loss",
+   "scene": "table",
+   "data": {
+    "rows": [
+     {
+      "name": "Wins",
+      "value": "2",
+      "ratio": 2,
+      "tone": "good"
+     },
+     {
+      "name": "Draws",
+      "value": "3",
+      "ratio": 3
+     },
+     {
+      "name": "Losses",
+      "value": "1",
+      "ratio": 1,
+      "tone": "bad"
+     }
+    ]
+   }
+  },
+  {
+   "id": "b8",
+   "role": "turn",
+   "say": "The deciding sixth game lasted only nineteen moves.",
+   "cap": "Game 6: 19 moves"
+  },
+  {
+   "id": "b9",
+   "role": "resolve",
+   "say": "Final score: three and a half to two and a half.",
+   "cap": "Final: 3.5 – 2.5"
+  },
+  {
+   "id": "b10",
+   "role": "resolve",
+   "say": "Four hundred eighty chips. Three and a half points.",
+   "cap": "480 chips. 3.5 points.",
+   "scene": "close",
+   "data": {
+    "lines": [
+     "1996: 2 – 4",
+     "1997: 3.5 – 2.5"
+    ],
+    "accent": "good"
+   }
+  }
+ ],
+ "claims": [
+  {
+   "shown": "3.5–2.5",
+   "expr": null,
+   "value": null,
+   "source": 0,
+   "note": "Britannica: Deep Blue won the 1997 rematch 3.5-2.5 (two wins, three draws)"
+  },
+  {
+   "shown": "30",
+   "expr": null,
+   "value": null,
+   "source": 1,
+   "note": "Campbell et al., Deep Blue: a 30-node IBM RS/6000 SP"
+  },
+  {
+   "shown": "16",
+   "expr": null,
+   "value": null,
+   "source": 1,
+   "note": "Campbell et al.: 16 chess chips per node"
+  },
+  {
+   "shown": "480",
+   "expr": "30*16",
+   "value": 480.0,
+   "source": null
+  },
+  {
+   "shown": "200 million",
+   "expr": null,
+   "value": null,
+   "source": 0,
+   "note": "Britannica: could evaluate 200 million chess positions per second"
+  },
+  {
+   "shown": "19",
+   "expr": null,
+   "value": null,
+   "source": 0,
+   "note": "Britannica: won the deciding sixth game in 19 moves"
+  }
+ ],
+ "facts": [
+  {
+   "claim": "IBM's Deep Blue won the six-game 1997 rematch 3.5 to 2.5 with two wins and three draws, and took the deciding sixth game in 19 moves",
+   "source": 0,
+   "note": "Britannica, Deep Blue: won 3.5-2.5, two wins and three draws; sixth game won in 19 moves"
+  },
+  {
+   "claim": "Deep Blue could evaluate 200 million chess positions per second",
+   "source": 0,
+   "note": "Britannica, Deep Blue: 200 million positions per second"
+  },
+  {
+   "claim": "In 1996 the human champion won 4-2 against Deep Blue I, a six-game match",
+   "source": 1,
+   "note": "Campbell, Hoane, Hsu 2002: 1996 match won 4-2 by the human champion against Deep Blue I"
+  },
+  {
+   "claim": "The 1997 Deep Blue was a 30-node IBM RS/6000 SP with 16 chess chips per node, 480 in total, and the rematch was played in May 1997",
+   "source": 1,
+   "note": "Campbell et al.: 30-node RS/6000 SP, 480 single-chip chess search engines, 16 per node; rematch May 1997"
+  }
+ ],
+ "copy_parts": {
+  "youtube": {
+   "hook": "IBM's Deep Blue lost a match in 1996 and won the 1997 rematch 3.5 to 2.5. The 1997 machine used 480 custom chess chips."
+  },
+  "instagram": {
+   "caption": "Deep Blue lost in 1996, then won the 1997 rematch 3.5 to 2.5. 480 chess chips, about 200 million positions a second."
+  },
+  "tiktok": {
+   "caption": "Deep Blue lost in 1996, then won in 1997."
+  },
+  "hashtags": {
+   "youtube": [
+    "#tech",
+    "#ai",
+    "#chess",
+    "#aihistory"
+   ],
+   "instagram": [
+    "#tech",
+    "#ai",
+    "#chess"
+   ],
+   "tiktok": [
+    "#tech",
+    "#ai"
+   ]
+  }
+ },
+ "authored": {
+  "by": "claude",
+  "date": "2026-11-08"
+ }
+}

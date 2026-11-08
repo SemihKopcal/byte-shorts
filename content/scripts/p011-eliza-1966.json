@@ -1,0 +1,213 @@
+{
+ "id": "p011-eliza-1966",
+ "series": "G",
+ "lang": "en",
+ "format": "story",
+ "theme": "slate",
+ "title": "ELIZA, the 1966 therapist made of rules",
+ "summary": "In 1966 Joseph Weizenbaum's ELIZA imitated a therapist with keyword rules and no understanding. He was startled by how fast people treated it as human.",
+ "tags": [
+  "eliza",
+  "chatbot history",
+  "ai history",
+  "weizenbaum"
+ ],
+ "sources": [
+  "https://en.wikipedia.org/wiki/ELIZA",
+  "https://people.eecs.berkeley.edu/~bh/v2ch9/doctor.html",
+  "https://sites.google.com/view/elizaarchaeology/blog/weizenbaums-secretary"
+ ],
+ "beats": [
+  {
+   "id": "b1",
+   "role": "hook",
+   "say": "A program from nineteen sixty six imitated a therapist using simple rules.",
+   "cap": "1966: a therapist made of rules",
+   "scene": "title",
+   "data": {
+    "kicker": "ELIZA",
+    "lines": [
+     "A therapist",
+     "made of rules"
+    ],
+    "accent": "mid"
+   }
+  },
+  {
+   "id": "b2",
+   "role": "why",
+   "say": "Joseph Weizenbaum built it at M.I.T. and named it ELIZA.",
+   "cap": "Joseph Weizenbaum, MIT"
+  },
+  {
+   "id": "b3",
+   "role": "why",
+   "say": "Its best known script, DOCTOR, played a therapist who mirrors the patient.",
+   "cap": "DOCTOR: a Rogerian therapist"
+  },
+  {
+   "id": "b4",
+   "role": "data",
+   "say": "It scanned each sentence for keywords, and every keyword had a priority.",
+   "cap": "Keywords had priorities",
+   "scene": "steps",
+   "data": {
+    "steps": [
+     {
+      "label": "Find the top keyword",
+      "sub": "each one has a priority"
+     },
+     {
+      "label": "Swap the pronouns",
+      "sub": "my becomes your"
+     },
+     {
+      "label": "Fill in a stored reply",
+      "sub": "replies take turns"
+     }
+    ]
+   }
+  },
+  {
+   "id": "b5",
+   "role": "data",
+   "say": "Then it swapped first and second person, so my became your.",
+   "cap": "Rule at work: my becomes your",
+   "scene": "chat",
+   "data": {
+    "messages": [
+     {
+      "who": "user",
+      "name": "Patient",
+      "text": "My spirits are low."
+     },
+     {
+      "who": "bot",
+      "name": "DOCTOR-style rule",
+      "text": "Your spirits are low?",
+      "tone": "mid"
+     }
+    ]
+   }
+  },
+  {
+   "id": "b6",
+   "role": "data",
+   "say": "The first matching rule supplied a reply, and replies took turns.",
+   "cap": "First matching rule wins"
+  },
+  {
+   "id": "b7",
+   "role": "turn",
+   "say": "It understood nothing, and its author said so.",
+   "cap": "No understanding. Pattern matching.",
+   "scene": "byte_says",
+   "data": {
+    "pose": "shrug",
+    "cursor": "amber",
+    "line": "No understanding. Patterns."
+   }
+  },
+  {
+   "id": "b8",
+   "role": "turn",
+   "say": "Weizenbaum was startled how quickly people treated it as human.",
+   "cap": "People treated it as human, fast"
+  },
+  {
+   "id": "b9",
+   "role": "resolve",
+   "say": "He opposed using programs like it to treat real patients.",
+   "cap": "He opposed it as real therapy"
+  },
+  {
+   "id": "b10",
+   "role": "resolve",
+   "say": "Pattern matching sounded like care. It was still pattern matching.",
+   "cap": "Sounded like care. Was rules.",
+   "scene": "close",
+   "data": {
+    "lines": [
+     "Sounded like care.",
+     "Was rules."
+    ],
+    "accent": "mid"
+   }
+  }
+ ],
+ "claims": [],
+ "facts": [
+  {
+   "claim": "Joseph Weizenbaum developed ELIZA at MIT and published about it in 1966",
+   "source": 0,
+   "note": "Wikipedia, ELIZA: developed at MIT by Joseph Weizenbaum (1964 to 1967); his paper appeared in 1966"
+  },
+  {
+   "claim": "Weizenbaum named the program after Eliza Doolittle in Shaw's Pygmalion",
+   "source": 1,
+   "note": "Harvey, Computer Science Logo Style v2 ch.9: named ELIZA after Eliza Doolittle in Pygmalion"
+  },
+  {
+   "claim": "The DOCTOR script imitated a Rogerian psychotherapist by reflecting the patient's statements back",
+   "source": 0,
+   "note": "Wikipedia, ELIZA: best-known script DOCTOR imitates a Rogerian psychotherapist, mirroring the patient"
+  },
+  {
+   "claim": "ELIZA looked for keywords, each with a priority, and used the highest-priority one",
+   "source": 1,
+   "note": "Harvey: input is split into sentences and searched for keywords, each with a priority; the highest is used"
+  },
+  {
+   "claim": "The rules swapped first and second person, for example my to your",
+   "source": 1,
+   "note": "Harvey: translations swap my/your and I/you so the reflected statement reads correctly; example 'My spirits are low' -> 'Your spirits are low?'"
+  },
+  {
+   "claim": "The first matching pattern supplied the reply and replies rotated so the same one did not repeat at once",
+   "source": 1,
+   "note": "Harvey: the first matching pattern is used; responses rotate so the same reply does not repeat right away"
+  },
+  {
+   "claim": "Weizenbaum wrote in 1976 that he was startled by how quickly and unequivocally people anthropomorphized the program",
+   "source": 2,
+   "note": "ELIZA archaeology page, citing Computer Power and Human Reason (1976, pp. 6-7)"
+  },
+  {
+   "claim": "Weizenbaum strongly opposed using programs like ELIZA to give therapy to real patients, and said the program does not understand conversation",
+   "source": 1,
+   "note": "Harvey: the program does not understand conversation (pattern matching and substitution); Weizenbaum strongly opposed using such programs as therapy for real patients"
+  }
+ ],
+ "copy_parts": {
+  "youtube": {
+   "hook": "ELIZA, built at MIT in 1966, imitated a therapist with keyword rules and pronoun swaps. It understood nothing, and its author said so."
+  },
+  "instagram": {
+   "caption": "ELIZA (1966): a therapist made of rules. It understood nothing, and Weizenbaum said so."
+  },
+  "tiktok": {
+   "caption": "ELIZA, the 1966 therapist made of rules."
+  },
+  "hashtags": {
+   "youtube": [
+    "#tech",
+    "#ai",
+    "#aihistory",
+    "#eliza"
+   ],
+   "instagram": [
+    "#tech",
+    "#ai",
+    "#aihistory"
+   ],
+   "tiktok": [
+    "#tech",
+    "#ai"
+   ]
+  }
+ },
+ "authored": {
+  "by": "claude",
+  "date": "2026-11-08"
+ }
+}

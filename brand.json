@@ -2,10 +2,10 @@
  "name": "BYTE",
  "handle": "@byte-knowledge",
  "tagline": "AI tools, measured.",
- "_handle_note": "handle = YouTube adi, kapanis kartinda gorunur. Instagram/TikTok tire kabul etmiyor; orada byte_knowledge kullanilacak (handles). Kodda baska yerde handle yazmiyor.",
- "handles": {"youtube": "@byte-knowledge", "instagram": "@byte_knowledge", "tiktok": "@byte_knowledge"},
+ "_handle_note": "handle = YouTube adi, kapanis kartinda gorunur. Instagram/TikTok tire kabul etmiyor; orada byte_knows kullaniliyor (handles). Kodda baska yerde handle yazmiyor.",
+ "handles": {"youtube": "@byte-knowledge", "instagram": "@byte_knows", "tiktok": "@byte_knows"},
 
- "description_footer": "BYTE measures things about AI tools so you don't have to.\nEvery number on screen comes from a source listed above, measured on the date shown.\nNo affiliate links. No sponsorships.\n\n@byte-knowledge on YouTube. @byte_knowledge on Instagram and TikTok.",
+ "description_footer": "BYTE measures things about AI tools so you don't have to.\nEvery number on screen comes from a source listed above, measured on the date shown.\nNo affiliate links. No sponsorships.\n\n@byte-knowledge on YouTube. @byte_knows on Instagram and TikTok.",
 
  "tags_base": ["ai tools", "ai", "tech", "shorts"],
 

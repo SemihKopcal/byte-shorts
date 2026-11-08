@@ -1,0 +1,292 @@
+{
+ "id": "p020-4k-is-four-1080p",
+ "series": "G",
+ "lang": "en",
+ "format": "measured",
+ "theme": "ice",
+ "title": "4K is four 1080p screens",
+ "summary": "Ultra HD 3840 x 2160 has 8,294,400 pixels, exactly four times the 2,073,600 of 1080p. Cinema 4K is slightly wider.",
+ "tags": [
+  "resolution",
+  "4k",
+  "pixels",
+  "explained"
+ ],
+ "sources": [
+  "https://en.wikipedia.org/wiki/4K_resolution",
+  "https://en.wikipedia.org/wiki/1080p"
+ ],
+ "beats": [
+  {
+   "id": "b1",
+   "role": "hook",
+   "say": "One four K screen has the pixels of four full H.D. screens.",
+   "cap": "1080p × 4 = 4K UHD",
+   "scene": "contrast",
+   "data": {
+    "left": {
+     "label": "1080p",
+     "value": "2,073,600 px"
+    },
+    "right": {
+     "label": "4K UHD",
+     "value": "8,294,400 px",
+     "tone": "mid"
+    },
+    "verdict": "Four times the pixels"
+   }
+  },
+  {
+   "id": "b2",
+   "role": "why",
+   "say": "Full H.D. is nineteen twenty pixels across and ten eighty pixels down.",
+   "cap": "1080p = 1,920 × 1,080",
+   "scene": "equation",
+   "data": {
+    "terms": [
+     {
+      "value": "1,920",
+      "label": "across"
+     },
+     {
+      "value": "1,080",
+      "label": "down"
+     }
+    ],
+    "op": "×",
+    "result": {
+     "value": "2,073,600",
+     "label": "pixels",
+     "tone": "good"
+    }
+   }
+  },
+  {
+   "id": "b3",
+   "role": "why",
+   "say": "Four K Ultra H.D. is thirty eight forty across and twenty one sixty down.",
+   "cap": "UHD = 3,840 × 2,160",
+   "scene": "equation",
+   "data": {
+    "terms": [
+     {
+      "value": "3,840",
+      "label": "across"
+     },
+     {
+      "value": "2,160",
+      "label": "down"
+     }
+    ],
+    "op": "×",
+    "result": {
+     "value": "8,294,400",
+     "label": "pixels",
+     "tone": "mid"
+    }
+   }
+  },
+  {
+   "id": "b4",
+   "role": "data",
+   "say": "Ultra H.D. is exactly double the width and double the height.",
+   "cap": "3,840 / 1,920 = 2 · 2,160 / 1,080 = 2",
+   "scene": "split",
+   "data": {
+    "a": {
+     "label": "Twice as wide",
+     "sub": "3,840 vs 1,920",
+     "tone": "good"
+    },
+    "b": {
+     "label": "Twice as tall",
+     "sub": "2,160 vs 1,080",
+     "tone": "mid"
+    }
+   }
+  },
+  {
+   "id": "b5",
+   "role": "data",
+   "say": "Two times two is four.",
+   "cap": "2 × 2 = 4"
+  },
+  {
+   "id": "b6",
+   "role": "data",
+   "say": "Eight million pixels, against about two million.",
+   "cap": "8.29 million vs 2.07 million",
+   "scene": "bars",
+   "data": {
+    "rows": [
+     {
+      "name": "1080p",
+      "v": 2.07,
+      "label": "2.07 million"
+     },
+     {
+      "name": "4K UHD",
+      "v": 8.29,
+      "label": "8.29 million",
+      "tone": "mid"
+     }
+    ]
+   }
+  },
+  {
+   "id": "b7",
+   "role": "turn",
+   "say": "A four K frame is four H.D. frames in a two by two grid.",
+   "cap": "4 × 1080p tiles = 1 UHD frame",
+   "scene": "dots",
+   "data": {
+    "total": 4,
+    "hit": 4,
+    "cols": 2,
+    "label": "1080p tiles in one UHD frame",
+    "tone": "mid"
+   }
+  },
+  {
+   "id": "b8",
+   "role": "turn",
+   "say": "Cinema four K is a little wider, so it is not exactly four.",
+   "cap": "Cinema 4K: 4,096 × 2,160",
+   "scene": "table",
+   "data": {
+    "rows": [
+     {
+      "name": "1080p",
+      "value": "1,920 × 1,080",
+      "ratio": 1
+     },
+     {
+      "name": "UHD 4K",
+      "value": "3,840 × 2,160",
+      "ratio": 4,
+      "tone": "mid"
+     },
+     {
+      "name": "Cinema 4K",
+      "value": "4,096 × 2,160",
+      "ratio": 4.27,
+      "tone": "good"
+     }
+    ]
+   }
+  },
+  {
+   "id": "b9",
+   "role": "resolve",
+   "say": "Double the width and the height, and you get four times the pixels.",
+   "cap": "2 wide × 2 tall = 4 times"
+  },
+  {
+   "id": "b10",
+   "role": "resolve",
+   "say": "The name four K covers more than one exact size.",
+   "cap": "4K is a family of sizes",
+   "scene": "close",
+   "data": {
+    "lines": [
+     "1080p × 4",
+     "= 4K UHD"
+    ],
+    "accent": "mid"
+   }
+  }
+ ],
+ "claims": [
+  {
+   "shown": "2,073,600",
+   "expr": "1920*1080",
+   "value": 2073600.0,
+   "source": null
+  },
+  {
+   "shown": "8,294,400",
+   "expr": "3840*2160",
+   "value": 8294400.0,
+   "source": null
+  },
+  {
+   "shown": "1,920 × 1,080",
+   "expr": "1920*1080",
+   "value": 2073600.0,
+   "source": null
+  },
+  {
+   "shown": "3,840 × 2,160",
+   "expr": "3840*2160",
+   "value": 8294400.0,
+   "source": null
+  },
+  {
+   "shown": "2.07",
+   "expr": "1920*1080/10**6",
+   "value": 2.0736,
+   "source": null
+  },
+  {
+   "shown": "8.29",
+   "expr": "3840*2160/10**6",
+   "value": 8.2944,
+   "source": null
+  },
+  {
+   "shown": "4,096 × 2,160",
+   "expr": "4096*2160",
+   "value": 8847360.0,
+   "source": null
+  }
+ ],
+ "facts": [
+  {
+   "claim": "Ultra HD is 3840 x 2160, 8,294,400 pixels, exactly double the horizontal and vertical resolution of 1080p, so four times the pixels",
+   "source": 0,
+   "note": "Wikipedia, 4K resolution: UHD 3840 x 2160 = 8,294,400 pixels; 'exactly double the horizontal and vertical resolution of 1080p'"
+  },
+  {
+   "claim": "DCI 4K is 4096 x 2160, 8,847,360 pixels, and ITU-R BT.2020 and the CTA define the UHD formats",
+   "source": 0,
+   "note": "Wikipedia, 4K resolution: DCI 4K 4096 x 2160 = 8,847,360 pixels; ITU-R Recommendation BT.2020 defines UHDTV; CEA/CTA defines Ultra HD with a 3840 x 2160 minimum"
+  },
+  {
+   "claim": "1080p is 1920 x 1080 pixels, about 2.1 megapixels, with progressive scan",
+   "source": 1,
+   "note": "Wikipedia, 1080p: 1920 x 1080; the p is progressive scan; about 2.1 megapixels"
+  }
+ ],
+ "copy_parts": {
+  "youtube": {
+   "hook": "One 4K UHD frame has 8,294,400 pixels, exactly four times the 2,073,600 of 1080p. Cinema 4K is slightly wider at 4096 by 2160."
+  },
+  "instagram": {
+   "caption": "4K UHD is four 1080p screens: 8,294,400 pixels vs 2,073,600. Cinema 4K is a little wider, so 4K is a family of sizes."
+  },
+  "tiktok": {
+   "caption": "4K is four 1080p screens."
+  },
+  "hashtags": {
+   "youtube": [
+    "#tech",
+    "#4k",
+    "#pixels",
+    "#explained"
+   ],
+   "instagram": [
+    "#tech",
+    "#4k",
+    "#pixels"
+   ],
+   "tiktok": [
+    "#tech",
+    "#4k"
+   ]
+  }
+ },
+ "authored": {
+  "by": "claude",
+  "date": "2026-11-08"
+ }
+}

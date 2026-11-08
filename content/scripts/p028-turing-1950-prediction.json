@@ -1,0 +1,193 @@
+{
+ "id": "p028-turing-1950-prediction",
+ "series": "G",
+ "lang": "en",
+ "format": "story",
+ "theme": "slate",
+ "title": "Turing's 1950 prediction, read closely",
+ "summary": "In 1950 Turing predicted that in about fifty years computers could play the imitation game well enough that an average interrogator would have no more than a 70 percent chance of a right identification after five minutes.",
+ "tags": [
+  "turing test",
+  "turing",
+  "ai history",
+  "1950"
+ ],
+ "sources": [
+  "https://www.cs.virginia.edu/evans/greatworks/TuringTest.pdf",
+  "https://plato.stanford.edu/archives/spr2006/entries/turing-test/"
+ ],
+ "beats": [
+  {
+   "id": "b1",
+   "role": "hook",
+   "say": "In nineteen fifty, Turing predicted a test with a five minute limit.",
+   "cap": "5 minutes. 70%.",
+   "scene": "contrast",
+   "data": {
+    "left": {
+     "label": "interrogator's time",
+     "value": "5 minutes"
+    },
+    "right": {
+     "label": "chance of a right call",
+     "value": "≤ 70%",
+     "tone": "mid"
+    },
+    "verdict": "Turing's own numbers"
+   }
+  },
+  {
+   "id": "b2",
+   "role": "why",
+   "say": "The paper was Computing Machinery and Intelligence, from nineteen fifty.",
+   "cap": "Computing Machinery and Intelligence, 1950"
+  },
+  {
+   "id": "b3",
+   "role": "why",
+   "say": "It described an imitation game with a machine and an interrogator.",
+   "cap": "The imitation game"
+  },
+  {
+   "id": "b4",
+   "role": "data",
+   "say": "He predicted that in about fifty years, computers could play it well.",
+   "cap": "About 50 years"
+  },
+  {
+   "id": "b5",
+   "role": "data",
+   "say": "With a storage capacity of about ten to the ninth.",
+   "cap": "Storage: about 10^9",
+   "scene": "scale",
+   "data": {
+    "items": [
+     {
+      "label": "Turing's storage figure",
+      "exp": 9,
+      "text": "about 10^9"
+     }
+    ]
+   }
+  },
+  {
+   "id": "b6",
+   "role": "data",
+   "say": "An average interrogator would have no more than a seventy percent chance of a right call.",
+   "cap": "At most 70% right, after 5 minutes",
+   "scene": "ring",
+   "data": {
+    "value": 70,
+    "of": 100,
+    "label": "chance of a right identification (at most)",
+    "sub": "after five minutes of questions",
+    "tone": "mid"
+   }
+  },
+  {
+   "id": "b7",
+   "role": "turn",
+   "say": "That means at least three calls in ten would be wrong.",
+   "cap": "At least 30% wrong"
+  },
+  {
+   "id": "b8",
+   "role": "turn",
+   "say": "Turing set a time limit and a threshold, both stated in numbers.",
+   "cap": "Time limit + threshold"
+  },
+  {
+   "id": "b9",
+   "role": "resolve",
+   "say": "Claims of passing can be checked against those two numbers: five minutes, seventy percent.",
+   "cap": "Check against the paper"
+  },
+  {
+   "id": "b10",
+   "role": "resolve",
+   "say": "The prediction is short and specific. That makes it testable.",
+   "cap": "Short. Specific. Testable.",
+   "scene": "close",
+   "data": {
+    "lines": [
+     "Five minutes.",
+     "Seventy percent."
+    ],
+    "accent": "mid"
+   }
+  }
+ ],
+ "claims": [
+  {
+   "shown": "70%",
+   "expr": null,
+   "value": null,
+   "source": 1,
+   "note": "Stanford Encyclopedia of Philosophy, Turing Test: Turing predicted an average interrogator would not have more than a 70 percent chance of making the right identification after five minutes"
+  },
+  {
+   "shown": "50",
+   "expr": null,
+   "value": null,
+   "source": 0,
+   "note": "Turing 1950 (Virginia copy): in about fifty years it would be possible to programme computers to play the imitation game"
+  },
+  {
+   "shown": "10^9",
+   "expr": null,
+   "value": null,
+   "source": 0,
+   "note": "Turing 1950: a storage capacity of about 10^9"
+  },
+  {
+   "shown": "30%",
+   "expr": "100-70",
+   "value": 30.0,
+   "source": null
+  }
+ ],
+ "facts": [
+  {
+   "claim": "In his 1950 paper Turing predicted that in about fifty years computers with a storage capacity of about 10^9 could play the imitation game so well that an average interrogator would not have more than a 70 percent chance of a right identification after five minutes of questioning",
+   "source": 0,
+   "note": "Turing 1950, section 6 (Virginia copy of the paper)"
+  },
+  {
+   "claim": "The Stanford Encyclopedia of Philosophy quotes the same prediction: about fifty years, storage about 10^9, no more than 70 percent chance after five minutes",
+   "source": 1,
+   "note": "SEP, The Turing Test (2006 archive): quotes Turing (1950) with 'in about fifty years' time', 'storage capacity of about 10^9' (superscript lost in the page text), 70 percent, five minutes"
+  }
+ ],
+ "copy_parts": {
+  "youtube": {
+   "hook": "In 1950 Turing predicted that in about fifty years computers could play the imitation game so well that an average interrogator would have no more than a 70 percent chance of a right identification after five minutes."
+  },
+  "instagram": {
+   "caption": "Turing's 1950 prediction in numbers: about fifty years, a storage figure of about 10^9, five minutes, and a 70 percent ceiling."
+  },
+  "tiktok": {
+   "caption": "Turing's 1950 prediction, read closely."
+  },
+  "hashtags": {
+   "youtube": [
+    "#tech",
+    "#ai",
+    "#turing",
+    "#aihistory"
+   ],
+   "instagram": [
+    "#tech",
+    "#ai",
+    "#turing"
+   ],
+   "tiktok": [
+    "#tech",
+    "#ai"
+   ]
+  }
+ },
+ "authored": {
+  "by": "claude",
+  "date": "2026-11-08"
+ }
+}

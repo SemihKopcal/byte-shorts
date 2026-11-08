@@ -1,0 +1,195 @@
+{
+ "id": "p025-words-as-coordinates",
+ "series": "G",
+ "lang": "en",
+ "format": "explain",
+ "theme": "midnight",
+ "title": "Words as coordinates: king minus man plus woman",
+ "summary": "A 2013 paper showed that king minus man plus woman lands closest to queen in a word vector space. A 2020 paper argued analogies are not an accurate test for bias.",
+ "tags": [
+  "word2vec",
+  "embeddings",
+  "vectors",
+  "explained"
+ ],
+ "sources": [
+  "https://arxiv.org/pdf/1301.3781",
+  "https://aclanthology.org/2020.cl-2.7"
+ ],
+ "beats": [
+  {
+   "id": "b1",
+   "role": "hook",
+   "say": "King minus man plus woman lands closest to queen, in a model.",
+   "cap": "king − man + woman ≈ queen",
+   "scene": "title",
+   "data": {
+    "kicker": "Word vectors",
+    "lines": [
+     "king − man",
+     "+ woman",
+     "≈ queen"
+    ],
+    "accent": "mid"
+   }
+  },
+  {
+   "id": "b2",
+   "role": "why",
+   "say": "A model can turn each word into a list of numbers.",
+   "cap": "word → vector"
+  },
+  {
+   "id": "b3",
+   "role": "why",
+   "say": "That list works like coordinates, a position on a map.",
+   "cap": "Vector = coordinates"
+  },
+  {
+   "id": "b4",
+   "role": "data",
+   "say": "A Google paper trained word vectors on one point six billion words, in under a day.",
+   "cap": "1.6 billion words · under a day"
+  },
+  {
+   "id": "b5",
+   "role": "data",
+   "say": "The paper's example: king minus man plus woman is closest to queen.",
+   "cap": "vec(king) − vec(man) + vec(woman) ≈ vec(queen)",
+   "scene": "equation",
+   "data": {
+    "terms": [
+     {
+      "value": "king"
+     },
+     {
+      "value": "man"
+     },
+     {
+      "value": "woman"
+     }
+    ],
+    "ops": [
+     "−",
+     "+"
+    ],
+    "result": {
+     "value": "≈ queen",
+     "tone": "good"
+    }
+   }
+  },
+  {
+   "id": "b6",
+   "role": "data",
+   "say": "On the paper's relationship test, its best skip-gram model scored sixty five point six percent.",
+   "cap": "Test accuracy: 65.6%",
+   "scene": "ring",
+   "data": {
+    "value": 65.6,
+    "of": 100,
+    "label": "relationship test accuracy",
+    "sub": "best model in the paper",
+    "tone": "mid",
+    "dp": 1
+   }
+  },
+  {
+   "id": "b7",
+   "role": "turn",
+   "say": "A later paper argued analogies are not an accurate test for bias.",
+   "cap": "2020: analogies ≠ a bias test"
+  },
+  {
+   "id": "b8",
+   "role": "turn",
+   "say": "Its title: Man is to doctor as woman is to doctor.",
+   "cap": "\"Man is to doctor as woman is to doctor\""
+  },
+  {
+   "id": "b9",
+   "role": "resolve",
+   "say": "The vectors are real. The tidy example is not the whole picture.",
+   "cap": "Real vectors. Partial picture."
+  },
+  {
+   "id": "b10",
+   "role": "resolve",
+   "say": "Words became positions, and positions can be added.",
+   "cap": "Words became positions.",
+   "scene": "close",
+   "data": {
+    "lines": [
+     "king − man + woman",
+     "≈ queen"
+    ],
+    "accent": "mid"
+   }
+  }
+ ],
+ "claims": [
+  {
+   "shown": "1.6",
+   "expr": null,
+   "value": null,
+   "source": 0,
+   "note": "Mikolov et al. abstract: high quality word vectors learned from a 1.6 billion word data set in less than a day"
+  },
+  {
+   "shown": "65.6%",
+   "expr": null,
+   "value": null,
+   "source": 0,
+   "note": "Mikolov et al., Table 6: Skip-gram 1000-dim trained on 6B words, total accuracy 65.6% on the Semantic-Syntactic Word Relationship test set"
+  }
+ ],
+ "facts": [
+  {
+   "claim": "Mikolov, Chen, Corrado and Dean (Google) learned word vectors from a 1.6 billion word data set in under a day, and vector('King') - vector('Man') + vector('Woman') is closest to vector('Queen')",
+   "source": 0,
+   "note": "arXiv 1301.3781: abstract and the vector-offset example"
+  },
+  {
+   "claim": "The best skip-gram model in the paper reached 65.6% total accuracy on the Semantic-Syntactic Word Relationship test",
+   "source": 0,
+   "note": "arXiv 1301.3781, Table 6: 1000-dim, 6B words: 66.1% semantic, 65.1% syntactic, 65.6% total"
+  },
+  {
+   "claim": "A 2020 Computational Linguistics paper titled 'Fair Is Better than Sensational: Man Is to Doctor as Woman Is to Doctor' argues analogies are not an accurate diagnostic for bias",
+   "source": 1,
+   "note": "ACL Anthology 2020.cl-2.7 abstract: 'analogies are in fact not an accurate diagnostic for bias'; human biases are still present in embeddings"
+  }
+ ],
+ "copy_parts": {
+  "youtube": {
+   "hook": "A 2013 paper showed king minus man plus woman lands closest to queen in a word vector space. A 2020 paper argued analogies are not an accurate test for bias."
+  },
+  "instagram": {
+   "caption": "Words as coordinates: king minus man plus woman lands closest to queen. A later paper explains where the trick stops working as a bias test."
+  },
+  "tiktok": {
+   "caption": "Words as coordinates: king minus man plus woman."
+  },
+  "hashtags": {
+   "youtube": [
+    "#tech",
+    "#ai",
+    "#embeddings",
+    "#explained"
+   ],
+   "instagram": [
+    "#tech",
+    "#ai",
+    "#embeddings"
+   ],
+   "tiktok": [
+    "#tech",
+    "#ai"
+   ]
+  }
+ },
+ "authored": {
+  "by": "claude",
+  "date": "2026-11-08"
+ }
+}

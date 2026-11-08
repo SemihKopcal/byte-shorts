@@ -1,0 +1,221 @@
+{
+ "id": "p030-the-context-window",
+ "series": "G",
+ "lang": "en",
+ "format": "explain",
+ "theme": "deep",
+ "title": "The context window: a chatbot's working memory",
+ "summary": "The context window is everything a model can reference while replying: the messages, documents and the reply itself. Too long and the request is rejected, or old turns drop out.",
+ "tags": [
+  "context window",
+  "tokens",
+  "llm basics",
+  "explained"
+ ],
+ "sources": [
+  "https://platform.claude.com/docs/en/build-with-claude/context-windows",
+  "https://developers.openai.com/api/docs/guides/conversation-state"
+ ],
+ "beats": [
+  {
+   "id": "b1",
+   "role": "hook",
+   "say": "A chatbot's working memory is a window of fixed size.",
+   "cap": "A fixed-size working memory",
+   "scene": "title",
+   "data": {
+    "kicker": "Context window",
+    "lines": [
+     "A fixed-size",
+     "working memory"
+    ],
+    "accent": "mid"
+   }
+  },
+  {
+   "id": "b2",
+   "role": "why",
+   "say": "The context window is everything the model can reference while replying.",
+   "cap": "Everything it can reference"
+  },
+  {
+   "id": "b3",
+   "role": "why",
+   "say": "That includes the messages, the documents, and the reply itself.",
+   "cap": "Messages + documents + reply",
+   "scene": "layers",
+   "data": {
+    "layers": [
+     {
+      "label": "System prompt"
+     },
+     {
+      "label": "Every message"
+     },
+     {
+      "label": "Tools and documents"
+     },
+     {
+      "label": "The reply itself",
+      "tone": "mid"
+     }
+    ],
+    "total": "all of it counts toward the window"
+   }
+  },
+  {
+   "id": "b4",
+   "role": "data",
+   "say": "OpenAI defines it as the maximum tokens in a single request.",
+   "cap": "Max tokens in one request"
+  },
+  {
+   "id": "b5",
+   "role": "data",
+   "say": "OpenAI's count includes input, output, and reasoning tokens.",
+   "cap": "Input + output + reasoning",
+   "scene": "equation",
+   "data": {
+    "terms": [
+     {
+      "value": "input"
+     },
+     {
+      "value": "output"
+     },
+     {
+      "value": "reasoning"
+     }
+    ],
+    "ops": [
+     "+",
+     "+"
+    ],
+    "result": {
+     "value": "the window",
+     "label": "all of them count",
+     "tone": "mid"
+    }
+   }
+  },
+  {
+   "id": "b6",
+   "role": "data",
+   "say": "If the input alone is too large, the API returns an error.",
+   "cap": "Too long: the request is rejected",
+   "scene": "terminal",
+   "data": {
+    "title": "request",
+    "lines": [
+     {
+      "text": "$ send request",
+      "kind": "cmd"
+     },
+     {
+      "text": "400 invalid_request_error",
+      "kind": "err"
+     },
+     {
+      "text": "prompt is too long",
+      "kind": "err"
+     }
+    ]
+   }
+  },
+  {
+   "id": "b7",
+   "role": "turn",
+   "say": "Chat apps can manage a full window by dropping the oldest turns first.",
+   "cap": "Oldest turns drop first"
+  },
+  {
+   "id": "b8",
+   "role": "turn",
+   "say": "Forgetting here means old text is no longer in the window.",
+   "cap": "Forgetting = out of the window"
+  },
+  {
+   "id": "b9",
+   "role": "resolve",
+   "say": "Windows are measured in tokens, so how much fits depends on the text.",
+   "cap": "Measured in tokens"
+  },
+  {
+   "id": "b10",
+   "role": "resolve",
+   "say": "Inside the window, text is used. Outside it, it is not.",
+   "cap": "Inside: used. Outside: not.",
+   "scene": "close",
+   "data": {
+    "lines": [
+     "Inside: used.",
+     "Outside: not used."
+    ],
+    "accent": "mid"
+   }
+  }
+ ],
+ "claims": [
+  {
+   "shown": "400",
+   "expr": null,
+   "value": null,
+   "source": 0,
+   "note": "Anthropic docs: if the input alone is too large, the API returns a 400 invalid_request_error ('prompt is too long')"
+  }
+ ],
+ "facts": [
+  {
+   "claim": "Anthropic's documentation defines the context window as all the text a language model can reference when generating a response, including the response itself, and calls it the model's working memory",
+   "source": 0,
+   "note": "Claude Platform docs, Context windows: definition and 'working memory'"
+  },
+  {
+   "claim": "Everything in the request counts toward the window: the system prompt, every message including tool results and documents, and the output counts too",
+   "source": 0,
+   "note": "Claude Platform docs: what counts toward the context window"
+  },
+  {
+   "claim": "If the input alone is too large the API returns a 400 invalid_request_error ('prompt is too long'), and chat interfaces can manage the window on a rolling first-in, first-out basis",
+   "source": 0,
+   "note": "Claude Platform docs: when the window is full"
+  },
+  {
+   "claim": "OpenAI defines the context window as the maximum number of tokens in a single request, including input, output and reasoning tokens",
+   "source": 1,
+   "note": "OpenAI API docs, Conversation state: 'the maximum number of tokens that can be used in a single request'; includes input, output, and reasoning tokens"
+  }
+ ],
+ "copy_parts": {
+  "youtube": {
+   "hook": "The context window is everything a model can reference while replying: the messages, documents and the reply itself. When it is full, a request can be rejected or old turns drop out."
+  },
+  "instagram": {
+   "caption": "The context window explained: a fixed-size working memory that counts input, output and reasoning tokens."
+  },
+  "tiktok": {
+   "caption": "The context window: a chatbot's working memory."
+  },
+  "hashtags": {
+   "youtube": [
+    "#tech",
+    "#ai",
+    "#tokens",
+    "#explained"
+   ],
+   "instagram": [
+    "#tech",
+    "#ai",
+    "#tokens"
+   ],
+   "tiktok": [
+    "#tech",
+    "#ai"
+   ]
+  }
+ },
+ "authored": {
+  "by": "claude",
+  "date": "2026-11-08"
+ }
+}

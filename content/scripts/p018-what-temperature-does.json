@@ -1,0 +1,253 @@
+{
+ "id": "p018-what-temperature-does",
+ "series": "G",
+ "lang": "en",
+ "format": "explain",
+ "theme": "deep",
+ "title": "What temperature does to a chatbot's next word",
+ "summary": "Temperature divides the model's scores before they become odds. Low sharpens the odds, high flattens them, zero always takes the top word.",
+ "tags": [
+  "temperature",
+  "sampling",
+  "llm basics",
+  "explained"
+ ],
+ "sources": [
+  "https://cloud-dot-devsite-v2-prod.appspot.com/vertex-ai/generative-ai/docs/multimodal/content-generation-parameters",
+  "https://arxiv.org/pdf/1503.02531"
+ ],
+ "beats": [
+  {
+   "id": "b1",
+   "role": "hook",
+   "say": "Same prompt, same model, and the answer can change every run.",
+   "cap": "Same prompt. Different answer.",
+   "scene": "title",
+   "data": {
+    "kicker": "Temperature",
+    "lines": [
+     "Same prompt.",
+     "Different answer."
+    ],
+    "accent": "mid"
+   }
+  },
+  {
+   "id": "b2",
+   "role": "why",
+   "say": "A model scores every possible next word, then picks one.",
+   "cap": "Score every word. Pick one."
+  },
+  {
+   "id": "b3",
+   "role": "why",
+   "say": "A setting called temperature divides those scores before they become odds.",
+   "cap": "scores ÷ temperature → odds"
+  },
+  {
+   "id": "b4",
+   "role": "data",
+   "say": "Take made up odds: seventy, twenty and ten percent.",
+   "cap": "Example odds (made up)",
+   "scene": "probs",
+   "data": {
+    "prompt": "The sky is",
+    "rows": [
+     {
+      "word": "blue",
+      "p": 0.7
+     },
+     {
+      "word": "clear",
+      "p": 0.2
+     },
+     {
+      "word": "falling",
+      "p": 0.1,
+      "tone": "bad"
+     }
+    ]
+   }
+  },
+  {
+   "id": "b5",
+   "role": "data",
+   "say": "Lower the temperature, and the top word pulls ahead.",
+   "cap": "Temperature 0.5: 91% / 7% / 2%",
+   "scene": "probs",
+   "data": {
+    "prompt": "The sky is",
+    "rows": [
+     {
+      "word": "blue",
+      "p": 0.9074
+     },
+     {
+      "word": "clear",
+      "p": 0.0741
+     },
+     {
+      "word": "falling",
+      "p": 0.0185,
+      "tone": "bad"
+     }
+    ]
+   }
+  },
+  {
+   "id": "b6",
+   "role": "data",
+   "say": "Raise it, and the odds flatten out.",
+   "cap": "Temperature 2: 52% / 28% / 20%",
+   "scene": "probs",
+   "data": {
+    "prompt": "The sky is",
+    "rows": [
+     {
+      "word": "blue",
+      "p": 0.5229
+     },
+     {
+      "word": "clear",
+      "p": 0.2795
+     },
+     {
+      "word": "falling",
+      "p": 0.1976,
+      "tone": "bad"
+     }
+    ]
+   }
+  },
+  {
+   "id": "b7",
+   "role": "turn",
+   "say": "At zero, the model always takes the highest odds word.",
+   "cap": "Temperature 0: always the top word",
+   "scene": "byte_says",
+   "data": {
+    "pose": "point_r",
+    "cursor": "mint",
+    "line": "Zero: always the top word."
+   }
+  },
+  {
+   "id": "b8",
+   "role": "turn",
+   "say": "Even then, small variations can still occur.",
+   "cap": "Mostly deterministic, not guaranteed"
+  },
+  {
+   "id": "b9",
+   "role": "resolve",
+   "say": "Temperature adds no knowledge. It only reshapes the odds.",
+   "cap": "Same scores. Different odds."
+  },
+  {
+   "id": "b10",
+   "role": "resolve",
+   "say": "Low is focused. High is varied.",
+   "cap": "Low: focused. High: varied.",
+   "scene": "close",
+   "data": {
+    "lines": [
+     "Low: focused.",
+     "High: varied."
+    ],
+    "accent": "mid"
+   }
+  }
+ ],
+ "claims": [
+  {
+   "shown": "70%",
+   "expr": "0.7*100",
+   "value": 70.0,
+   "source": null
+  },
+  {
+   "shown": "20%",
+   "expr": "0.2*100",
+   "value": 20.0,
+   "source": null
+  },
+  {
+   "shown": "0.5",
+   "expr": "1/2",
+   "value": 0.5,
+   "source": null
+  },
+  {
+   "shown": "91%",
+   "expr": "0.7**2/(0.7**2+0.2**2+0.1**2)*100",
+   "value": 90.7407,
+   "source": null
+  },
+  {
+   "shown": "52%",
+   "expr": "0.7**0.5/(0.7**0.5+0.2**0.5+0.1**0.5)*100",
+   "value": 52.2879,
+   "source": null
+  },
+  {
+   "shown": "28%",
+   "expr": "0.2**0.5/(0.7**0.5+0.2**0.5+0.1**0.5)*100",
+   "value": 27.9491,
+   "source": null
+  }
+ ],
+ "facts": [
+  {
+   "claim": "Google's documentation says temperature controls the degree of randomness in token selection, and a temperature of 0 means the highest-probability tokens are always selected",
+   "source": 0,
+   "note": "Vertex AI docs, Content generation parameters: 'Temperature controls the degree of randomness in token selection'; 'A temperature of 0 means that the highest probability tokens are always selected'"
+  },
+  {
+   "claim": "Google's documentation says low temperatures give more predictable output and high temperatures more varied output, and that small variations can still occur",
+   "source": 0,
+   "note": "Same page: low values suit focused answers, high values give more varied or creative output; responses are mostly deterministic but small variations can still occur"
+  },
+  {
+   "claim": "Hinton et al. define the softmax with temperature as q_i = exp(z_i/T) / sum_j exp(z_j/T), and say a higher T produces a softer probability distribution",
+   "source": 1,
+   "note": "arXiv 1503.02531, Equation 1: q_i = exp(z_i/T)/sum_j exp(z_j/T); 'Using a higher value for T produces a softer probability distribution over classes'"
+  },
+  {
+   "claim": "The example odds are made up; temperature 0.5 and 2 are applied by raising each odd to the power 1/T and renormalizing, which equals dividing the scores by T",
+   "source": 1,
+   "note": "Derived from Equation 1: p_i is proportional to exp(z_i), so exp(z_i/T) is proportional to p_i^(1/T); 70/20/10 -> 90.7/7.4/1.9 at T=0.5 and 52.3/28.0/19.8 at T=2"
+  }
+ ],
+ "copy_parts": {
+  "youtube": {
+   "hook": "Temperature divides a model's scores before they become odds. Low sharpens, high flattens, and zero always takes the top word. The example odds are made up."
+  },
+  "instagram": {
+   "caption": "What temperature does: it reshapes the odds for the next word. Low is focused, high is varied. The example numbers are made up."
+  },
+  "tiktok": {
+   "caption": "What temperature does to a chatbot's next word."
+  },
+  "hashtags": {
+   "youtube": [
+    "#tech",
+    "#ai",
+    "#temperature",
+    "#explained"
+   ],
+   "instagram": [
+    "#tech",
+    "#ai",
+    "#temperature"
+   ],
+   "tiktok": [
+    "#tech",
+    "#ai"
+   ]
+  }
+ },
+ "authored": {
+  "by": "claude",
+  "date": "2026-11-08"
+ }
+}

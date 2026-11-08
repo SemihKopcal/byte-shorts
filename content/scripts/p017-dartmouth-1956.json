@@ -1,0 +1,201 @@
+{
+ "id": "p017-dartmouth-1956",
+ "series": "G",
+ "lang": "en",
+ "format": "story",
+ "theme": "slate",
+ "title": "Dartmouth, 1956: where AI got its name",
+ "summary": "A 1955 proposal asked for a 2 month, 10 man study at Dartmouth. McCarthy picked the name artificial intelligence.",
+ "tags": [
+  "dartmouth",
+  "ai history",
+  "mccarthy",
+  "1956"
+ ],
+ "sources": [
+  "https://mlanthology.org/misc/1955/mccarthy1955misc-proposal",
+  "https://en.wikipedia.org/wiki/Dartmouth_workshop"
+ ],
+ "beats": [
+  {
+   "id": "b1",
+   "role": "hook",
+   "say": "A two month, ten man study gave artificial intelligence its name.",
+   "cap": "A 2-month, 10-man study",
+   "scene": "title",
+   "data": {
+    "kicker": "Dartmouth, 1956",
+    "lines": [
+     "A 2-month,",
+     "10-man study"
+    ],
+    "accent": "mid"
+   }
+  },
+  {
+   "id": "b2",
+   "role": "why",
+   "say": "Four researchers wrote the proposal: McCarthy, Minsky, Rochester and Shannon.",
+   "cap": "McCarthy · Minsky · Rochester · Shannon",
+   "scene": "timeline",
+   "data": {
+    "steps": [
+     {
+      "at": "Sep 1955",
+      "label": "Proposal submitted"
+     },
+     {
+      "at": "Summer 1956",
+      "label": "Workshop",
+      "tone": "mid"
+     }
+    ]
+   }
+  },
+  {
+   "id": "b3",
+   "role": "why",
+   "say": "It asked for a summer study at Dartmouth College in New Hampshire.",
+   "cap": "Dartmouth College, Hanover, NH"
+  },
+  {
+   "id": "b4",
+   "role": "data",
+   "say": "Its bet: any feature of intelligence could be described precisely enough to simulate.",
+   "cap": "Describe it precisely. Simulate it."
+  },
+  {
+   "id": "b5",
+   "role": "data",
+   "say": "John McCarthy chose the name artificial intelligence.",
+   "cap": "Name: artificial intelligence",
+   "scene": "headline",
+   "data": {
+    "source": "Proposal",
+    "date": "1955",
+    "headline": "A Proposal for the Dartmouth Summer Research Project on Artificial Intelligence",
+    "kicker": "Credited as the term's first use"
+   }
+  },
+  {
+   "id": "b6",
+   "role": "data",
+   "say": "Eleven people were planned. Only three stayed for the whole summer.",
+   "cap": "11 planned · 3 stayed throughout",
+   "scene": "dots",
+   "data": {
+    "total": 11,
+    "hit": 3,
+    "cols": 6,
+    "label": "stayed the whole time",
+    "sub": "11 were planned",
+    "tone": "mid"
+   }
+  },
+  {
+   "id": "b7",
+   "role": "turn",
+   "say": "It ran about six to eight weeks, not the promised two months.",
+   "cap": "6–8 weeks, not 2 months"
+  },
+  {
+   "id": "b8",
+   "role": "turn",
+   "say": "Daily sessions drew about three to eight people.",
+   "cap": "3–8 people a day"
+  },
+  {
+   "id": "b9",
+   "role": "resolve",
+   "say": "The meeting was small and short. The name outlasted it.",
+   "cap": "Small meeting. Lasting name."
+  },
+  {
+   "id": "b10",
+   "role": "resolve",
+   "say": "Two months planned. About six weeks held. A field named.",
+   "cap": "Planned 2 months. Held ~6 weeks.",
+   "scene": "close",
+   "data": {
+    "lines": [
+     "Planned: 2 months.",
+     "Named: a field."
+    ],
+    "accent": "mid"
+   }
+  }
+ ],
+ "claims": [
+  {
+   "shown": "11",
+   "expr": null,
+   "value": null,
+   "source": 1,
+   "note": "Wikipedia, Dartmouth workshop: eleven mathematicians and scientists originally planned to attend"
+  }
+ ],
+ "facts": [
+  {
+   "claim": "The 1955 proposal asked for a 2 month, 10 man study of artificial intelligence in summer 1956 at Dartmouth College in Hanover, New Hampshire",
+   "source": 0,
+   "note": "McCarthy et al. proposal (mlanthology): 'a 2 month, 10 man study of artificial intelligence' during the summer of 1956 at Dartmouth College in Hanover, New Hampshire"
+  },
+  {
+   "claim": "McCarthy, Minsky, Rochester and Shannon proposed it, and it was formally submitted on September 2, 1955",
+   "source": 1,
+   "note": "Wikipedia, Dartmouth workshop: proposers John McCarthy, Marvin Minsky, Nathaniel Rochester, Claude Shannon; submitted September 2, 1955"
+  },
+  {
+   "claim": "McCarthy picked the name artificial intelligence, and the proposal is credited with introducing the term",
+   "source": 1,
+   "note": "Wikipedia, Dartmouth workshop: McCarthy picked the name; the proposal is credited with introducing the term"
+  },
+  {
+   "claim": "Eleven people were originally planned and only Solomonoff, Minsky and McCarthy stayed the full time",
+   "source": 1,
+   "note": "Wikipedia, Dartmouth workshop: eleven originally planned; only Solomonoff, Minsky and McCarthy stayed the full time"
+  },
+  {
+   "claim": "The project lasted about six to eight weeks and is usually said to have run six weeks, with daily sessions of about three to eight people",
+   "source": 1,
+   "note": "Wikipedia, Dartmouth workshop: about six to eight weeks, usually said six; daily sessions had about three to eight people"
+  },
+  {
+   "claim": "The proposal rested on the conjecture that learning and other features of intelligence can be described precisely enough for a machine to simulate",
+   "source": 1,
+   "note": "Wikipedia, Dartmouth workshop: proposal content: conjecture that every aspect of learning or other feature of intelligence can be so precisely described that a machine can simulate it"
+  }
+ ],
+ "copy_parts": {
+  "youtube": {
+   "hook": "In 1955 four researchers proposed a 2 month, 10 man study of artificial intelligence. McCarthy picked the name, and the workshop ran in summer 1956."
+  },
+  "instagram": {
+   "caption": "Dartmouth, 1956: a 2-month, 10-man study that named a field. About six weeks held, three people stayed throughout."
+  },
+  "tiktok": {
+   "caption": "Dartmouth, 1956: where AI got its name."
+  },
+  "hashtags": {
+   "youtube": [
+    "#tech",
+    "#ai",
+    "#aihistory",
+    "#dartmouth"
+   ],
+   "instagram": [
+    "#tech",
+    "#ai",
+    "#aihistory"
+   ],
+   "tiktok": [
+    "#tech",
+    "#ai"
+   ]
+  }
+ },
+ "authored": {
+  "by": "claude",
+  "date": "2026-11-08"
+ }
+}

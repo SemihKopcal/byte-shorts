@@ -1,0 +1,226 @@
+{
+ "id": "p015-watson-toronto",
+ "series": "G",
+ "lang": "en",
+ "format": "story",
+ "theme": "plum",
+ "title": "Watson won, and still answered Toronto",
+ "summary": "In February 2011 IBM's Watson won Jeopardy! and still answered Toronto to a clue in the category U.S. Cities.",
+ "tags": [
+  "watson",
+  "jeopardy",
+  "ibm",
+  "ai history"
+ ],
+ "sources": [
+  "https://www.eweek.com/database/ibm-s-watson-wins-in-jeopardy-needs-lessons-in-u-s-geography/",
+  "https://www.cioinsight.com/application-development/ibms-watson-wins-jeopardy-match-despite-u-s-geography-stumble/",
+  "https://phys.org/news/2011-02-creams-human-jeopardy-champs.pdf"
+ ],
+ "beats": [
+  {
+   "id": "b1",
+   "role": "hook",
+   "say": "IBM's quiz machine answered a U.S. cities clue with Toronto.",
+   "cap": "Category: U.S. Cities. Answer: Toronto.",
+   "scene": "contrast",
+   "data": {
+    "left": {
+     "label": "the right answer",
+     "value": "Chicago"
+    },
+    "right": {
+     "label": "Watson said",
+     "value": "Toronto",
+     "tone": "bad"
+    },
+    "verdict": "Category: U.S. Cities"
+   }
+  },
+  {
+   "id": "b2",
+   "role": "why",
+   "say": "In February two thousand eleven, Watson played two human champions on Jeopardy.",
+   "cap": "Jeopardy!, February 2011"
+  },
+  {
+   "id": "b3",
+   "role": "why",
+   "say": "The category was U.S. cities. The clue described two airports.",
+   "cap": "Category: U.S. Cities",
+   "scene": "headline",
+   "data": {
+    "source": "Jeopardy!",
+    "date": "Feb 2011",
+    "headline": "Its largest airport is named for a World War II hero, its second largest for a World War II battle.",
+    "kicker": "Category: U.S. Cities"
+   }
+  },
+  {
+   "id": "b4",
+   "role": "data",
+   "say": "Watson answered Toronto, with several question marks to show doubt.",
+   "cap": "\"What is Toronto????\"",
+   "scene": "chat",
+   "data": {
+    "messages": [
+     {
+      "who": "bot",
+      "name": "Watson",
+      "text": "What is Toronto????",
+      "tone": "bad"
+     }
+    ]
+   }
+  },
+  {
+   "id": "b5",
+   "role": "data",
+   "say": "It wagered nine hundred forty seven dollars, a cautious bet.",
+   "cap": "Wager: $947"
+  },
+  {
+   "id": "b6",
+   "role": "data",
+   "say": "Both human players answered Chicago.",
+   "cap": "Humans: Chicago"
+  },
+  {
+   "id": "b7",
+   "role": "turn",
+   "say": "Watson still won the match, with seventy seven thousand dollars.",
+   "cap": "Watson $77,147. Humans $24,000 and $21,600.",
+   "scene": "bars",
+   "data": {
+    "rows": [
+     {
+      "name": "Watson",
+      "v": 77147,
+      "label": "$77,147",
+      "tone": "good"
+     },
+     {
+      "name": "Human champion",
+      "v": 24000,
+      "label": "$24,000"
+     },
+     {
+      "name": "Human champion",
+      "v": 21600,
+      "label": "$21,600"
+     }
+    ]
+   }
+  },
+  {
+   "id": "b8",
+   "role": "turn",
+   "say": "One wrong answer did not change the result.",
+   "cap": "One miss. Same result."
+  },
+  {
+   "id": "b9",
+   "role": "resolve",
+   "say": "The match was won. The mistake got the headlines.",
+   "cap": "Won the match. Missed the clue."
+  },
+  {
+   "id": "b10",
+   "role": "resolve",
+   "say": "Doubt showed in the answer. It showed in the wager too.",
+   "cap": "Doubt: question marks and a small bet",
+   "scene": "close",
+   "data": {
+    "lines": [
+     "Won the match.",
+     "Missed the clue."
+    ],
+    "accent": "mid"
+   }
+  }
+ ],
+ "claims": [
+  {
+   "shown": "$947",
+   "expr": null,
+   "value": null,
+   "source": 0,
+   "note": "eWeek: Watson wagered $947"
+  },
+  {
+   "shown": "$77,147",
+   "expr": null,
+   "value": null,
+   "source": 2,
+   "note": "phys.org (Feb 17, 2011): Watson $77,147; the two human players $24,000 and $21,600"
+  },
+  {
+   "shown": "$24,000",
+   "expr": null,
+   "value": null,
+   "source": 2,
+   "note": "phys.org: one human player finished with $24,000"
+  },
+  {
+   "shown": "$21,600",
+   "expr": null,
+   "value": null,
+   "source": 2,
+   "note": "phys.org: the other human player finished with $21,600"
+  }
+ ],
+ "facts": [
+  {
+   "claim": "In the category U.S. Cities, Watson answered 'What is Toronto?' to a clue about a city whose largest airport is named for a World War II hero and second largest for a World War II battle; the correct answer was Chicago",
+   "source": 1,
+   "note": "CIO Insight: category U.S. Cities; clue 'Its largest airport is named for a World War II hero, its second largest for a World War II battle'; Watson said Toronto with multiple question marks; both humans said Chicago"
+  },
+  {
+   "claim": "Watson wagered $947 on that Final Jeopardy clue, a cautious bet tied to its low confidence",
+   "source": 0,
+   "note": "eWeek: Watson answered 'What is Toronto?' with multiple question marks signalling low confidence; wager $947"
+  },
+  {
+   "claim": "The Final Jeopardy rounds of the first game aired February 15, 2011",
+   "source": 0,
+   "note": "eWeek and CIO Insight: Double Jeopardy and Final Jeopardy of the first game aired on February 15, 2011"
+  },
+  {
+   "claim": "Watson won the match with $77,147 against $24,000 and $21,600 for the two human players",
+   "source": 2,
+   "note": "phys.org, Feb 17, 2011: totals Watson $77,147, Jennings $24,000, Rutter $21,600"
+  }
+ ],
+ "copy_parts": {
+  "youtube": {
+   "hook": "In February 2011 IBM's Watson won Jeopardy! and still answered Toronto to a U.S. Cities clue. Its wager was $947."
+  },
+  "instagram": {
+   "caption": "Watson won Jeopardy! in 2011 and still answered Toronto to a clue in the category U.S. Cities. The wager showed the doubt too."
+  },
+  "tiktok": {
+   "caption": "Watson won, and still answered Toronto."
+  },
+  "hashtags": {
+   "youtube": [
+    "#tech",
+    "#ai",
+    "#watson",
+    "#aihistory"
+   ],
+   "instagram": [
+    "#tech",
+    "#ai",
+    "#watson"
+   ],
+   "tiktok": [
+    "#tech",
+    "#ai"
+   ]
+  }
+ },
+ "authored": {
+  "by": "claude",
+  "date": "2026-11-08"
+ }
+}

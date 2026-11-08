@@ -20,7 +20,7 @@ Hicbir sayi buradan videoya kopyalanmaz.
 - Hook soru degil, <= 12 kelime. `say` icinde rakam yok, rakam yalniz `cap`te.
 - Kapi: `python -m editorial.authored` (CI'da `check.yml` calistirir).
 
-## Yazildi (gun 1-10)
+## Yazildi (gun 1-30)
 
 | Gun | Dosya | Bicim | Acilis cumlesi |
 |---|---|---|---|
@@ -34,6 +34,26 @@ Hicbir sayi buradan videoya kopyalanmaz.
 | 8 | `p008-whisper-77-years` | measured | Whisper learned from more than seventy seven years of nonstop audio. |
 | 9 | `p009-belamy-432500` | story | An algorithm's portrait sold for forty three times its top estimate. |
 | 10 | `p010-unix-2038` | measured | In twenty thirty eight, some computers will think it's nineteen oh one. |
+| 11 | `p011-eliza-1966` | story | A program from nineteen sixty six imitated a therapist using simple rules. |
+| 12 | `p012-one-token-four-characters` | measured | The unit most chatbot prices use is about four characters long. |
+| 13 | `p013-deep-blue-1997` | story | A chess machine lost in nineteen ninety six, then won the rematch. |
+| 14 | `p014-chatbots-miscount-letters` | explain | Language models write essays, yet struggle to count letters in a word. |
+| 15 | `p015-watson-toronto` | story | IBM's quiz machine answered a U.S. cities clue with Toronto. |
+| 16 | `p016-seven-billion-parameters-memory` | measured | One model can weigh twenty eight gigabytes or three and a half. |
+| 17 | `p017-dartmouth-1956` | story | A two month, ten man study gave artificial intelligence its name. |
+| 18 | `p018-what-temperature-does` | explain | Same prompt, same model, and the answer can change every run. |
+| 19 | `p019-clever-hans` | story | A horse seemed to do arithmetic. He was reading the humans. |
+| 20 | `p020-4k-is-four-1080p` | measured | One four K screen has the pixels of four full H.D. screens. |
+| 21 | `p021-alphago-move-37` | story | AlphaGo's move thirty seven had a one in ten thousand chance. |
+| 22 | `p022-perceptron-1958` | story | In nineteen fifty eight, a newspaper suggested a machine might walk. |
+| 23 | `p023-a-billion-seconds` | measured | A billion seconds is almost thirty two years. |
+| 24 | `p024-netflix-prize` | story | Netflix paid one million dollars for an algorithm it did not deploy. |
+| 25 | `p025-words-as-coordinates` | explain | King minus man plus woman lands closest to queen, in a model. |
+| 26 | `p026-the-speaker-that-laughed` | story | In two thousand eighteen, some Alexa speakers began laughing without being asked. |
+| 27 | `p027-24-bit-colour` | measured | A twenty four bit pixel can show sixteen million colors. |
+| 28 | `p028-turing-1950-prediction` | story | In nineteen fifty, Turing predicted a test with a five minute limit. |
+| 29 | `p029-why-models-hallucinate` | explain | A language model can state a false fact in a confident tone. |
+| 30 | `p030-the-context-window` | explain | A chatbot's working memory is a window of fixed size. |
 
 ## Siradaki (gun 11-100)
 
@@ -42,29 +62,9 @@ S = hikaye, M = olcum, E = aciklama. Gun numarasi kuyruktaki sirayi gosterir; gu
 
 | Gun | Bicim | Konu | Acilis fikri | Dogrulanacak |
 |---|---|---|---|---|
-| 11 | S | ELIZA, 1966 | A script of pattern rules, and people confided in it | Weizenbaum's 1966 paper and the DOCTOR script; any anecdote about users needs a primary or book source or it is cut |
-| 12 | M | One token is about four characters | The rule of thumb that prices every chatbot, turned into pages | the provider's own help page on tokens; the arithmetic from tokens to words is ours |
-| 13 | S | Deep Blue, 1997 | A six game match and a machine that searched millions of positions a second | IBM or Computer History Museum for the match score and the machine's speed; no player named |
-| 14 | E | Why chatbots miscount letters | Models read tokens, not letters | tokenizer documentation; show a split from one published tokenizer and name it; no claim about any other model |
-| 15 | S | Watson's Toronto answer | A quiz show win with one famous wrong answer, 2011 | the clue category and the response, from the show's coverage or IBM Research |
-| 16 | M | How much memory a 7B model needs | Parameters times bytes per number: 32-bit, 16-bit, 4-bit | bytes per number from the IEEE 754 formats; the rest is arithmetic |
-| 17 | S | Dartmouth, 1956 | Two months, ten people, and a new field gets its name | the 1955 funding proposal text; who coined the term and where it first appears |
-| 18 | E | What temperature does | Same prompt, different odds for each next word | provider API docs for the definition; a tiny worked example with made-up probabilities, labeled as such |
-| 19 | S | Clever Hans | The horse that could 'count' and what it was really reading | Pfungst's investigation as summarized by Britannica or a museum; tie to models that are right for the wrong reason |
-| 20 | M | 4K is four 1080p screens | Pixel arithmetic on the screens in your pocket | resolution definitions (ITU or a standards page); arithmetic only |
-| 21 | S | AlphaGo, move 37 | A move the system itself rated as very unlikely | DeepMind or Nature coverage for the stated probability and the match score; no player named |
-| 22 | E | The context window | What 'forgetting' actually is | a provider's documented window size; a plain-words analogy; no claim about hidden internals |
-| 23 | S | The perceptron, 1958 | Hype arrived long before the hardware | how the 1958 press coverage is described by a museum or paper; the 1969 critique; quote nothing over 15 words |
-| 24 | M | A billion seconds | 31.7 years, and a trillion seconds is 31,700 | arithmetic; ties to 'trillion tokens' training sets |
-| 25 | S | The Netflix Prize | One million dollars, ten percent, and a winner nobody shipped | the prize rules; Netflix's own later write-up on what it deployed |
-| 26 | E | Words as coordinates | king minus man plus woman, and where the trick breaks | Mikolov et al. 2013; a later paper on the analogy's limits |
-| 27 | S | The speaker that laughed | A smart speaker started laughing unprompted in 2018 | Amazon's statement as reported by a major outlet; what the fix was |
-| 28 | M | 24-bit colour | 256 times 256 times 256 | a standards or vendor definition of 8 bits per channel; arithmetic |
 | 29 | S | Pasted code, 2023 | A chat window, source code, and a company-wide rule | a reputable report on the memo and the policy response; DROP if only paywalled sources exist |
-| 30 | E | Why models hallucinate | A next-word predictor does not check facts | a survey paper on hallucination; link back to the six fake cases |
 | 31 | S | The state fair blue ribbon | An image-model entry took first place in 2022 | the fair's results page and news coverage; the category and prize |
 | 32 | M | IPv4 against IPv6 | Two to the 32nd against two to the 128th | RFC 791 and RFC 8200; arithmetic |
-| 33 | S | Turing's 1950 bet | A prediction with a percentage and a deadline | the 1950 paper's own wording; compare only what the paper says |
 | 34 | E | Training versus inference | One costs a cluster, the other costs a request | use the GPT-3 figures already verified in day 2; provider docs for the definitions |
 | 35 | S | Eugene Goostman | A claimed Turing test pass in 2014 | the organizer's announcement, the percentage, and researchers' objections |
 | 36 | M | The genome on a USB stick | 3.1 billion bases at two bits each | NHGRI for the base-pair count; arithmetic |

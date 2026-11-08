@@ -1,0 +1,231 @@
+{
+ "id": "p024-netflix-prize",
+ "series": "G",
+ "lang": "en",
+ "format": "story",
+ "theme": "ember",
+ "title": "The Netflix Prize: $1 million, not deployed",
+ "summary": "Netflix paid $1,000,000 in 2009 for a recommendation algorithm that beat its own by 10.06%. It later said the gains did not justify the engineering effort.",
+ "tags": [
+  "netflix prize",
+  "recommendation",
+  "ai history",
+  "machine learning"
+ ],
+ "sources": [
+  "https://en.wikipedia.org/wiki/Netflix_Prize",
+  "https://bgr.com/2012/04/13/netflix-paid-1-million-for-a-recommendation-algorithm-it-never-used"
+ ],
+ "beats": [
+  {
+   "id": "b1",
+   "role": "hook",
+   "say": "Netflix paid one million dollars for an algorithm it did not deploy.",
+   "cap": "$1,000,000 prize. Not deployed.",
+   "scene": "contrast",
+   "data": {
+    "left": {
+     "label": "prize paid",
+     "value": "$1,000,000"
+    },
+    "right": {
+     "label": "winner put in production",
+     "value": "No",
+     "tone": "bad"
+    },
+    "verdict": "Per Netflix's own 2012 post, as reported"
+   }
+  },
+  {
+   "id": "b2",
+   "role": "why",
+   "say": "In October two thousand six, Netflix opened a contest to improve its recommendations.",
+   "cap": "Oct 2006: the contest opens"
+  },
+  {
+   "id": "b3",
+   "role": "why",
+   "say": "The grand prize needed ten percent better predictions than its own algorithm, Cinematch.",
+   "cap": "Goal: 10% better than Cinematch"
+  },
+  {
+   "id": "b4",
+   "role": "data",
+   "say": "The training data held about one hundred million ratings.",
+   "cap": "100,480,507 ratings",
+   "scene": "counter",
+   "data": {
+    "from": 0,
+    "to": 100480507,
+    "suffix": " ratings",
+    "note": "the training data",
+    "tone": "mid"
+   }
+  },
+  {
+   "id": "b5",
+   "role": "data",
+   "say": "Those came from about four hundred eighty thousand users, on seventeen thousand movies.",
+   "cap": "480,189 users · 17,770 movies"
+  },
+  {
+   "id": "b6",
+   "role": "data",
+   "say": "More than five thousand teams submitted entries.",
+   "cap": "5,169 teams · 44,014 submissions"
+  },
+  {
+   "id": "b7",
+   "role": "turn",
+   "say": "The winner hit ten point oh six percent. A rival matched it, twenty minutes later.",
+   "cap": "10.06% vs a 10% target",
+   "scene": "ring",
+   "data": {
+    "value": 10.06,
+    "of": 100,
+    "label": "better than Cinematch",
+    "sub": "winner: 10.06% · target: 10%",
+    "tone": "good",
+    "dp": 2
+   }
+  },
+  {
+   "id": "b8",
+   "role": "turn",
+   "say": "Netflix later said the gains did not justify the engineering effort.",
+   "cap": "Gain vs engineering cost"
+  },
+  {
+   "id": "b9",
+   "role": "resolve",
+   "say": "Most users were streaming by then, not renting discs.",
+   "cap": "Streaming, not discs"
+  },
+  {
+   "id": "b10",
+   "role": "resolve",
+   "say": "A winning model still has to fit the product.",
+   "cap": "Won the prize. Skipped production.",
+   "scene": "close",
+   "data": {
+    "lines": [
+     "Won the prize.",
+     "Skipped production."
+    ],
+    "accent": "mid"
+   }
+  }
+ ],
+ "claims": [
+  {
+   "shown": "$1,000,000",
+   "expr": null,
+   "value": null,
+   "source": 0,
+   "note": "Wikipedia, Netflix Prize: grand prize of $1,000,000"
+  },
+  {
+   "shown": "100,480,507",
+   "expr": null,
+   "value": null,
+   "source": 0,
+   "note": "Wikipedia: training set 100,480,507 ratings from 480,189 users on 17,770 movies"
+  },
+  {
+   "shown": "480,189",
+   "expr": null,
+   "value": null,
+   "source": 0,
+   "note": "Wikipedia: 480,189 users"
+  },
+  {
+   "shown": "17,770",
+   "expr": null,
+   "value": null,
+   "source": 0,
+   "note": "Wikipedia: 17,770 movies"
+  },
+  {
+   "shown": "5,169",
+   "expr": null,
+   "value": null,
+   "source": 0,
+   "note": "Wikipedia: 5,169 teams made 44,014 submissions"
+  },
+  {
+   "shown": "44,014",
+   "expr": null,
+   "value": null,
+   "source": 0,
+   "note": "Wikipedia: 44,014 submissions"
+  },
+  {
+   "shown": "10.06%",
+   "expr": null,
+   "value": null,
+   "source": 0,
+   "note": "Wikipedia: BellKor's Pragmatic Chaos test RMSE 0.8567, a 10.06% improvement over Cinematch"
+  },
+  {
+   "shown": "20 minutes",
+   "expr": null,
+   "value": null,
+   "source": 0,
+   "note": "Wikipedia: The Ensemble matched the result but BellKor's submission came 20 minutes earlier"
+  }
+ ],
+ "facts": [
+  {
+   "claim": "Netflix opened the contest in October 2006 with a $1,000,000 grand prize for a 10% improvement over its Cinematch algorithm",
+   "source": 0,
+   "note": "Wikipedia, Netflix Prize: start October 2, 2006; $1,000,000; 10% improvement over Cinematch"
+  },
+  {
+   "claim": "The training set held 100,480,507 ratings from 480,189 users on 17,770 movies, and 5,169 teams made 44,014 submissions",
+   "source": 0,
+   "note": "Wikipedia, Netflix Prize: dataset and submission counts"
+  },
+  {
+   "claim": "BellKor's Pragmatic Chaos won with a 10.06% improvement, and The Ensemble matched it but submitted 20 minutes later",
+   "source": 0,
+   "note": "Wikipedia: winner announced September 18, 2009; RMSE 0.8567, 10.06% improvement; The Ensemble matched, BellKor's came 20 minutes earlier"
+  },
+  {
+   "claim": "Netflix said the accuracy gains did not seem to justify the engineering effort, and most users were streaming rather than renting DVDs",
+   "source": 1,
+   "note": "BGR (April 13, 2012), based on a Netflix blog post: gains did not justify engineering effort; most users streaming rather than renting DVDs"
+  }
+ ],
+ "copy_parts": {
+  "youtube": {
+   "hook": "Netflix paid $1,000,000 in 2009 for a recommendation algorithm that beat its own by 10.06%. It later said the gains did not justify the engineering effort."
+  },
+  "instagram": {
+   "caption": "The Netflix Prize: $1,000,000 for a 10% improvement, 5,169 teams, and a winner that was not deployed."
+  },
+  "tiktok": {
+   "caption": "The Netflix Prize: $1 million, not deployed."
+  },
+  "hashtags": {
+   "youtube": [
+    "#tech",
+    "#ai",
+    "#netflix",
+    "#aihistory"
+   ],
+   "instagram": [
+    "#tech",
+    "#ai",
+    "#netflix"
+   ],
+   "tiktok": [
+    "#tech",
+    "#ai"
+   ]
+  }
+ },
+ "authored": {
+  "by": "claude",
+  "date": "2026-11-08"
+ }
+}

@@ -311,8 +311,8 @@ yapılsın.
 - [x] Kod: `publish/instagram.py`, `publish/tiktok.py`, `tools/host_video.sh`,
       `tools/tiktok_login.py`, `tokens.yml`, `media-init.yml`, defter
       `content/social.json`, 28 test
-- [x] Handle: YouTube `@byte-knowledge`; Instagram/TikTok `@byte_knowledge`
-      (alt çizgi; hesap açılınca farklıysa `brand.json` > `handles`)
+- [x] Handle: YouTube `@byte-knowledge`; Instagram/TikTok `@byte_knows`
+      (hesaplar açıldı, 8 Kasım; YouTube şimdilik `@byte-knowledge` kalıyor)
 - [ ] Instagram: Professional hesap, Meta uygulaması, token, `media-init`, Pages
 - [ ] TikTok: geliştirici uygulaması, `tiktok_login.py`, secret'lar
 - [ ] İlk gerçek yükleme ikisinde de (mod `public` iken)

@@ -1,0 +1,204 @@
+{
+ "id": "p026-the-speaker-that-laughed",
+ "series": "G",
+ "lang": "en",
+ "format": "story",
+ "theme": "plum",
+ "title": "The smart speaker that laughed on its own",
+ "summary": "In 2018 some Alexa speakers laughed without being asked. Amazon said Alexa could mistakenly hear the phrase Alexa, laugh, and changed the command.",
+ "tags": [
+  "alexa",
+  "smart speaker",
+  "voice assistant",
+  "bug"
+ ],
+ "sources": [
+  "https://www.npr.org/sections/thetwo-way/2018/03/08/591831871/alexa-please-stop-laughing-amazon-says-its-fixing-device-s-unprompted-cackles",
+  "https://www.engadget.com/2018-03-07-amazon-is-fixing-alexa-creepy-laughter.html"
+ ],
+ "beats": [
+  {
+   "id": "b1",
+   "role": "hook",
+   "say": "In two thousand eighteen, some Alexa speakers began laughing without being asked.",
+   "cap": "Alexa, 2018",
+   "scene": "title",
+   "data": {
+    "kicker": "Alexa, 2018",
+    "lines": [
+     "The speaker",
+     "that laughed"
+    ],
+    "accent": "mid"
+   }
+  },
+  {
+   "id": "b2",
+   "role": "why",
+   "say": "Owners reported laughter with no request and no blue light.",
+   "cap": "No request. No blue light."
+  },
+  {
+   "id": "b3",
+   "role": "why",
+   "say": "One owner thought a child was laughing behind them.",
+   "cap": "\"A child behind me\""
+  },
+  {
+   "id": "b4",
+   "role": "data",
+   "say": "Amazon said Alexa can mistakenly hear the phrase Alexa, laugh.",
+   "cap": "\"Alexa, laugh\" can be misheard",
+   "scene": "flow",
+   "data": {
+    "nodes": [
+     {
+      "label": "Ordinary sound"
+     },
+     {
+      "label": "Misheard as a command",
+      "sub": "\"Alexa, laugh\"",
+      "tone": "bad"
+     },
+     {
+      "label": "Speaker laughs",
+      "tone": "mid"
+     }
+    ]
+   }
+  },
+  {
+   "id": "b5",
+   "role": "data",
+   "say": "The fix was to turn off the short command.",
+   "cap": "\"Alexa, laugh\" disabled"
+  },
+  {
+   "id": "b6",
+   "role": "data",
+   "say": "The new phrase was Alexa, can you laugh? A longer phrase is harder to mishear.",
+   "cap": "New phrase: \"Alexa, can you laugh?\"",
+   "scene": "split",
+   "data": {
+    "a": {
+     "label": "Before",
+     "sub": "\"Alexa, laugh\"",
+     "tone": "bad"
+    },
+    "b": {
+     "label": "After",
+     "sub": "\"Alexa, can you laugh?\"",
+     "tone": "good"
+    }
+   }
+  },
+  {
+   "id": "b7",
+   "role": "turn",
+   "say": "Alexa also changed its reply: it now confirms before laughing.",
+   "cap": "Reply: \"Sure, I can laugh.\"",
+   "scene": "chat",
+   "data": {
+    "messages": [
+     {
+      "who": "user",
+      "name": "Owner",
+      "text": "Alexa, can you laugh?"
+     },
+     {
+      "who": "bot",
+      "name": "Alexa",
+      "text": "Sure, I can laugh.",
+      "tone": "mid"
+     }
+    ]
+   }
+  },
+  {
+   "id": "b8",
+   "role": "turn",
+   "say": "Amazon's first statement had not said what went wrong.",
+   "cap": "First statement: no cause"
+  },
+  {
+   "id": "b9",
+   "role": "resolve",
+   "say": "The cause was a misheard phrase, not a plan.",
+   "cap": "A misheard phrase"
+  },
+  {
+   "id": "b10",
+   "role": "resolve",
+   "say": "A short command was easy to trigger. A longer one was safer.",
+   "cap": "Misheard once. Fixed by a longer phrase.",
+   "scene": "close",
+   "data": {
+    "lines": [
+     "Misheard once.",
+     "Fixed by a longer phrase."
+    ],
+    "accent": "mid"
+   }
+  }
+ ],
+ "claims": [],
+ "facts": [
+  {
+   "claim": "Engadget reported on March 7, 2018 that Alexa owners said their speakers laughed without a request, and without the blue light that signals a response",
+   "source": 1,
+   "note": "Engadget, March 7, 2018 (Jon Fingas): owners reported random laughter, sometimes ignoring requests; no blue light"
+  },
+  {
+   "claim": "One user described thinking a child was laughing behind them",
+   "source": 1,
+   "note": "Engadget: a user was startled in the kitchen and thought a child was laughing behind them"
+  },
+  {
+   "claim": "Amazon said that in rare circumstances Alexa can mistakenly hear the phrase 'Alexa, laugh'",
+   "source": 0,
+   "note": "NPR: Amazon statement 'In rare circumstances, Alexa can mistakenly hear the phrase Alexa, laugh'; Engadget: same statement"
+  },
+  {
+   "claim": "Amazon disabled the short command, changed the phrase to 'Alexa, can you laugh?' as less likely to cause false positives, and changed the reply to 'Sure, I can laugh' before laughing",
+   "source": 0,
+   "note": "NPR: changing the phrase to 'Alexa, can you laugh?', disabling the short command, response 'Sure, I can laugh' followed by laughter; Engadget: less likely to produce false positives"
+  },
+  {
+   "claim": "Amazon's initial statement had not said what went wrong",
+   "source": 1,
+   "note": "Engadget: initial statement did not say what went wrong"
+  }
+ ],
+ "copy_parts": {
+  "youtube": {
+   "hook": "In 2018 some Alexa speakers laughed without being asked. Amazon said Alexa could mistakenly hear the phrase Alexa, laugh, and changed the command."
+  },
+  "instagram": {
+   "caption": "The smart speaker that laughed on its own: a misheard phrase, a disabled command, and a longer phrase as the fix."
+  },
+  "tiktok": {
+   "caption": "The smart speaker that laughed on its own."
+  },
+  "hashtags": {
+   "youtube": [
+    "#tech",
+    "#ai",
+    "#alexa",
+    "#bug"
+   ],
+   "instagram": [
+    "#tech",
+    "#ai",
+    "#alexa"
+   ],
+   "tiktok": [
+    "#tech",
+    "#ai"
+   ]
+  }
+ },
+ "authored": {
+  "by": "claude",
+  "date": "2026-11-08"
+ }
+}

@@ -1,0 +1,252 @@
+{
+ "id": "p012-one-token-four-characters",
+ "series": "G",
+ "lang": "en",
+ "format": "measured",
+ "theme": "ice",
+ "title": "One token is about four characters",
+ "summary": "The rule of thumb behind chatbot prices: one token is about four characters of English, or three quarters of a word.",
+ "tags": [
+  "tokens",
+  "pricing",
+  "llm basics",
+  "explained"
+ ],
+ "sources": [
+  "https://help.openai.com/en/articles/4936856-what-are-tokens-and-how-to-count-them",
+  "https://ai.google.dev/gemini-api/docs/tokens?hl=hr"
+ ],
+ "beats": [
+  {
+   "id": "b1",
+   "role": "hook",
+   "say": "The unit most chatbot prices use is about four characters long.",
+   "cap": "1 token ≈ 4 characters",
+   "scene": "contrast",
+   "data": {
+    "left": {
+     "label": "one token",
+     "value": "≈ 4 characters"
+    },
+    "right": {
+     "label": "one token",
+     "value": "≈ ¾ of a word",
+     "tone": "mid"
+    },
+    "verdict": "English text, rule of thumb"
+   }
+  },
+  {
+   "id": "b2",
+   "role": "why",
+   "say": "Models do not read words. They read chunks called tokens.",
+   "cap": "Models read tokens, not words"
+  },
+  {
+   "id": "b3",
+   "role": "why",
+   "say": "OpenAI and Google both publish the same rule of thumb.",
+   "cap": "Same rule from OpenAI and Google",
+   "scene": "split",
+   "data": {
+    "a": {
+     "label": "OpenAI",
+     "sub": "1 token ≈ 4 characters",
+     "tone": "good"
+    },
+    "b": {
+     "label": "Google",
+     "sub": "1 token ≈ 4 characters",
+     "tone": "mid"
+    }
+   }
+  },
+  {
+   "id": "b4",
+   "role": "data",
+   "say": "One token is about four characters of English.",
+   "cap": "1 token ≈ 4 characters"
+  },
+  {
+   "id": "b5",
+   "role": "data",
+   "say": "That is about three quarters of a word.",
+   "cap": "1 token ≈ 0.75 words"
+  },
+  {
+   "id": "b6",
+   "role": "data",
+   "say": "So one hundred tokens come to about seventy five words.",
+   "cap": "100 tokens ≈ 75 words",
+   "scene": "equation",
+   "data": {
+    "terms": [
+     {
+      "value": "100",
+      "label": "tokens"
+     },
+     {
+      "value": "0.75",
+      "label": "words per token"
+     }
+    ],
+    "op": "×",
+    "result": {
+     "value": "75",
+     "label": "words",
+     "tone": "good"
+    }
+   }
+  },
+  {
+   "id": "b7",
+   "role": "data",
+   "say": "OpenAI's own example: fifteen hundred words are about two thousand forty eight tokens.",
+   "cap": "1,500 words ≈ 2,048 tokens",
+   "scene": "bars",
+   "data": {
+    "rows": [
+     {
+      "name": "words",
+      "v": 1500,
+      "label": "1,500 words"
+     },
+     {
+      "name": "tokens",
+      "v": 2048,
+      "label": "2,048 tokens",
+      "tone": "mid"
+     }
+    ]
+   }
+  },
+  {
+   "id": "b8",
+   "role": "turn",
+   "say": "Other languages can need more tokens per character.",
+   "cap": "Not every language costs the same"
+  },
+  {
+   "id": "b9",
+   "role": "turn",
+   "say": "OpenAI's example: ten Spanish characters took five tokens.",
+   "cap": "Spanish example: 10 characters, 5 tokens",
+   "scene": "contrast",
+   "data": {
+    "left": {
+     "label": "English rule",
+     "value": "~4 chars per token"
+    },
+    "right": {
+     "label": "Spanish example",
+     "value": "2 chars per token",
+     "tone": "bad"
+    },
+    "verdict": "One phrase, not a law"
+   }
+  },
+  {
+   "id": "b10",
+   "role": "resolve",
+   "say": "The same token budget can buy fewer words in some languages.",
+   "cap": "Same budget, fewer words",
+   "scene": "close",
+   "data": {
+    "lines": [
+     "1 token ≈ 4 characters",
+     "100 tokens ≈ 75 words"
+    ],
+    "accent": "mid"
+   }
+  }
+ ],
+ "claims": [
+  {
+   "shown": "100",
+   "expr": null,
+   "value": null,
+   "source": 0,
+   "note": "OpenAI help: 100 tokens is about 75 words"
+  },
+  {
+   "shown": "0.75",
+   "expr": "3/4",
+   "value": 0.75,
+   "source": null
+  },
+  {
+   "shown": "75",
+   "expr": "100*0.75",
+   "value": 75.0,
+   "source": null
+  },
+  {
+   "shown": "1,500",
+   "expr": null,
+   "value": null,
+   "source": 0,
+   "note": "OpenAI help: 1,500 words is about 2,048 tokens"
+  },
+  {
+   "shown": "2,048",
+   "expr": null,
+   "value": null,
+   "source": 0,
+   "note": "OpenAI help: 1,500 words is about 2,048 tokens"
+  }
+ ],
+ "facts": [
+  {
+   "claim": "OpenAI's help page says one token is about 4 characters of English text, about 3/4 of a word",
+   "source": 0,
+   "note": "OpenAI help, what are tokens: 1 token ~= 4 chars in English; 1 token ~= 3/4 words; 100 tokens ~= 75 words"
+  },
+  {
+   "claim": "OpenAI's help page gives 1,500 words as about 2,048 tokens",
+   "source": 0,
+   "note": "OpenAI help: 1-2 sentences ~= 30 tokens, 1 paragraph ~= 100 tokens, 1,500 words ~= 2,048 tokens"
+  },
+  {
+   "claim": "OpenAI's help page says the Spanish phrase 'Cómo estás' is 5 tokens for 10 characters and that other languages can cost more",
+   "source": 0,
+   "note": "OpenAI help: token-to-character ratios are higher for many other languages; example 'Cómo estás' = 5 tokens, 10 characters"
+  },
+  {
+   "claim": "Google's Gemini documentation says a token is equivalent to about 4 characters, and 100 tokens is roughly 60 to 80 English words",
+   "source": 1,
+   "note": "Gemini API docs, Understand and count tokens: a token is equivalent to about 4 characters; 100 tokens is about 60-80 English words"
+  }
+ ],
+ "copy_parts": {
+  "youtube": {
+   "hook": "A token, the unit most chatbot prices use, is about four characters of English. One hundred tokens is about seventy five words."
+  },
+  "instagram": {
+   "caption": "1 token is about 4 characters. 100 tokens is about 75 words. Other languages can need more tokens for the same text."
+  },
+  "tiktok": {
+   "caption": "One token is about four characters."
+  },
+  "hashtags": {
+   "youtube": [
+    "#tech",
+    "#ai",
+    "#tokens",
+    "#explained"
+   ],
+   "instagram": [
+    "#tech",
+    "#ai",
+    "#tokens"
+   ],
+   "tiktok": [
+    "#tech",
+    "#ai"
+   ]
+  }
+ },
+ "authored": {
+  "by": "claude",
+  "date": "2026-11-08"
+ }
+}
