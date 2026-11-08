@@ -116,9 +116,28 @@ class Daily(unittest.TestCase):
         env = self.step("uret")["env"]
         self.assertEqual(env["SCRIPT"], "${{ steps.pick.outputs.path }}")
 
+    def test_four_runs_a_day_six_hours_apart(self):
+        # Kullanici karari (8 Kasim): gunde 4 video. Saat :15 (tam saat
+        # GitHub'da en kalabalik), aralar esit; fazla/eksik satir sessizce
+        # sayiyi degistirmesin.
+        crons = [c["cron"] for c in self.y[True]["schedule"]]
+        self.assertEqual(len(crons), 4)
+        self.assertEqual(len(set(crons)), 4)
+        hours = []
+        for c in crons:
+            minute, hour, *rest = c.split()
+            self.assertEqual(minute, "15", c)
+            self.assertEqual(rest, ["*", "*", "*"], c)
+            hours.append(int(hour))
+        hours.sort()
+        gaps = [(b - a) % 24 for a, b in zip(hours, hours[1:] + hours[:1])]
+        self.assertEqual(gaps, [6, 6, 6, 6])
+
     def test_a_short_queue_raises_a_warning_not_an_error(self):
         s = self.step("kuyruk az kaldi mi")
         self.assertIn("::warning", s["run"])
+        # gunde 4 videoda 8 senaryo = 2 gun onceden haber
+        self.assertIn('"$LEFT" -le 8', s["run"])
         self.assertNotIn("exit 1", s["run"])
 
 

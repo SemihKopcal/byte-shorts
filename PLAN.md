@@ -10,7 +10,7 @@ sorduğumuzda cevap kodun içinde değil burada olsun.
 
 **Çalışıyor:** Piper sesi, 9 sahneli katalog, 8 tema, kapalı döngü
 (Gemini yazar → editör yargılar → kod aritmetiği hesaplar → render → QC →
-YouTube → defter → release). Günde 2 video, `AUTO_PRIVACY` değişkeniyle tek
+YouTube → defter → release). Günde 4 video, `AUTO_PRIVACY` değişkeniyle tek
 düğmeli yayın kontrolü.
 
 **Konu çeşitliliği (6 Kasım, kullanıcı isteği: "sadece bilgi değil ilgi çekici

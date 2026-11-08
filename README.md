@@ -1,6 +1,6 @@
 # byte-shorts
 
-BYTE kanalinin uretim hatti. Gunde 2 video, hepsi kodla ciziliyor, konular
+BYTE kanalinin uretim hatti. Gunde 4 video, hepsi kodla ciziliyor, konular
 `content/scripts` kuyrugundaki yazilmis senaryolardan geliyor (Gemini yok),
 YouTube'a kendiliginden yukleniyor; Instagram Reels'e kendiliginden, TikTok'a
 taslak olarak gidiyor.
@@ -30,7 +30,7 @@ sinyal ─┤   5 konu    senaryo   yargi + sayi/olay        revize    tema     
    kurulumundan once. Gemini yok, API anahtari gerekmez.
 2. Kuyruk bossa kosu ~15 saniyede **kirmizi** durur ("Kuyruk bos"), hicbir sey
    kurulmaz, dakika yanmaz; yeni parti yazilana kadar her kosu boyle biter.
-   Kuyrukta 4 ya da daha az senaryo kalinca uyari yazar (kirmizi degil).
+   Kuyrukta 8 ya da daha az senaryo kalinca uyari yazar (kirmizi degil).
 3. Video cizilir, `worker/qc.py` kontrol eder (sure, en-boy, ses, tekrar,
    kaynak, yayin metni).
 4. `AUTO_PRIVACY` ne diyorsa o gizlilikle YouTube'a yuklenir.
@@ -68,7 +68,7 @@ python -m editorial.authored          # hepsi, sorun varsa cikis kodu 1
 python -m editorial.authored p003-air-canada-chatbot
 ```
 
-Kuyruk 100 senaryoda biter: gunde 1 videoyla 100 gun, gunde 2 videoyla 50 gun.
+Kuyruk 100 senaryoda biter: gunde 1 videoyla 100 gun, gunde 2 videoyla 50 gun, gunde 4 videoyla 25 gun.
 Bitince daily "Kuyruk bos" diye kirmizi durur (Gemini'ye dusmez); yeni parti
 zamaninda yazilmali. Kuyruk sirasi dosya adi sirasidir, bu yuzden `pNNN-`
 numarasi plandaki siradir.

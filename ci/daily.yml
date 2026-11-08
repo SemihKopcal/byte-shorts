@@ -1,11 +1,12 @@
 name: daily
 
-# Gunde 2 video (saatler UTC). TAM OTOMATIK, Gemini YOK:
+# Gunde 4 video, 6 saatte bir (UTC 01:15 07:15 13:15 19:15; Turkiye 04:15 10:15
+# 16:15 22:15). TAM OTOMATIK, Gemini YOK:
 #
 #   senaryo  content/scripts'teki siradaki islenmemis senaryo (plan: content/plan.md).
 #            Kuyruk bossa kosu ~15 saniyede KIRMIZI durur ("kuyruk bos"): hicbir
-#            sey kurulmaz, render edilmez, dakika yanmaz. Kuyrukta 4 ya da daha az
-#            senaryo kalinca uyari yazar.
+#            sey kurulmaz, render edilmez, dakika yanmaz. Kuyrukta 8 ya da daha az
+#            senaryo kalinca (gunde 4 videoda 2 gun) uyari yazar.
 #   render   kodla cizilir, QC'den gecer
 #   YouTube  AUTO_PRIVACY neyse o gizlilikle yuklenir
 #   defter   uretildi/yayinlandi kaydi repoya geri yazilir
@@ -19,8 +20,10 @@ name: daily
 # (secret'lar da yoksa zaten gonderilmez). Yalnizca mod `public` iken calisirlar.
 on:
   schedule:
-    - cron: "15 4 * * *"
+    - cron: "15 1 * * *"
+    - cron: "15 7 * * *"
     - cron: "15 13 * * *"
+    - cron: "15 19 * * *"
   workflow_dispatch:
     inputs:
       script:
@@ -69,7 +72,7 @@ jobs:
         env:
           LEFT: ${{ steps.pick.outputs.left }}
         run: |
-          if [ "$LEFT" -le 4 ]; then
+          if [ "$LEFT" -le 8 ]; then
             echo "::warning title=Kuyruk azaliyor::bu video dahil $LEFT senaryo kaldi; yeni parti yazilmali (content/plan.md)"
           fi
 
@@ -249,7 +252,7 @@ jobs:
           git push
 
       # retention-days: ucretsiz hesapta artifact kotasi 500 MB. Video ~39 MB,
-      # gunde 2 tane. Kalici kopya zaten release'te.
+      # gunde 4 tane, 2 gun saklaniyor (~312 MB). Kalici kopya zaten release'te.
       - name: artifact
         if: steps.render.outcome == 'success'
         uses: actions/upload-artifact@v4

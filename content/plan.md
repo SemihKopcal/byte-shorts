@@ -4,7 +4,7 @@ Bu dosya kanalin yol haritasi. Videolar Gemini olmadan, **yazilmis senaryolardan
 uretiliyor: `content/scripts/pNNN-*.json` dosyalari dosya adi sirasiyla alinir
 (`tools/pick_script.py`), render edilir, yayinlanir. Siradaki senaryo kalmayinca
 daily ~15 saniyede "Kuyruk bos" diye kirmizi durur (Gemini'ye dusmez), yani
-**kuyruk bos kalmamali**; kalan 4 ya da daha azsa uyari yazar.
+**kuyruk bos kalmamali**; kalan 8 ya da daha azsa uyari yazar.
 
 Bu tablo **konu listesi ve ipucu**dur, dogrulanmis bilgi degil. Bir satir senaryoya
 donusurken "Dogrulanacak" sutunundaki sayfalar gercekten acilip okunur; sayi ya da
@@ -38,7 +38,7 @@ Hicbir sayi buradan videoya kopyalanmaz.
 ## Siradaki (gun 11-100)
 
 S = hikaye, M = olcum, E = aciklama. Gun numarasi kuyruktaki sirayi gosterir; gunde
-1 video ise takvim gunu, gunde 2 video ise yarisi kadar.
+1 video ise takvim gunu, gunde 4 video ise dortte biri kadar.
 
 | Gun | Bicim | Konu | Acilis fikri | Dogrulanacak |
 |---|---|---|---|---|

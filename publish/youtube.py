@@ -8,7 +8,7 @@ public'e basmadan once kapilarin (editorial/ + worker/qc.py) calistigindan
 emin ol.
 
 Kota notu: videos.insert "Video Uploads" kovasindan 1 birim yiyor ve gunde
-100 cagri ile sinirli. Gunde 2 video icin fazlasiyla yeterli; tekrar denemeler
+100 cagri ile sinirli. Gunde 4 video icin fazlasiyla yeterli; tekrar denemeler
 de bu kovadan dustugu icin sonsuz retry yazmiyoruz.
 """
 import argparse
