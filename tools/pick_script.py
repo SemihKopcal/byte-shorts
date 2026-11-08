@@ -15,6 +15,8 @@ bekledigin surece daily her gece AYNI videoyu uretiyordu.
 
 Kullanim:
     python tools/pick_script.py                 -> path=content/scripts/xxx.json
+                                                   left=<bu dahil kalan senaryo sayisi>
+                                                   (kuyruk bossa: path= ve left=0)
     python tools/pick_script.py xxx.json        -> o dosyayi secer
     python tools/pick_script.py --newest        -> SIRADAKI en yeni olani secer
     python tools/pick_script.py --dir xxx.json  -> dir=out/<id>
@@ -59,6 +61,7 @@ def main() -> None:
                     help="CJK fontu gerekiyorsa 'yes' yazar")
     a = ap.parse_args()
 
+    left = None
     if a.name:
         f = SCRIPTS / a.name
         if not f.exists():
@@ -67,9 +70,11 @@ def main() -> None:
         done = _ids(PUBLISHED) | _ids(BUILT)
         todo = [c for c in sorted(SCRIPTS.glob("*.json"))
                 if _spec_id(c) not in done]
+        left = len(todo)
         f = (todo[-1] if a.newest else todo[0]) if todo else None
         if f is None:
             print("path=")
+            print("left=0")
             return
 
     if a.needs_cjk:
@@ -100,6 +105,8 @@ def main() -> None:
         print(f"dir=out/{_spec_id(f)}")
     else:
         print(f"path={f.relative_to(ROOT)}")
+        if left is not None:
+            print(f"left={left}")
 
 
 if __name__ == "__main__":

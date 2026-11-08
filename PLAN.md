@@ -31,8 +31,16 @@ hesapla ya da okunmuş bir sayfayla eşleşmek, kaynaklar https, her olay iddias
 `note` ile. Kod sayfayı okuyamaz; doğrulama yazarın okuduğu sayfadadır ve dosyada
 isimle görünür. Sebep: ücretsiz anahtarda arama yok, aramasız Gemini hiçbir dış
 olguyu doğrulayamıyor, ücretli arama için fatura bağlamak kullanıcı kararı değil.
-İlk parti `p001`–`p010` yazıldı. Kuyruk bitince daily Gemini yoluna döner ve o
-yol aramasız çalışmaz: yeni parti kuyruk bitmeden yazılmalı.
+İlk parti `p001`–`p010` yazıldı.
+
+**Daily'den Gemini söküldü (8 Kasım, kullanıcı kararı: "hiç denemesin"):** 6–8
+Kasım'daki 4 zamanlı koşu aynı adımda düştü ("konu üret", Gemini); senaryolar
+repoya ulaşmadığı için sıra boştu ve Gemini'nin her adayı kapıda reddedildi
+(`content/rejected`). Şimdi `daily.yml` ilk iş sırayı seçiyor; boşsa kurulum
+yapmadan ~15 sn'de kırmızı duruyor, ≤4 senaryo kalınca uyarı yazıyor. Kuyruk
+boşalınca yapılacak tek şey yeni parti yazmak. `editorial/` kodu repoda duruyor
+ama daily'ye bağlı değil (`tests/test_daily.py` bunu denetliyor, `ci/` ile
+`.github/workflows/` ayrışmasını da).
 
 **Gemini anahtarı (6 Kasım, gemini-check #1):** ücretsiz katmanda Google
 Search grounding yok (resmi fiyat sayfası). Sonuç: `story`/`trend` biçimleri

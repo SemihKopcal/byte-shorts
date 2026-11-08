@@ -3,8 +3,8 @@
 Bu dosya kanalin yol haritasi. Videolar Gemini olmadan, **yazilmis senaryolardan**
 uretiliyor: `content/scripts/pNNN-*.json` dosyalari dosya adi sirasiyla alinir
 (`tools/pick_script.py`), render edilir, yayinlanir. Siradaki senaryo kalmayinca
-daily eski Gemini yoluna doner; bu yol arama olmadan calismaz, yani **kuyruk bos
-kalmamali**.
+daily ~15 saniyede "Kuyruk bos" diye kirmizi durur (Gemini'ye dusmez), yani
+**kuyruk bos kalmamali**; kalan 4 ya da daha azsa uyari yazar.
 
 Bu tablo **konu listesi ve ipucu**dur, dogrulanmis bilgi degil. Bir satir senaryoya
 donusurken "Dogrulanacak" sutunundaki sayfalar gercekten acilip okunur; sayi ya da

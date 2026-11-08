@@ -1,8 +1,13 @@
 # byte-shorts
 
-BYTE kanalinin uretim hatti. Gunde 2 video, hepsi kodla ciziliyor, konuyu
-Gemini seciyor, YouTube'a kendiliginden yukleniyor; Instagram Reels'e
-kendiliginden, TikTok'a taslak olarak gidiyor.
+BYTE kanalinin uretim hatti. Gunde 2 video, hepsi kodla ciziliyor, konular
+`content/scripts` kuyrugundaki yazilmis senaryolardan geliyor (Gemini yok),
+YouTube'a kendiliginden yukleniyor; Instagram Reels'e kendiliginden, TikTok'a
+taslak olarak gidiyor.
+
+> `editorial/` (Gemini) asagidaki semada duruyor ama **daily'ye bagli degil**
+> (8 Kasim karari). Kod repoda, ileride faturali anahtarla geri baglanabilir;
+> su an daily yalniz `content/scripts` kuyrugunu isliyor.
 
 ```
         ┌───────────────────────────── editorial/ (Gemini) ─────────────────────────────┐
@@ -20,12 +25,12 @@ sinyal ─┤   5 konu    senaryo   yargi + sayi/olay        revize    tema     
 
 ## Gunluk akis (`daily.yml`, 04:15 ve 13:15 UTC)
 
-1. `content/scripts/` icinde islenmemis bir senaryo varsa **o** alinir; Gemini
-   hic cagrilmaz, API anahtari gerekmez (asagida "Yazilmis senaryolar"). Yalniz
-   kuyruk bossa (ya da `topic` verildiyse) Gemini yeni senaryo yazar.
-2. Editor kapisindan gecemeyen konu **yazilmaz**; nedeni `content/rejected/`
-   altina duser. Hicbiri gecmezse kosu kirmizi biter: "bugun video yok",
-   kotu video yayinlamaktan iyidir.
+1. `content/scripts/` icindeki siradaki islenmemis senaryo alinir (asagida
+   "Yazilmis senaryolar"). Bu, kosunun **ilk isi**: ffmpeg/font/pip/ses modeli
+   kurulumundan once. Gemini yok, API anahtari gerekmez.
+2. Kuyruk bossa kosu ~15 saniyede **kirmizi** durur ("Kuyruk bos"), hicbir sey
+   kurulmaz, dakika yanmaz; yeni parti yazilana kadar her kosu boyle biter.
+   Kuyrukta 4 ya da daha az senaryo kalinca uyari yazar (kirmizi degil).
 3. Video cizilir, `worker/qc.py` kontrol eder (sure, en-boy, ses, tekrar,
    kaynak, yayin metni).
 4. `AUTO_PRIVACY` ne diyorsa o gizlilikle YouTube'a yuklenir.
@@ -64,8 +69,9 @@ python -m editorial.authored p003-air-canada-chatbot
 ```
 
 Kuyruk 100 senaryoda biter: gunde 1 videoyla 100 gun, gunde 2 videoyla 50 gun.
-Bitince daily eski Gemini yoluna doner (arama olmadan calismaz), bu yuzden
-yeni parti zamaninda yazilmali.
+Bitince daily "Kuyruk bos" diye kirmizi durur (Gemini'ye dusmez); yeni parti
+zamaninda yazilmali. Kuyruk sirasi dosya adi sirasidir, bu yuzden `pNNN-`
+numarasi plandaki siradir.
 
 ## Konu bicimleri: bilgi + ilgi
 
@@ -120,13 +126,14 @@ Bir sey ters giderse `off`. Kod degismiyor, bir sonraki kosudan itibaren gecerli
 
 Actions > daily > Run workflow:
 
-- `topic`: "Gemini su konuyu yazsin" (bos = kendi secer)
 - `script`: kuyruktaki belirli bir dosya
 - `mode`: bu kosu icin yayin modu (`auto` = AUTO_PRIVACY)
 
 `publish.yml` eski videoyu yeniden uretip yuklemek icin duruyor.
 
 ## Gemini'nin rolleri (`editorial/roles.py`)
+
+> Daily bunlari **cagirmiyor** (8 Kasim). Bolum, kod geri baglanirsa diye duruyor.
 
 | rol | is | kodun kontrolu |
 |---|---|---|
@@ -263,7 +270,8 @@ yaparken ikisini de guncelle ya da `cp ci/*.yml .github/workflows/`.
 
 | belirti | sebep | cozum |
 |---|---|---|
-| kosu kirmizi, "BUGUN VIDEO YOK" | Gemini 3 konuda da editor kapisindan gecemedi | `content/rejected/` icindeki dosyada nedeni yazar |
+| kosu kirmizi, "Kuyruk bos" (~15 sn) | `content/scripts` icinde islenmemis senaryo kalmadi | yeni parti yaz (`content/plan.md`'deki siradaki 10 satir), `python -m editorial.authored`, push |
+| kosu kirmizi, "BUGUN VIDEO YOK" | eski Gemini yolundan kalma; daily artik Gemini'yi cagirmiyor | `ci/daily.yml` ile `.github/workflows/daily.yml` ayni mi? (`cp ci/*.yml .github/workflows/`; `tests/test_daily.py` bunu denetler) |
 | "youtube secrets gecersiz" | token iptal / client uyusmuyor | `python tools/check_token.py`, sonra secrets'i guncelle |
 | "UYARI: public istendi, YouTube private yapti" | API projesi dogrulanmamis | videoyu Studio'dan elle public yap; Google'a API denetimi basvurusu |
 | Actions "startup failure" | GitHub faturalandirma kilidi | Settings > Billing > odeme yontemi ekle |
