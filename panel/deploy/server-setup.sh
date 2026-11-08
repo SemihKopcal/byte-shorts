@@ -59,7 +59,21 @@ ask() {   # ask "Soru" "varsayilan" "regex" "hata mesaji"
 
 declare -A VAL
 if [[ -s $ENV_FILE ]]; then
-  say ".env var, korundu."
+  # Elle yazilmis ya da baska yerden kopyalanmis .env olabilir: eksiksiz ve sirsiz mi?
+  chmod 600 "$ENV_FILE"
+  bad=0
+  while IFS= read -r line; do
+    [[ $line =~ ^[[:space:]]*([A-Z0-9_]+)= ]] || continue
+    key=${BASH_REMATCH[1]}
+    val=$(grep -m1 "^$key=" "$ENV_FILE" | cut -d= -f2- || true)
+    if [[ -z ${val//[[:space:]]/} ]]; then say "  ! .env'de $key yok ya da bos"; bad=1; fi
+  done < "$DEPLOY_DIR/.env.example"
+  # Sirlar .env'e girmez: compose .env'i konteynerin ortam degiskenlerine koyar (docker inspect'te gorunur).
+  while IFS= read -r key; do
+    say "  ! .env'de sir var: $key. Satiri sil; sirlar secrets/ dosyalarina bu script ile girilir"; bad=1
+  done < <(grep -Eo '^(R2_ACCESS_KEY_ID|R2_SECRET_ACCESS_KEY|GITHUB_TOKEN|TUNNEL_TOKEN|PANEL_CSRF_SECRET)=' "$ENV_FILE" | tr -d '=' || true)
+  [[ $bad -eq 0 ]] || die ".env duzeltilmeden devam edilmez ($ENV_FILE)"
+  say ".env var ve eksiksiz, korundu."
 else
   say ""
   say "Ayarlar (bunlar sir degil):"

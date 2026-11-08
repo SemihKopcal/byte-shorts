@@ -135,6 +135,45 @@ class ServerSetup(unittest.TestCase):
         for n, b in before.items():
             self.assertEqual((self.deploy / n).read_bytes(), b, n)
 
+    def write_env(self, **override):
+        env = {k: v for k, v in (ln.split("=", 1) for ln in (DEPLOY / ".env.example").read_text().splitlines()
+                                 if ln.strip() and not ln.lstrip().startswith("#") and "=" in ln)}
+        env.update({"R2_ENDPOINT": ENDPOINT, "CF_ACCESS_TEAM_DOMAIN": "byte-team.cloudflareaccess.com",
+                    "CF_ACCESS_AUD": "a" * 64, "PANEL_ALLOWED_EMAILS": "semih@example.com", "CLOUDFLARED_TAG": "2026.1.0"})
+        env.update(override)
+        p = self.deploy / ".env"
+        p.write_text("\n".join(f"{k}={v}" for k, v in env.items()) + "\n")
+        p.chmod(0o644)
+        return p
+
+    def secret_answers(self):
+        return [SECRETS["r2_key"], SECRETS["r2_secret"], SECRETS["gh"], SECRETS["tunnel"], ""]
+
+    def test_a_complete_env_from_elsewhere_is_kept_and_locked_down(self):
+        p = self.write_env()
+        before = p.read_bytes()
+        r = self.run_script(self.secret_answers())
+        self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
+        self.assertIn("eksiksiz", r.stdout)
+        self.assertEqual(p.read_bytes(), before)
+        self.assertEqual(stat.S_IMODE(p.stat().st_mode), 0o600)
+
+    def test_an_env_with_an_empty_value_is_refused_and_names_the_key(self):
+        self.write_env(CF_ACCESS_AUD="")
+        r = self.run_script(self.secret_answers())
+        self.assertNotEqual(r.returncode, 0)
+        self.assertIn("CF_ACCESS_AUD", r.stdout)
+        self.assertFalse(list((self.deploy / "secrets").glob("r2_*")), "hata varken sir dosyasi yazilmamali")
+
+    def test_an_env_holding_secrets_is_refused_without_printing_them(self):
+        self.write_env(R2_SECRET_ACCESS_KEY=SECRETS["r2_secret"], R2_ACCESS_KEY_ID=SECRETS["r2_key"])
+        r = self.run_script(self.secret_answers())
+        self.assertNotEqual(r.returncode, 0)
+        self.assertIn("R2_SECRET_ACCESS_KEY", r.stdout)
+        self.assertIn("R2_ACCESS_KEY_ID", r.stdout)
+        for v in SECRETS.values():
+            self.assertNotIn(v, r.stdout + r.stderr)
+
     def test_the_script_never_traces_or_echoes_the_secret_variable(self):
         text = SCRIPT.read_text()
         self.assertNotRegex(text, r"(?m)^\s*set\s+-[a-z]*x")
