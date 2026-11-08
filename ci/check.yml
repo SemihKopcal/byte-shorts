@@ -24,6 +24,11 @@ jobs:
       - name: sozdizimi
         run: python -m compileall -q worker editorial publish tools tests
 
+      # Elle/Claude tarafindan yazilmis senaryolarin kapisi: her ekran sayisi
+      # hesapla ya da kaynakla eslesmeli, kaynaklar https, yayin metni temiz.
+      - name: yazilmis senaryolar
+        run: python -m editorial.authored
+
       - name: shell scriptleri
         run: bash -n tools/setup_runner.sh tools/fetch_voice.sh tools/release.sh tools/host_video.sh
 

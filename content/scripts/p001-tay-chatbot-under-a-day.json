@@ -1,0 +1,245 @@
+{
+ "id": "p001-tay-chatbot-under-a-day",
+ "series": "G",
+ "lang": "en",
+ "format": "story",
+ "theme": "plum",
+ "title": "Tay: the chatbot that lasted under a day",
+ "summary": "Microsoft's Tay chatbot was built to learn from Twitter users. Within a day it was suspended.",
+ "tags": [
+  "tay",
+  "chatbot",
+  "microsoft",
+  "ai history"
+ ],
+ "sources": [
+  "https://en.wikipedia.org/wiki/Tay_(chatbot)",
+  "https://www.thewrap.com/microsofts-artificial-intelligence-twitter-bot-tay-turns-nazi-is-shut-down"
+ ],
+ "beats": [
+  {
+   "id": "b1",
+   "role": "hook",
+   "say": "Microsoft's chatbot learned from strangers. It lasted under a day.",
+   "cap": "Tay: Microsoft's chatbot lasted under a day",
+   "scene": "title",
+   "data": {
+    "kicker": "twitter, 2016",
+    "lines": [
+     "Tay",
+     "learned from strangers"
+    ],
+    "accent": "mid"
+   }
+  },
+  {
+   "id": "b2",
+   "role": "why",
+   "say": "It was built to learn from every conversation it had.",
+   "cap": "Built to learn from every chat"
+  },
+  {
+   "id": "b3",
+   "role": "why",
+   "say": "People found a command that made it repeat anything they typed.",
+   "cap": "A 'repeat after me' feature",
+   "scene": "split",
+   "data": {
+    "a": {
+     "label": "What Tay was built for",
+     "sub": "learning from chats",
+     "tone": "good"
+    },
+    "b": {
+     "label": "What strangers used it for",
+     "sub": "repeat after me",
+     "tone": "bad"
+    }
+   }
+  },
+  {
+   "id": "b4",
+   "role": "data",
+   "say": "It launched on Twitter in March, twenty sixteen.",
+   "cap": "Launched on Twitter, March 2016",
+   "scene": "timeline",
+   "data": {
+    "steps": [
+     {
+      "at": "Launch",
+      "label": "Goes live on Twitter",
+      "tone": "good"
+     },
+     {
+      "at": "Hours later",
+      "label": "Offensive replies spread",
+      "tone": "bad"
+     },
+     {
+      "at": "Under a day",
+      "label": "Microsoft suspends it",
+      "tone": "mid"
+     }
+    ]
+   }
+  },
+  {
+   "id": "b5",
+   "role": "data",
+   "say": "Within hours it was producing racist and sexist replies.",
+   "cap": "Offensive replies within hours"
+  },
+  {
+   "id": "b6",
+   "role": "data",
+   "say": "By then it had posted more than ninety six thousand tweets.",
+   "cap": "96,000+ tweets",
+   "scene": "counter",
+   "data": {
+    "suffix": " tweets",
+    "from": 0,
+    "to": 96000,
+    "dp": 0,
+    "tone": "mid",
+    "note": "more than, in under a day"
+   }
+  },
+  {
+   "id": "b7",
+   "role": "turn",
+   "say": "Microsoft called it a coordinated attack. Then it apologized.",
+   "cap": "Called an attack, then apologized",
+   "scene": "byte_says",
+   "data": {
+    "pose": "shrug",
+    "cursor": "amber",
+    "line": "Attack, then apology."
+   }
+  },
+  {
+   "id": "b8",
+   "role": "turn",
+   "say": "A week later, Microsoft switched it on again, by accident.",
+   "cap": "A week later: switched on by accident",
+   "scene": "contrast",
+   "data": {
+    "left": {
+     "label": "Planned status",
+     "value": "offline"
+    },
+    "right": {
+     "label": "What happened",
+     "value": "back on",
+     "tone": "bad"
+    },
+    "verdict": "A testing slip."
+   }
+  },
+  {
+   "id": "b9",
+   "role": "turn",
+   "say": "It spammed one sentence at more than two hundred thousand followers.",
+   "cap": "200,000+ followers saw the loop"
+  },
+  {
+   "id": "b10",
+   "role": "resolve",
+   "say": "It did what it was built to do. It learned.",
+   "cap": "It learned. Quickly."
+  },
+  {
+   "id": "b11",
+   "role": "resolve",
+   "say": "It learned fast. That was the whole problem.",
+   "cap": "Learned fast",
+   "scene": "close",
+   "data": {
+    "lines": [
+     "Built to learn.",
+     "Taught in a day."
+    ],
+    "accent": "mid"
+   }
+  }
+ ],
+ "claims": [
+  {
+   "shown": "96,000",
+   "expr": null,
+   "value": null,
+   "source": 0,
+   "note": "Wikipedia: by the time of suspension Tay had tweeted more than 96,000 times"
+  },
+  {
+   "shown": "200,000",
+   "expr": null,
+   "value": null,
+   "source": 0,
+   "note": "Wikipedia: after the March 30 re-release, tweets mentioning its own username reached over 200,000 followers"
+  }
+ ],
+ "facts": [
+  {
+   "claim": "Tay launched on Twitter in March 2016 as a chatbot built to learn from conversations with users",
+   "source": 0,
+   "note": "Wikipedia: launched March 23, 2016 on Twitter; built to learn from its conversations with Twitter users"
+  },
+  {
+   "claim": "Users exploited a 'repeat after me' capability to make Tay post offensive replies",
+   "source": 0,
+   "note": "Wikipedia: many offensive tweets came from a 'repeat after me' capability; it began producing racist and sexist replies"
+  },
+  {
+   "claim": "Microsoft suspended Tay within a day of launch",
+   "source": 1,
+   "note": "TheWrap (March 24, 2016): shut down 'just 15 hours' after launch; Wikipedia cites 16 hours. The video says 'under a day' to stay inside both"
+  },
+  {
+   "claim": "Microsoft deleted many of the offensive tweets",
+   "source": 1,
+   "note": "TheWrap: Microsoft pulled the plug and deleted the offensive tweets"
+  },
+  {
+   "claim": "Microsoft blamed a coordinated attack by a subset of people, then apologized",
+   "source": 0,
+   "note": "Wikipedia: 'coordinated attack by a subset of people'; later 'deeply sorry for the unintended offensive and hurtful tweets'"
+  },
+  {
+   "claim": "Microsoft accidentally re-released Tay a week later, on March 30, 2016, and it looped one phrase",
+   "source": 0,
+   "note": "Wikipedia: accidentally reactivated during testing; stuck in a loop; taken offline again"
+  }
+ ],
+ "copy_parts": {
+  "youtube": {
+   "hook": "Tay was a Microsoft chatbot built to learn from Twitter users. It was suspended within a day, then switched on again by accident a week later."
+  },
+  "instagram": {
+   "caption": "Built to learn from everyone. Suspended in under a day. The story of Microsoft's Tay."
+  },
+  "tiktok": {
+   "caption": "Tay learned from strangers and lasted under a day."
+  },
+  "hashtags": {
+   "youtube": [
+    "#ai",
+    "#chatbot",
+    "#microsoft",
+    "#aihistory"
+   ],
+   "instagram": [
+    "#ai",
+    "#chatbot",
+    "#aihistory"
+   ],
+   "tiktok": [
+    "#ai",
+    "#chatbot"
+   ]
+  }
+ },
+ "authored": {
+  "by": "claude",
+  "date": "2026-11-06"
+ }
+}

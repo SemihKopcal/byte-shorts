@@ -1,0 +1,243 @@
+{
+ "id": "p009-belamy-432500",
+ "series": "G",
+ "lang": "en",
+ "format": "story",
+ "theme": "plum",
+ "title": "The AI portrait that sold for $432,500",
+ "summary": "Christie's estimated an AI-generated portrait at $7,000 to $10,000. It sold for $432,500.",
+ "tags": [
+  "ai art",
+  "gan",
+  "christie's",
+  "ai history"
+ ],
+ "sources": [
+  "https://news.artnet.com/market/first-ever-artificial-intelligence-portrait-painting-sells-at-christies-1379902?amp=1",
+  "https://www.cbsnews.com/news/ai-generated-portrait-sells-for-stunning-432500-portrait-of-edmond-de-belamy/"
+ ],
+ "beats": [
+  {
+   "id": "b1",
+   "role": "hook",
+   "say": "An algorithm's portrait sold for forty three times its top estimate.",
+   "cap": "Estimate: $10,000. Sold: $432,500.",
+   "scene": "contrast",
+   "data": {
+    "left": {
+     "label": "top estimate",
+     "value": "$10,000"
+    },
+    "right": {
+     "label": "sold for",
+     "value": "$432,500",
+     "tone": "good"
+    },
+    "verdict": "Christie's, 2018."
+   }
+  },
+  {
+   "id": "b2",
+   "role": "why",
+   "say": "A Paris collective called Obvious trained it on fifteen thousand portraits.",
+   "cap": "Trained on 15,000 historical portraits"
+  },
+  {
+   "id": "b3",
+   "role": "why",
+   "say": "One part drew images. The other part tried to spot the fakes.",
+   "cap": "A generator and a discriminator",
+   "scene": "split",
+   "data": {
+    "a": {
+     "label": "Generator",
+     "sub": "draws portraits",
+     "tone": "mid"
+    },
+    "b": {
+     "label": "Discriminator",
+     "sub": "spots the fakes",
+     "tone": "good"
+    }
+   }
+  },
+  {
+   "id": "b4",
+   "role": "why",
+   "say": "Christie's put it up for auction in New York.",
+   "cap": "Christie's, New York, 2018"
+  },
+  {
+   "id": "b5",
+   "role": "data",
+   "say": "Estimates ran from seven thousand to ten thousand dollars.",
+   "cap": "Estimate: $7,000 to $10,000",
+   "scene": "bars",
+   "data": {
+    "rows": [
+     {
+      "name": "low estimate",
+      "v": 7000,
+      "label": "$7,000",
+      "tone": "base"
+     },
+     {
+      "name": "high estimate",
+      "v": 10000,
+      "label": "$10,000",
+      "tone": "base"
+     },
+     {
+      "name": "hammer price",
+      "v": 350000,
+      "label": "$350,000",
+      "tone": "mid"
+     },
+     {
+      "name": "final price",
+      "v": 432500,
+      "label": "$432,500",
+      "tone": "good"
+     }
+    ]
+   }
+  },
+  {
+   "id": "b6",
+   "role": "data",
+   "say": "The hammer fell at three hundred fifty thousand dollars.",
+   "cap": "Hammer price: $350,000"
+  },
+  {
+   "id": "b7",
+   "role": "data",
+   "say": "With the buyer's premium, the price was four hundred thirty two thousand five hundred.",
+   "cap": "With premium: $432,500"
+  },
+  {
+   "id": "b8",
+   "role": "turn",
+   "say": "The premium alone was bigger than the top estimate.",
+   "cap": "Premium: $82,500 vs $10,000 estimate",
+   "scene": "byte_says",
+   "data": {
+    "pose": "shrug",
+    "cursor": "violet",
+    "line": "Fees beat the estimate."
+   }
+  },
+  {
+   "id": "b9",
+   "role": "resolve",
+   "say": "A machine made the image. A room of bidders set the price.",
+   "cap": "Machine made it. Bidders priced it."
+  },
+  {
+   "id": "b10",
+   "role": "resolve",
+   "say": "Fifteen thousand portraits in. Four hundred thirty two thousand dollars out.",
+   "cap": "15,000 portraits in. $432,500 out.",
+   "scene": "close",
+   "data": {
+    "lines": [
+     "15,000 portraits in.",
+     "$432,500 out."
+    ],
+    "accent": "good"
+   }
+  }
+ ],
+ "claims": [
+  {
+   "shown": "$432,500",
+   "expr": null,
+   "value": null,
+   "source": 0,
+   "note": "Artnet: hammered at $350,000; with premium, $432,500"
+  },
+  {
+   "shown": "$350,000",
+   "expr": null,
+   "value": null,
+   "source": 0,
+   "note": "Artnet: hammered at $350,000"
+  },
+  {
+   "shown": "$10,000",
+   "expr": null,
+   "value": null,
+   "source": 0,
+   "note": "Artnet: estimate range $7,000 to $10,000"
+  },
+  {
+   "shown": "$7,000",
+   "expr": null,
+   "value": null,
+   "source": 1,
+   "note": "CBS News: the auction house initially estimated it would sell between $7,000 and $10,000"
+  },
+  {
+   "shown": "15,000",
+   "expr": null,
+   "value": null,
+   "source": 0,
+   "note": "Artnet: trained on a dataset of 15,000 portraits from the 14th to 20th centuries"
+  },
+  {
+   "shown": "43",
+   "expr": "432500/10000",
+   "value": 43,
+   "source": null
+  },
+  {
+   "shown": "$82,500",
+   "expr": "432500-350000",
+   "value": 82500,
+   "source": null
+  }
+ ],
+ "facts": [
+  {
+   "claim": "Obvious, a Paris-based collective, made the portrait with a generative adversarial network",
+   "source": 0,
+   "note": "Artnet: made by an AI using a GAN; the generator creates images and the discriminator tries to tell them from human-made portraits; creator is Obvious, a Paris-based collective"
+  },
+  {
+   "claim": "Christie's sold the portrait in New York in 2018 for $432,500 against an estimate of $7,000 to $10,000",
+   "source": 1,
+   "note": "CBS News (October 26, 2018): sold for $432,500; initially estimated between $7,000 and $10,000; Artnet places the sale at Christie's New York"
+  }
+ ],
+ "copy_parts": {
+  "youtube": {
+   "hook": "In 2018 Christie's sold an AI-generated portrait for $432,500, against an estimate of $7,000 to $10,000. The collective Obvious had trained it on 15,000 historical portraits."
+  },
+  "instagram": {
+   "caption": "Estimate: $10,000. Sold: $432,500. An algorithm's portrait, priced by a room of bidders."
+  },
+  "tiktok": {
+   "caption": "An algorithm's portrait sold for 43 times its top estimate."
+  },
+  "hashtags": {
+   "youtube": [
+    "#ai",
+    "#aiart",
+    "#gan",
+    "#aihistory"
+   ],
+   "instagram": [
+    "#ai",
+    "#aiart",
+    "#aihistory"
+   ],
+   "tiktok": [
+    "#ai",
+    "#aiart"
+   ]
+  }
+ },
+ "authored": {
+  "by": "claude",
+  "date": "2026-11-06"
+ }
+}

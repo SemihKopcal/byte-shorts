@@ -1,0 +1,230 @@
+{
+ "id": "p003-air-canada-chatbot",
+ "series": "G",
+ "lang": "en",
+ "format": "story",
+ "theme": "rust",
+ "title": "A chatbot's bad advice cost Air Canada",
+ "summary": "A tribunal ordered Air Canada to pay after its chatbot gave a customer wrong advice about bereavement fares.",
+ "tags": [
+  "air canada",
+  "chatbot",
+  "liability",
+  "ai history"
+ ],
+ "sources": [
+  "https://dailyhive.com/canada/air-canada-chatbot-decision",
+  "https://globalnews.ca/news/10297307/air-canada-chatbot-error-bc-ruling/amp"
+ ],
+ "beats": [
+  {
+   "id": "b1",
+   "role": "hook",
+   "say": "Air Canada's chatbot gave wrong advice. A tribunal made Air Canada pay.",
+   "cap": "A chatbot's bad advice cost Air Canada",
+   "scene": "title",
+   "data": {
+    "kicker": "british columbia, 2024",
+    "lines": [
+     "A chatbot's",
+     "bad advice"
+    ],
+    "accent": "bad"
+   }
+  },
+  {
+   "id": "b2",
+   "role": "why",
+   "say": "A customer asked the chatbot about fares after his grandmother died.",
+   "cap": "A bereavement fare question"
+  },
+  {
+   "id": "b3",
+   "role": "why",
+   "say": "The chatbot said he could claim the discount after flying.",
+   "cap": "Chatbot: claim the discount afterwards",
+   "scene": "split",
+   "data": {
+    "a": {
+     "label": "The chatbot said",
+     "sub": "claim after you fly",
+     "tone": "mid"
+    },
+    "b": {
+     "label": "The airline's policy",
+     "sub": "no claims after flying",
+     "tone": "bad"
+    }
+   }
+  },
+  {
+   "id": "b4",
+   "role": "why",
+   "say": "The airline's policy did not allow that.",
+   "cap": "Policy: no claims after the flight"
+  },
+  {
+   "id": "b5",
+   "role": "data",
+   "say": "The tribunal ordered damages of about six hundred fifty dollars.",
+   "cap": "Damages: $650.88",
+   "scene": "table",
+   "data": {
+    "unit": "usd",
+    "rows": [
+     {
+      "name": "damages",
+      "value": "$650.88",
+      "ratio": 650.88,
+      "tone": "bad"
+     },
+     {
+      "name": "interest",
+      "value": "$36.14",
+      "ratio": 36.14,
+      "tone": "mid"
+     },
+     {
+      "name": "tribunal fees",
+      "value": "$125",
+      "ratio": 125,
+      "tone": "mid"
+     }
+    ]
+   }
+  },
+  {
+   "id": "b6",
+   "role": "data",
+   "say": "Plus interest, and one hundred twenty five dollars in fees.",
+   "cap": "Plus interest $36.14 and fees $125"
+  },
+  {
+   "id": "b7",
+   "role": "data",
+   "say": "The total comes to about eight hundred twelve dollars.",
+   "cap": "Total: $812.02"
+  },
+  {
+   "id": "b8",
+   "role": "turn",
+   "say": "Air Canada argued it was not responsible for what its chatbot said.",
+   "cap": "Air Canada: not liable for its chatbot",
+   "scene": "byte_says",
+   "data": {
+    "pose": "shrug",
+    "cursor": "amber",
+    "line": "Whose words were those?"
+   }
+  },
+  {
+   "id": "b9",
+   "role": "turn",
+   "say": "The tribunal disagreed.",
+   "cap": "The tribunal disagreed"
+  },
+  {
+   "id": "b10",
+   "role": "resolve",
+   "say": "The tribunal sent the bill to the airline.",
+   "cap": "The bill went to the airline"
+  },
+  {
+   "id": "b11",
+   "role": "resolve",
+   "say": "One chatbot answer. Eight hundred twelve dollars.",
+   "cap": "One answer. $812.02.",
+   "scene": "close",
+   "data": {
+    "lines": [
+     "One chatbot answer.",
+     "$812.02."
+    ],
+    "accent": "bad"
+   }
+  }
+ ],
+ "claims": [
+  {
+   "shown": "$650.88",
+   "expr": null,
+   "value": null,
+   "source": 0,
+   "note": "Daily Hive: damages of $650.88"
+  },
+  {
+   "shown": "$36.14",
+   "expr": null,
+   "value": null,
+   "source": 0,
+   "note": "Daily Hive: pre-judgment interest of $36.14"
+  },
+  {
+   "shown": "$125",
+   "expr": null,
+   "value": null,
+   "source": 0,
+   "note": "Daily Hive: Civil Resolution Tribunal fees of $125"
+  },
+  {
+   "shown": "$812.02",
+   "expr": "650.88+36.14+125",
+   "value": 812.02,
+   "source": null
+  }
+ ],
+ "facts": [
+  {
+   "claim": "A customer asked Air Canada's chatbot about bereavement fares after his grandmother died, and it said he could apply afterwards",
+   "source": 1,
+   "note": "Global News: researching flights after his grandmother's death; the chatbot said he could apply for bereavement fares retroactively"
+  },
+  {
+   "claim": "Air Canada's policy did not permit retroactive bereavement applications",
+   "source": 1,
+   "note": "Global News: he later learned Air Canada does not permit retroactive applications"
+  },
+  {
+   "claim": "Air Canada argued it could not be held liable for what its chatbot said, and the tribunal disagreed",
+   "source": 1,
+   "note": "Global News: Air Canada argued it could not be held liable for the information the chatbot provided; the tribunal disagreed"
+  },
+  {
+   "claim": "The tribunal ordered damages of $650.88, interest of $36.14 and fees of $125",
+   "source": 0,
+   "note": "Daily Hive: decision issued February 14, 2024; the three amounts as listed. The $812.02 total is the sum (the article says it is its own calculation)"
+  }
+ ],
+ "copy_parts": {
+  "youtube": {
+   "hook": "Air Canada's chatbot told a customer he could claim a bereavement fare after flying. Air Canada's policy said otherwise. A British Columbia tribunal ordered the airline to pay."
+  },
+  "instagram": {
+   "caption": "One chatbot answer. A bill of $812.02. Air Canada argued it was not responsible for what its chatbot said. The tribunal disagreed."
+  },
+  "tiktok": {
+   "caption": "Air Canada's chatbot gave wrong advice. A tribunal made the airline pay."
+  },
+  "hashtags": {
+   "youtube": [
+    "#ai",
+    "#chatbot",
+    "#aircanada",
+    "#aihistory"
+   ],
+   "instagram": [
+    "#ai",
+    "#chatbot",
+    "#aihistory"
+   ],
+   "tiktok": [
+    "#ai",
+    "#chatbot"
+   ]
+  }
+ },
+ "authored": {
+  "by": "claude",
+  "date": "2026-11-06"
+ }
+}

@@ -1,0 +1,217 @@
+{
+ "id": "p006-instructgpt-small-beats-big",
+ "series": "G",
+ "lang": "en",
+ "format": "explain",
+ "theme": "slate",
+ "title": "The 1.3B model people preferred to GPT-3",
+ "summary": "In OpenAI's InstructGPT paper, human evaluators preferred a 1.3B parameter model over the 175B parameter GPT-3.",
+ "tags": [
+  "instructgpt",
+  "gpt-3",
+  "alignment",
+  "explained"
+ ],
+ "sources": [
+  "https://arxiv.org/pdf/2203.02155v1.pdf",
+  "https://huggingface.co/papers/2203.02155"
+ ],
+ "beats": [
+  {
+   "id": "b1",
+   "role": "hook",
+   "say": "People preferred a model one hundred times smaller than G.P.T. three.",
+   "cap": "1.3B InstructGPT preferred over 175B GPT-3",
+   "scene": "contrast",
+   "data": {
+    "left": {
+     "label": "GPT-3",
+     "value": "175B"
+    },
+    "right": {
+     "label": "InstructGPT",
+     "value": "1.3B",
+     "tone": "good"
+    },
+    "verdict": "Preferred by human raters."
+   }
+  },
+  {
+   "id": "b2",
+   "role": "why",
+   "say": "Making a model bigger does not automatically make it follow instructions.",
+   "cap": "Bigger is not inherently better at following intent"
+  },
+  {
+   "id": "b3",
+   "role": "why",
+   "say": "Parameters are the adjustable numbers inside a model.",
+   "cap": "Parameters: a model's adjustable numbers"
+  },
+  {
+   "id": "b4",
+   "role": "why",
+   "say": "The small model got extra training: labelers wrote and ranked answers.",
+   "cap": "Extra step: fine-tuned with human feedback",
+   "scene": "split",
+   "data": {
+    "a": {
+     "label": "GPT-3",
+     "sub": "175B parameters",
+     "tone": "mid"
+    },
+    "b": {
+     "label": "InstructGPT",
+     "sub": "1.3B + human feedback",
+     "tone": "good"
+    }
+   }
+  },
+  {
+   "id": "b5",
+   "role": "data",
+   "say": "In human evaluations, its outputs were preferred over the big model's.",
+   "cap": "Human evaluators preferred the small model"
+  },
+  {
+   "id": "b6",
+   "role": "data",
+   "say": "That is one hundred times fewer parameters, according to the paper.",
+   "cap": "100x fewer parameters",
+   "scene": "counter",
+   "data": {
+    "suffix": "x fewer",
+    "from": 0,
+    "to": 100,
+    "dp": 0,
+    "tone": "good",
+    "note": "per the paper"
+   }
+  },
+  {
+   "id": "b7",
+   "role": "data",
+   "say": "The exact ratio is closer to one hundred thirty five.",
+   "cap": "175 / 1.3 = about 135",
+   "scene": "counter",
+   "data": {
+    "suffix": "x",
+    "from": 100,
+    "to": 135,
+    "dp": 0,
+    "tone": "mid",
+    "note": "175 / 1.3"
+   }
+  },
+  {
+   "id": "b8",
+   "role": "turn",
+   "say": "It was not larger. It was better aimed at what people wanted.",
+   "cap": "Better aligned with user intent",
+   "scene": "byte_says",
+   "data": {
+    "pose": "point_r",
+    "cursor": "mint",
+    "line": "Aimed, not bigger."
+   }
+  },
+  {
+   "id": "b9",
+   "role": "resolve",
+   "say": "Training on what people prefer can beat adding parameters.",
+   "cap": "Human feedback can beat raw size"
+  },
+  {
+   "id": "b10",
+   "role": "resolve",
+   "say": "One hundred times smaller. Still preferred.",
+   "cap": "100x smaller. Still preferred.",
+   "scene": "close",
+   "data": {
+    "lines": [
+     "100x smaller.",
+     "Still preferred."
+    ],
+    "accent": "good"
+   }
+  }
+ ],
+ "claims": [
+  {
+   "shown": "1.3 billion",
+   "expr": null,
+   "value": null,
+   "source": 0,
+   "note": "InstructGPT paper abstract: 'outputs from the 1.3B parameter InstructGPT model are preferred to outputs from the 175B GPT-3'"
+  },
+  {
+   "shown": "175 billion",
+   "expr": null,
+   "value": null,
+   "source": 0,
+   "note": "same abstract sentence: the 175B GPT-3"
+  },
+  {
+   "shown": "100",
+   "expr": null,
+   "value": null,
+   "source": 1,
+   "note": "Hugging Face paper page: preferred 'despite having 100x fewer parameters'"
+  },
+  {
+   "shown": "135",
+   "expr": "175/1.3",
+   "value": 135,
+   "source": null
+  }
+ ],
+ "facts": [
+  {
+   "claim": "Human evaluators preferred outputs from the 1.3B InstructGPT model to outputs from the 175B GPT-3",
+   "source": 0,
+   "note": "Abstract: 'outputs from the 1.3B parameter InstructGPT model are preferred to outputs from the 175B GPT-3'"
+  },
+  {
+   "claim": "Making language models bigger does not inherently make them better at following a user's intent",
+   "source": 0,
+   "note": "Abstract, first sentence: 'Making language models bigger does not inherently make them better'"
+  },
+  {
+   "claim": "InstructGPT was fine-tuned with labeler demonstrations and rankings of model outputs",
+   "source": 0,
+   "note": "Abstract: a dataset of labeler demonstrations of the desired behavior and a dataset of rankings of model outputs; fine-tuning with human feedback"
+  }
+ ],
+ "copy_parts": {
+  "youtube": {
+   "hook": "In OpenAI's InstructGPT paper, human evaluators preferred outputs from a 1.3B parameter model over outputs from the 175B parameter GPT-3. The small model had been fine-tuned with human feedback."
+  },
+  "instagram": {
+   "caption": "A model 100 times smaller than GPT-3 was preferred by human evaluators. Size was not the deciding factor."
+  },
+  "tiktok": {
+   "caption": "A 1.3B model beat GPT-3's 175B in human preference."
+  },
+  "hashtags": {
+   "youtube": [
+    "#ai",
+    "#gpt3",
+    "#instructgpt",
+    "#explained"
+   ],
+   "instagram": [
+    "#ai",
+    "#gpt3",
+    "#explained"
+   ],
+   "tiktok": [
+    "#ai",
+    "#gpt3"
+   ]
+  }
+ },
+ "authored": {
+  "by": "claude",
+  "date": "2026-11-06"
+ }
+}

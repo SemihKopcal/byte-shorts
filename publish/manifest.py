@@ -143,7 +143,7 @@ def build_manifest(spec: dict, tl: dict, video: Path,
                    root: Path = ROOT) -> dict:
     """Yayin adiminin okuyacagi metadata."""
     brand = load_brand(root)
-    copy = spec.get("copy") or compose(brand, spec)
+    copy = spec.get("copy") or compose(brand, spec, spec.get("copy_parts"))
     tags = [t for t in brand.get("tags_base", []) + spec.get("tags", [])
             if len(t) <= 30]
     return {

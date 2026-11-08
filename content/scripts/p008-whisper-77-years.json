@@ -1,0 +1,212 @@
+{
+ "id": "p008-whisper-77-years",
+ "series": "G",
+ "lang": "en",
+ "format": "measured",
+ "theme": "moss",
+ "title": "Whisper learned from 77 years of audio",
+ "summary": "OpenAI trained Whisper on 680,000 hours of audio. Played nonstop, that is 77.6 years.",
+ "tags": [
+  "whisper",
+  "openai",
+  "speech recognition",
+  "training data"
+ ],
+ "sources": [
+  "https://openai.com/index/whisper/",
+  "https://sotaverified.org/papers/robust-speech-recognition-via-large-scale-1"
+ ],
+ "beats": [
+  {
+   "id": "b1",
+   "role": "hook",
+   "say": "Whisper learned from more than seventy seven years of nonstop audio.",
+   "cap": "680,000 hours = 77.6 years of nonstop audio",
+   "scene": "contrast",
+   "data": {
+    "left": {
+     "label": "training audio",
+     "value": "680,000 hours"
+    },
+    "right": {
+     "label": "played nonstop",
+     "value": "77.6 years",
+     "tone": "mid"
+    },
+    "verdict": "Same audio."
+   }
+  },
+  {
+   "id": "b2",
+   "role": "why",
+   "say": "Whisper is OpenAI's speech recognition model. It turns audio into text.",
+   "cap": "Speech recognition: audio in, text out"
+  },
+  {
+   "id": "b3",
+   "role": "why",
+   "say": "It was trained on six hundred eighty thousand hours of audio.",
+   "cap": "680,000 hours of training audio",
+   "scene": "counter",
+   "data": {
+    "suffix": " hours",
+    "from": 0,
+    "to": 680000,
+    "dp": 0,
+    "tone": "mid"
+   }
+  },
+  {
+   "id": "b4",
+   "role": "why",
+   "say": "The audio was collected from the web, in many languages.",
+   "cap": "Collected from the web, many languages"
+  },
+  {
+   "id": "b5",
+   "role": "data",
+   "say": "About a third of it is not English.",
+   "cap": "About a third is non-English"
+  },
+  {
+   "id": "b6",
+   "role": "data",
+   "say": "Divide the hours by twenty four, and it is twenty eight thousand days.",
+   "cap": "Hours to days: 28,333",
+   "scene": "timeline",
+   "data": {
+    "steps": [
+     {
+      "at": "680,000 h",
+      "label": "hours of audio",
+      "tone": "mid"
+     },
+     {
+      "at": "28,333 days",
+      "label": "same audio in days",
+      "tone": "mid"
+     },
+     {
+      "at": "77.6 years",
+      "label": "same audio in years",
+      "tone": "good"
+     }
+    ]
+   }
+  },
+  {
+   "id": "b7",
+   "role": "data",
+   "say": "Divide again by three sixty five. Seventy seven point six years.",
+   "cap": "Days to years: 77.6"
+  },
+  {
+   "id": "b8",
+   "role": "turn",
+   "say": "Listen eight hours a day and it takes over two hundred thirty years.",
+   "cap": "At 8 hours a day: 233 years",
+   "scene": "byte_says",
+   "data": {
+    "pose": "point_up",
+    "cursor": "amber",
+    "line": "Eight hours a day: 233 years."
+   }
+  },
+  {
+   "id": "b9",
+   "role": "resolve",
+   "say": "Speech recognition was learned by listening, at a scale no person could.",
+   "cap": "Learned at a scale no person could"
+  },
+  {
+   "id": "b10",
+   "role": "resolve",
+   "say": "Seventy seven years of audio. One training set.",
+   "cap": "77.6 years of audio. One training set.",
+   "scene": "close",
+   "data": {
+    "lines": [
+     "77.6 years of audio.",
+     "One training set."
+    ],
+    "accent": "good"
+   }
+  }
+ ],
+ "claims": [
+  {
+   "shown": "680,000",
+   "expr": null,
+   "value": null,
+   "source": 0,
+   "note": "OpenAI: 'trained on 680,000 hours of multilingual and multitask supervised data collected from the web'"
+  },
+  {
+   "shown": "77.6",
+   "expr": "680000/(24*365)",
+   "value": 77.6,
+   "source": null
+  },
+  {
+   "shown": "28,333",
+   "expr": "680000/24",
+   "value": 28333,
+   "source": null
+  },
+  {
+   "shown": "233",
+   "expr": "680000/8/365",
+   "value": 233,
+   "source": null
+  }
+ ],
+ "facts": [
+  {
+   "claim": "Whisper was trained on 680,000 hours of multilingual and multitask data from the web",
+   "source": 1,
+   "note": "Paper abstract as shown on sotaverified.org: 'When scaled to 680,000 hours of multilingual and multitask supervision'"
+  },
+  {
+   "claim": "Whisper is a speech recognition model that converts spoken audio into text",
+   "source": 0,
+   "note": "OpenAI's Whisper page: a speech recognition model that converts spoken audio into text in many languages"
+  },
+  {
+   "claim": "About a third of Whisper's audio dataset is non-English",
+   "source": 0,
+   "note": "OpenAI: 'About a third of Whisper's audio dataset is non-English'"
+  }
+ ],
+ "copy_parts": {
+  "youtube": {
+   "hook": "OpenAI trained Whisper on 680,000 hours of audio. Played nonstop, that is 77.6 years. Listening eight hours a day, it would take about 233 years."
+  },
+  "instagram": {
+   "caption": "680,000 hours of training audio. 77.6 years of nonstop listening. One training set."
+  },
+  "tiktok": {
+   "caption": "Whisper learned from 77 years of nonstop audio."
+  },
+  "hashtags": {
+   "youtube": [
+    "#ai",
+    "#whisper",
+    "#openai",
+    "#speechrecognition"
+   ],
+   "instagram": [
+    "#ai",
+    "#whisper",
+    "#openai"
+   ],
+   "tiktok": [
+    "#ai",
+    "#whisper"
+   ]
+  }
+ },
+ "authored": {
+  "by": "claude",
+  "date": "2026-11-06"
+ }
+}

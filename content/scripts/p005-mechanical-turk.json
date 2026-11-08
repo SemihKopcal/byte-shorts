@@ -1,0 +1,250 @@
+{
+ "id": "p005-mechanical-turk",
+ "series": "G",
+ "lang": "en",
+ "format": "story",
+ "theme": "midnight",
+ "title": "The chess robot with a person inside",
+ "summary": "In 1770 a chess-playing machine amazed an empress. A hidden person operated it for the rest of its life.",
+ "tags": [
+  "mechanical turk",
+  "automaton",
+  "chess",
+  "ai history"
+ ],
+ "sources": [
+  "https://www.history.com/news/how-a-phony-18th-century-chess-robot-fooled-the-world",
+  "https://www.lindahall.org/wolfgang-von-kempelen/"
+ ],
+ "beats": [
+  {
+   "id": "b1",
+   "role": "hook",
+   "say": "The chess robot that played for an empress had a person inside.",
+   "cap": "The Turk: a chess robot with a person inside",
+   "scene": "title",
+   "data": {
+    "kicker": "1770",
+    "lines": [
+     "The Turk",
+     "a chess robot"
+    ],
+    "accent": "mid"
+   }
+  },
+  {
+   "id": "b2",
+   "role": "why",
+   "say": "An inventor built it to impress an empress.",
+   "cap": "Built to impress Empress Maria Theresa"
+  },
+  {
+   "id": "b3",
+   "role": "why",
+   "say": "It debuted in seventeen seventy.",
+   "cap": "Debut: 1770",
+   "scene": "timeline",
+   "data": {
+    "steps": [
+     {
+      "at": "1770",
+      "label": "Debut for an empress",
+      "tone": "good"
+     },
+     {
+      "at": "1783",
+      "label": "European tour begins",
+      "tone": "base"
+     },
+     {
+      "at": "1826",
+      "label": "U.S. tour begins",
+      "tone": "base"
+     },
+     {
+      "at": "1854",
+      "label": "Destroyed by fire",
+      "tone": "bad"
+     }
+    ]
+   }
+  },
+  {
+   "id": "b4",
+   "role": "data",
+   "say": "Its European tour began in seventeen eighty three.",
+   "cap": "European tour from 1783"
+  },
+  {
+   "id": "b5",
+   "role": "data",
+   "say": "A later owner took it across America from eighteen twenty six.",
+   "cap": "U.S. tour from 1826"
+  },
+  {
+   "id": "b6",
+   "role": "turn",
+   "say": "All that time, a skilled chess player sat inside the cabinet.",
+   "cap": "A chess player was inside",
+   "scene": "split",
+   "data": {
+    "a": {
+     "label": "What the audience saw",
+     "sub": "a thinking machine",
+     "tone": "mid"
+    },
+    "b": {
+     "label": "What was inside",
+     "sub": "a hidden chess player",
+     "tone": "bad"
+    }
+   }
+  },
+  {
+   "id": "b7",
+   "role": "turn",
+   "say": "When the cabinet was opened, the operator slid out of view.",
+   "cap": "The operator slid out of view"
+  },
+  {
+   "id": "b8",
+   "role": "turn",
+   "say": "The operator tracked moves with magnets and moved the arm with levers.",
+   "cap": "Magnets and levers",
+   "scene": "byte_says",
+   "data": {
+    "pose": "point_r",
+    "cursor": "violet",
+    "line": "Magnets. Levers. A person."
+   }
+  },
+  {
+   "id": "b9",
+   "role": "resolve",
+   "say": "Fire destroyed it in a Philadelphia museum, eighty four years after its debut.",
+   "cap": "Debut 1770, fire 1854: 84 years",
+   "scene": "contrast",
+   "data": {
+    "left": {
+     "label": "debut",
+     "value": "1770"
+    },
+    "right": {
+     "label": "destroyed",
+     "value": "1854",
+     "tone": "bad"
+    },
+    "verdict": "84 years."
+   }
+  },
+  {
+   "id": "b10",
+   "role": "resolve",
+   "say": "The thinking machine was a person in a box.",
+   "cap": "A person in a box",
+   "scene": "close",
+   "data": {
+    "lines": [
+     "Machine on the outside.",
+     "Person on the inside."
+    ],
+    "accent": "mid"
+   }
+  }
+ ],
+ "claims": [
+  {
+   "shown": "1770",
+   "expr": null,
+   "value": null,
+   "source": 0,
+   "note": "History.com: the first public performance was in 1770, before Empress Maria Theresa and a group of nobles"
+  },
+  {
+   "shown": "1783",
+   "expr": null,
+   "value": null,
+   "source": 0,
+   "note": "History.com: Kempelen's European tour, from 1783 on Joseph II's orders, lasted two years"
+  },
+  {
+   "shown": "1826",
+   "expr": null,
+   "value": null,
+   "source": 0,
+   "note": "History.com: Maelzel's U.S. tour began in 1826"
+  },
+  {
+   "shown": "1854",
+   "expr": null,
+   "value": null,
+   "source": 1,
+   "note": "Linda Hall Library: destroyed in a fire in Philadelphia on July 5, 1854"
+  },
+  {
+   "shown": "84",
+   "expr": "1854-1770",
+   "value": 84,
+   "source": null
+  }
+ ],
+ "facts": [
+  {
+   "claim": "Wolfgang von Kempelen built the Turk to impress Empress Maria Theresa; it debuted in 1770",
+   "source": 0,
+   "note": "History.com: built in 1769 by Kempelen to impress the empress; first public performance in 1770 (Linda Hall Library also dates the unveiling to 1770)"
+  },
+  {
+   "claim": "A hidden human chess player operated the Turk from inside the cabinet",
+   "source": 1,
+   "note": "Linda Hall Library: a 'pseudo-automaton' controlled by a hidden human operator on a sliding chair below the desk"
+  },
+  {
+   "claim": "The operator tracked moves with magnetized discs and moved the arm with levers",
+   "source": 0,
+   "note": "History.com: tracked moves through magnetized discs, moved the arm with levers"
+  },
+  {
+   "claim": "Its European tour began in 1783 and Maelzel's U.S. tour in 1826",
+   "source": 0,
+   "note": "History.com: tour from 1783 on Joseph II's orders; Maelzel's U.S. tour began in 1826"
+  },
+  {
+   "claim": "The Turk was destroyed in a fire at a Philadelphia museum in 1854",
+   "source": 1,
+   "note": "Linda Hall Library: destroyed in a fire at Peale's Museum in Philadelphia, July 5, 1854 (History.com names the Chinese Museum in Philadelphia, same date; the video says only 'a Philadelphia museum')"
+  }
+ ],
+ "copy_parts": {
+  "youtube": {
+   "hook": "The Turk was an 18th-century chess machine that performed for an empress and toured for decades. A hidden chess player operated it from inside the cabinet."
+  },
+  "instagram": {
+   "caption": "The thinking machine was a person in a box. The story of the Mechanical Turk."
+  },
+  "tiktok": {
+   "caption": "The chess robot that played for an empress had a person inside."
+  },
+  "hashtags": {
+   "youtube": [
+    "#ai",
+    "#aihistory",
+    "#chess",
+    "#automaton"
+   ],
+   "instagram": [
+    "#ai",
+    "#aihistory",
+    "#chess"
+   ],
+   "tiktok": [
+    "#ai",
+    "#aihistory"
+   ]
+  }
+ },
+ "authored": {
+  "by": "claude",
+  "date": "2026-11-06"
+ }
+}

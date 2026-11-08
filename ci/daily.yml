@@ -2,7 +2,9 @@ name: daily
 
 # Gunde 2 video (saatler UTC). TAM OTOMATIK:
 #
-#   senaryo  Gemini yazar, editor yargilar, kod sayilari hesaplar
+#   senaryo  content/scripts'te islenmemis senaryo varsa o alinir (Gemini yok,
+#            API anahtari gerekmez); kuyruk bossa Gemini yazar, editor yargilar,
+#            kod sayilari hesaplar
 #   render   kodla cizilir, QC'den gecer
 #   YouTube  AUTO_PRIVACY neyse o gizlilikle yuklenir
 #   defter   uretildi/yayinlandi kaydi repoya geri yazilir

@@ -23,6 +23,17 @@ aramayla doğrulanır; **arama kapalıysa hiçbir şey doğrulanmış sayılmaz*
 haftada YouTube Analytics'te biçim başına izlenme/tutma karşılaştırılacak;
 tutmayan biçimin ağırlığı `rank` içindeki bonustan ayarlanır.
 
+**Yazılmış senaryolar (6 Kasım, kullanıcı kararı: "Gemini'yi boşverelim"):**
+Konuları ve senaryoları Claude yazıyor ve doğruluyor; `content/plan.md` 100
+videoluk yol haritası (45 hikaye, 30 ölçüm, 25 açıklama, hiçbir ardışık iki
+video aynı biçimde değil). Kapı `editorial/authored.py`: ekran sayıları
+hesapla ya da okunmuş bir sayfayla eşleşmek, kaynaklar https, her olay iddiası
+`note` ile. Kod sayfayı okuyamaz; doğrulama yazarın okuduğu sayfadadır ve dosyada
+isimle görünür. Sebep: ücretsiz anahtarda arama yok, aramasız Gemini hiçbir dış
+olguyu doğrulayamıyor, ücretli arama için fatura bağlamak kullanıcı kararı değil.
+İlk parti `p001`–`p010` yazıldı. Kuyruk bitince daily Gemini yoluna döner ve o
+yol aramasız çalışmaz: yeni parti kuyruk bitmeden yazılmalı.
+
 **Gemini anahtarı (6 Kasım, gemini-check #1):** ücretsiz katmanda Google
 Search grounding yok (resmi fiyat sayfası). Sonuç: `story`/`trend` biçimleri
 bu anahtarla çalışamaz; kod aramayı kendisi bırakıp yalnız `measured` ve

@@ -1,0 +1,242 @@
+{
+ "id": "p002-gpt3-on-one-gpu",
+ "series": "G",
+ "lang": "en",
+ "format": "measured",
+ "theme": "deep",
+ "title": "Training GPT-3 on one GPU takes 288 years",
+ "summary": "A paper estimates 288 years to train GPT-3 on one GPU, and 34 days on 1,024 newer GPUs.",
+ "tags": [
+  "gpt-3",
+  "gpu",
+  "training",
+  "scale"
+ ],
+ "sources": [
+  "https://arxiv.org/pdf/2104.04473",
+  "https://huggingface.co/papers/2005.14165"
+ ],
+ "beats": [
+  {
+   "id": "b1",
+   "role": "hook",
+   "say": "One graphics card would need two hundred eighty eight years.",
+   "cap": "1 GPU: 288 years. 1,024 GPUs: 34 days.",
+   "scene": "contrast",
+   "data": {
+    "left": {
+     "label": "1 x V100 GPU",
+     "value": "288 years"
+    },
+    "right": {
+     "label": "1,024 x A100 GPUs",
+     "value": "34 days",
+     "tone": "good"
+    },
+    "verdict": "Same model."
+   }
+  },
+  {
+   "id": "b2",
+   "role": "why",
+   "say": "That is the estimate for training G.P.T. three on a single chip.",
+   "cap": "Training GPT-3 on a single chip"
+  },
+  {
+   "id": "b3",
+   "role": "why",
+   "say": "The model has a hundred seventy five billion parameters.",
+   "cap": "175 billion parameters",
+   "scene": "counter",
+   "data": {
+    "suffix": " billion parameters",
+    "from": 0,
+    "to": 175,
+    "dp": 0,
+    "tone": "mid"
+   }
+  },
+  {
+   "id": "b4",
+   "role": "why",
+   "say": "It trained on three hundred billion tokens of text.",
+   "cap": "300 billion training tokens"
+  },
+  {
+   "id": "b5",
+   "role": "data",
+   "say": "Two hundred eighty eight years is over one hundred five thousand days.",
+   "cap": "288 years = 105,120 days",
+   "scene": "bars",
+   "data": {
+    "rows": [
+     {
+      "name": "one GPU",
+      "v": 105120,
+      "label": "105,120 days",
+      "tone": "bad"
+     },
+     {
+      "name": "1,024 GPUs",
+      "v": 34,
+      "label": "34 days",
+      "tone": "good"
+     }
+    ]
+   }
+  },
+  {
+   "id": "b6",
+   "role": "data",
+   "say": "Spread the job over one thousand twenty four newer chips.",
+   "cap": "1,024 newer GPUs, 140 teraFLOP/s each"
+  },
+  {
+   "id": "b7",
+   "role": "data",
+   "say": "The same training run takes thirty four days.",
+   "cap": "34 days"
+  },
+  {
+   "id": "b8",
+   "role": "turn",
+   "say": "That is roughly three thousand times faster.",
+   "cap": "About 3,092x faster",
+   "scene": "byte_says",
+   "data": {
+    "pose": "point_up",
+    "cursor": "mint",
+    "line": "About 3,092x faster."
+   }
+  },
+  {
+   "id": "b9",
+   "role": "turn",
+   "say": "The model did not change. The hardware and the count did.",
+   "cap": "Same model. Different hardware."
+  },
+  {
+   "id": "b10",
+   "role": "resolve",
+   "say": "Scale turned nearly three centuries into thirty four days.",
+   "cap": "288 years to 34 days"
+  },
+  {
+   "id": "b11",
+   "role": "resolve",
+   "say": "One model. Two timelines.",
+   "cap": "One model. Two timelines.",
+   "scene": "close",
+   "data": {
+    "lines": [
+     "One model.",
+     "Two timelines."
+    ],
+    "accent": "good"
+   }
+  }
+ ],
+ "claims": [
+  {
+   "shown": "288 years",
+   "expr": null,
+   "value": null,
+   "source": 0,
+   "note": "Megatron-LM paper, introduction: training GPT-3 with 175 billion parameters 'would require approximately 288 years with a single V100 NVIDIA GPU'"
+  },
+  {
+   "shown": "V100",
+   "expr": null,
+   "value": null,
+   "source": 0,
+   "note": "same sentence names the V100 for the single-GPU estimate"
+  },
+  {
+   "shown": "A100",
+   "expr": null,
+   "value": null,
+   "source": 0,
+   "note": "Section 5.1 names the A100 for the cluster estimate"
+  },
+  {
+   "shown": "34 days",
+   "expr": null,
+   "value": null,
+   "source": 0,
+   "note": "Section 5.1: 1024 A100 GPUs, batch size 1536, 140 teraFLOP/s per GPU; the paper gives 34 days for GPT-3"
+  },
+  {
+   "shown": "1,024",
+   "expr": null,
+   "value": null,
+   "source": 0,
+   "note": "Section 5.1: n = 1024 A100 GPUs"
+  },
+  {
+   "shown": "140",
+   "expr": null,
+   "value": null,
+   "source": 0,
+   "note": "Section 5.1: 140 teraFLOP/s achieved per GPU"
+  },
+  {
+   "shown": "300 billion",
+   "expr": null,
+   "value": null,
+   "source": 0,
+   "note": "Section 5.1: trained on T = 300 billion tokens"
+  },
+  {
+   "shown": "175 billion",
+   "expr": null,
+   "value": null,
+   "source": 1,
+   "note": "GPT-3 paper abstract: 'an autoregressive language model with 175 billion parameters'"
+  },
+  {
+   "shown": "105,120",
+   "expr": "288*365",
+   "value": 105120,
+   "source": null
+  },
+  {
+   "shown": "3,092",
+   "expr": "105120/34",
+   "value": 3092,
+   "source": null
+  }
+ ],
+ "facts": [],
+ "copy_parts": {
+  "youtube": {
+   "hook": "One V100 GPU would need about 288 years to train GPT-3. A cluster of 1,024 A100 GPUs would need 34 days, by the estimates in the Megatron-LM paper."
+  },
+  "instagram": {
+   "caption": "One GPU: 288 years. 1,024 GPUs: 34 days. Same model, GPT-3."
+  },
+  "tiktok": {
+   "caption": "Training GPT-3: 288 years on one GPU, 34 days on 1,024."
+  },
+  "hashtags": {
+   "youtube": [
+    "#ai",
+    "#gpt3",
+    "#gpu",
+    "#machinelearning"
+   ],
+   "instagram": [
+    "#ai",
+    "#gpt3",
+    "#gpu"
+   ],
+   "tiktok": [
+    "#ai",
+    "#gpt3"
+   ]
+  }
+ },
+ "authored": {
+  "by": "claude",
+  "date": "2026-11-06"
+ }
+}

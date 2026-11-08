@@ -1,0 +1,227 @@
+{
+ "id": "p004-one-terabyte-931",
+ "series": "G",
+ "lang": "en",
+ "format": "measured",
+ "theme": "ice",
+ "title": "Why a 1 TB drive shows up as 931 GB",
+ "summary": "Drive makers count in powers of ten, computers often in powers of two. One trillion bytes is about 931 gibibytes.",
+ "tags": [
+  "storage",
+  "terabyte",
+  "units",
+  "explained"
+ ],
+ "sources": [
+  "https://www.physics.nist.gov/cgi-bin/cuu/Info/Units/binary.html",
+  "https://en.wikipedia.org/wiki/Binary_prefix",
+  "https://en.wikipedia.org/wiki/Tera-"
+ ],
+ "beats": [
+  {
+   "id": "b1",
+   "role": "hook",
+   "say": "A one terabyte drive can read as nine hundred thirty one gigabytes.",
+   "cap": "1 TB on the box. 931 GB on screen.",
+   "scene": "contrast",
+   "data": {
+    "left": {
+     "label": "on the box",
+     "value": "1 TB"
+    },
+    "right": {
+     "label": "in the computer",
+     "value": "931 GB",
+     "tone": "mid"
+    },
+    "verdict": "Nothing was stolen."
+   }
+  },
+  {
+   "id": "b2",
+   "role": "why",
+   "say": "Nothing is missing. The two sides count in different units.",
+   "cap": "Different units, not missing space"
+  },
+  {
+   "id": "b3",
+   "role": "why",
+   "say": "Drive makers count in powers of ten. A gigabyte is a billion bytes.",
+   "cap": "GB = 1,000,000,000 bytes",
+   "scene": "split",
+   "data": {
+    "a": {
+     "label": "Drive maker",
+     "sub": "1 GB = 1,000,000,000 bytes",
+     "tone": "good"
+    },
+    "b": {
+     "label": "Computer",
+     "sub": "1 GiB = 1,073,741,824 bytes",
+     "tone": "mid"
+    }
+   }
+  },
+  {
+   "id": "b4",
+   "role": "why",
+   "say": "Some systems count in powers of two, and still say gigabytes.",
+   "cap": "GiB = 1,073,741,824 bytes"
+  },
+  {
+   "id": "b5",
+   "role": "data",
+   "say": "To the drive maker, a terabyte is exactly one trillion bytes.",
+   "cap": "1 TB = 1,000,000,000,000 bytes"
+  },
+  {
+   "id": "b6",
+   "role": "data",
+   "say": "A trillion bytes, divided into computer gigabytes, is nine hundred thirty one.",
+   "cap": "1,000,000,000,000 / 1,073,741,824 = 931",
+   "scene": "bars",
+   "data": {
+    "rows": [
+     {
+      "name": "drive maker counts",
+      "v": 1000,
+      "label": "1,000 GB",
+      "tone": "good"
+     },
+     {
+      "name": "computer counts",
+      "v": 931,
+      "label": "931 GiB",
+      "tone": "mid"
+     }
+    ]
+   }
+  },
+  {
+   "id": "b7",
+   "role": "turn",
+   "say": "No bytes vanish. The drive holds one trillion either way.",
+   "cap": "1,000,000,000,000 bytes either way"
+  },
+  {
+   "id": "b8",
+   "role": "turn",
+   "say": "It is a naming problem, not a storage problem.",
+   "cap": "A naming problem",
+   "scene": "byte_says",
+   "data": {
+    "pose": "point_r",
+    "cursor": "mint",
+    "line": "Naming problem. Not storage."
+   }
+  },
+  {
+   "id": "b9",
+   "role": "resolve",
+   "say": "The fix is a separate unit with its own name: the gibibyte.",
+   "cap": "GiB: its own name"
+  },
+  {
+   "id": "b10",
+   "role": "resolve",
+   "say": "One trillion bytes. Nine hundred thirty one gibibytes.",
+   "cap": "1 TB = 931 GiB",
+   "scene": "close",
+   "data": {
+    "lines": [
+     "1 TB",
+     "931 GiB"
+    ],
+    "accent": "mid"
+   }
+  }
+ ],
+ "claims": [
+  {
+   "shown": "1,000,000,000",
+   "expr": null,
+   "value": null,
+   "source": 0,
+   "note": "NIST: 1 GB = 10^9 B = 1 000 000 000 B"
+  },
+  {
+   "shown": "1,073,741,824",
+   "expr": "1024**3",
+   "value": 1073741824,
+   "source": null
+  },
+  {
+   "shown": "1,000,000,000,000",
+   "expr": null,
+   "value": null,
+   "source": 2,
+   "note": "Wikipedia, Tera-: tera equals 10^12, the integer 1,000,000,000,000"
+  },
+  {
+   "shown": "1,000",
+   "expr": "10**12/10**9",
+   "value": 1000,
+   "source": null
+  },
+  {
+   "shown": "931",
+   "expr": "1000**4/1024**3",
+   "value": 931.3,
+   "source": null
+  }
+ ],
+ "facts": [
+  {
+   "claim": "NIST defines the gibibyte as 2^30 bytes, 1,073,741,824 bytes",
+   "source": 0,
+   "note": "NIST binary-prefix page: 1 GiB = 2^30 B = 1 073 741 824 B; 1 GB = 10^9 B"
+  },
+  {
+   "claim": "Drive makers use decimal prefixes, and a drive marketed as 1 TB could be reported as 931 GB",
+   "source": 1,
+   "note": "Wikipedia, Binary prefix: manufacturers always used decimal SI prefixes; 'a hard drive marketed as 1 TB could be reported as having only 931 GB'"
+  },
+  {
+   "claim": "Some operating systems still use GB to denote binary multiples",
+   "source": 1,
+   "note": "Wikipedia, Binary prefix: some programs and operating systems, such as Microsoft Windows, still use MB and GB for binary prefixes"
+  },
+  {
+   "claim": "The IEC adopted binary prefixes such as gibi to remove the ambiguity",
+   "source": 2,
+   "note": "Wikipedia, Tera-: the IEC adopted tebi- to signify 2^40 and avoid the ambiguity"
+  }
+ ],
+ "copy_parts": {
+  "youtube": {
+   "hook": "A 1 TB drive holds one trillion bytes. A computer that counts in powers of two reports that as about 931 GiB. Nothing is missing, the two sides use different units."
+  },
+  "instagram": {
+   "caption": "1 TB on the box. 931 GB on screen. Nothing is missing: the drive maker and the computer count in different units."
+  },
+  "tiktok": {
+   "caption": "Why a 1 TB drive shows up as 931 GB."
+  },
+  "hashtags": {
+   "youtube": [
+    "#tech",
+    "#storage",
+    "#terabyte",
+    "#explained"
+   ],
+   "instagram": [
+    "#tech",
+    "#storage",
+    "#explained"
+   ],
+   "tiktok": [
+    "#tech",
+    "#storage"
+   ]
+  }
+ },
+ "authored": {
+  "by": "claude",
+  "date": "2026-11-06"
+ }
+}

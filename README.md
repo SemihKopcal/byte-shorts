@@ -20,7 +20,9 @@ sinyal ─┤   5 konu    senaryo   yargi + sayi/olay        revize    tema     
 
 ## Gunluk akis (`daily.yml`, 04:15 ve 13:15 UTC)
 
-1. Kuyruk bossa (ya da `topic` verildiyse) Gemini yeni senaryo yazar.
+1. `content/scripts/` icinde islenmemis bir senaryo varsa **o** alinir; Gemini
+   hic cagrilmaz, API anahtari gerekmez (asagida "Yazilmis senaryolar"). Yalniz
+   kuyruk bossa (ya da `topic` verildiyse) Gemini yeni senaryo yazar.
 2. Editor kapisindan gecemeyen konu **yazilmaz**; nedeni `content/rejected/`
    altina duser. Hicbiri gecmezse kosu kirmizi biter: "bugun video yok",
    kotu video yayinlamaktan iyidir.
@@ -34,6 +36,36 @@ sinyal ─┤   5 konu    senaryo   yargi + sayi/olay        revize    tema     
    konur (GitHub Pages), Instagram Reels olarak yayinlanir, TikTok'a
    gelen kutusu taslagi olarak yuklenir. Bu iki adim **uyari olarak** kirmizi
    biter: patlarlarsa YouTube yuklemesini ve kosuyu bozmazlar.
+
+## Yazilmis senaryolar (Gemini'siz, 100 gunluk kuyruk)
+
+Konulari Claude secip yaziyor ve dogruluyor; plan `content/plan.md`. Senaryolar
+`content/scripts/pNNN-<ad>.json`, dosya adi sirasiyla alinir (`pick_script.py`
+siralayip islenmemis ilkini secer). Dosyada `"authored": {"by", "date"}` varsa
+`editorial/authored.py` kapisindan gecmek zorunda:
+
+- alanlar: `id` (dosya adiyla ayni), `series` "G", `lang`, `format`
+  (measured | story | explain), `title` (<= 60), `summary`, `tags`, `sources`
+  (2-6 tane, https), `beats` (10-18), `claims`, `facts`, `copy_parts`, `authored`
+- `rules.validate_script`: sure <= 52 sn, 4+ sahne, hook/why/data/turn/resolve
+  sirasi, hook <= 12 kelime, `say` icinde rakam yok
+- `claims`: ekrandaki her anlamli sayi (10'dan buyuk, yil degil) ya `expr`+`value`
+  ile hesaplanir (kod hesaplar) ya da `source` + `note` ile bir sayfaya baglanir
+- `facts`: hikayede en az 2 olay iddiasi, her biri kaynak numarasi ve `note` ile
+- her kaynak en az bir iddiada kullanilmali; `copy_parts` yayin metnini kurar
+
+Kod bir sayfanin ne dedigini okuyamaz. Bu yuzden her kaynakli iddianin `note`
+alani sayfanin ne dedigini yazar ve senaryo o not olmadan kapidan gecmez; yani
+dogrulama kodda degil, yazarin okudugu sayfada. Kontrol:
+
+```bash
+python -m editorial.authored          # hepsi, sorun varsa cikis kodu 1
+python -m editorial.authored p003-air-canada-chatbot
+```
+
+Kuyruk 100 senaryoda biter: gunde 1 videoyla 100 gun, gunde 2 videoyla 50 gun.
+Bitince daily eski Gemini yoluna doner (arama olmadan calismaz), bu yuzden
+yeni parti zamaninda yazilmali.
 
 ## Konu bicimleri: bilgi + ilgi
 
@@ -123,6 +155,7 @@ tutmuyorsa yayinlanmaz.
 ```
 editorial/   Gemini: llm.py (istemci) roles.py (istemler) rules.py (kurallar)
              pipeline.py (akis) signals.py (HN/GitHub/YouTube canli sinyal)
+             authored.py (yazilmis senaryolarin kapisi, Gemini yok)
 worker/      cizim: synth, draw, scenes, themes, byte, series_*, qc, build
 publish/     youtube.py (yukleme) manifest.py (platform metinleri)
              instagram.py tiktok.py net.py ledger.py (content/social.json)
@@ -130,7 +163,7 @@ tools/       setup_runner.sh, fetch_voice.sh, pick_script.py, release.sh,
              check_token.py, get_refresh_token.py, gemini_check.py,
              host_video.sh (mp4'u media dalina koyar), tiktok_login.py
 tests/       agsiz testler (sahte Gemini)
-content/     scripts/ rejected/ backlog.json built.json published.json
+content/     scripts/ rejected/ plan.md backlog.json built.json published.json
 ci/          .github/workflows'un kopyasi (asagiya bak)
 ```
 

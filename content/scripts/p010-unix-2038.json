@@ -1,0 +1,262 @@
+{
+ "id": "p010-unix-2038",
+ "series": "G",
+ "lang": "en",
+ "format": "measured",
+ "theme": "deep",
+ "title": "The clock bug set for January 2038",
+ "summary": "Unix time stored in a signed 32-bit integer overflows at 03:14:07 UTC on 19 January 2038.",
+ "tags": [
+  "unix time",
+  "2038",
+  "bugs",
+  "explained"
+ ],
+ "sources": [
+  "https://en.wikipedia.org/wiki/Year_2038_problem",
+  "https://hackaday.com/2025/07/22/the-epochalypse-y2k-but-38-years-later"
+ ],
+ "beats": [
+  {
+   "id": "b1",
+   "role": "hook",
+   "say": "In twenty thirty eight, some computers will think it's nineteen oh one.",
+   "cap": "19 Jan 2038, 03:14:07 UTC",
+   "scene": "title",
+   "data": {
+    "kicker": "unix time",
+    "lines": [
+     "03:14:07 UTC",
+     "19 January 2038"
+    ],
+    "accent": "bad"
+   }
+  },
+  {
+   "id": "b2",
+   "role": "why",
+   "say": "Many systems count time in seconds since January first, nineteen seventy.",
+   "cap": "Seconds since 1 January 1970"
+  },
+  {
+   "id": "b3",
+   "role": "why",
+   "say": "That count is stored in a signed thirty two bit number.",
+   "cap": "Stored as a signed 32-bit integer",
+   "scene": "split",
+   "data": {
+    "a": {
+     "label": "counts seconds",
+     "sub": "since 1970",
+     "tone": "base"
+    },
+    "b": {
+     "label": "stored in 32 bits",
+     "sub": "signed integer",
+     "tone": "mid"
+    }
+   }
+  },
+  {
+   "id": "b4",
+   "role": "why",
+   "say": "One bit marks the sign. Thirty one bits hold the value.",
+   "cap": "1 sign bit + 31 value bits"
+  },
+  {
+   "id": "b5",
+   "role": "data",
+   "say": "The largest value it can hold is about two point one billion.",
+   "cap": "Max value: 2,147,483,647",
+   "scene": "counter",
+   "data": {
+    "suffix": " seconds",
+    "from": 0,
+    "to": 2147483647,
+    "dp": 0,
+    "tone": "bad",
+    "note": "the largest value"
+   }
+  },
+  {
+   "id": "b6",
+   "role": "data",
+   "say": "Two point one billion seconds is about sixty eight years.",
+   "cap": "2,147,483,647 s = about 68 years",
+   "scene": "timeline",
+   "data": {
+    "steps": [
+     {
+      "at": "1970",
+      "label": "The count starts at zero",
+      "tone": "good"
+     },
+     {
+      "at": "2038",
+      "label": "The count hits its limit",
+      "tone": "bad"
+     },
+     {
+      "at": "+1 second",
+      "label": "It wraps to a negative",
+      "tone": "bad"
+     }
+    ]
+   }
+  },
+  {
+   "id": "b7",
+   "role": "data",
+   "say": "Count sixty eight years from nineteen seventy and you land in twenty thirty eight.",
+   "cap": "1970 + 68 years = 2038"
+  },
+  {
+   "id": "b8",
+   "role": "turn",
+   "say": "One second later, the number wraps to a large negative value.",
+   "cap": "Wraps to -2,147,483,648",
+   "scene": "byte_says",
+   "data": {
+    "pose": "alert",
+    "cursor": "red",
+    "line": "Negative time."
+   }
+  },
+  {
+   "id": "b9",
+   "role": "turn",
+   "say": "Systems that read it see December, nineteen oh one.",
+   "cap": "Reads as 13 December 1901"
+  },
+  {
+   "id": "b10",
+   "role": "resolve",
+   "say": "Switch to sixty four bits and the deadline moves two hundred ninety two billion years.",
+   "cap": "64-bit time: about 292 billion years"
+  },
+  {
+   "id": "b11",
+   "role": "resolve",
+   "say": "The fix exists. Old unpatched systems are the problem.",
+   "cap": "The fix exists. The old systems remain.",
+   "scene": "close",
+   "data": {
+    "lines": [
+     "The fix exists.",
+     "The old systems remain."
+    ],
+    "accent": "bad"
+   }
+  }
+ ],
+ "claims": [
+  {
+   "shown": "03:14:07 UTC on 19 January 2038",
+   "expr": null,
+   "value": null,
+   "source": 0,
+   "note": "Wikipedia: 03:14:07 UTC on 19 January 2038 is the last representable second; Hackaday gives the same moment"
+  },
+  {
+   "shown": "32-bit",
+   "expr": null,
+   "value": null,
+   "source": 0,
+   "note": "Wikipedia: Unix time stored as a signed 32-bit integer"
+  },
+  {
+   "shown": "2,147,483,647",
+   "expr": "1024**3*2-1",
+   "value": 2147483647,
+   "source": null
+  },
+  {
+   "shown": "31",
+   "expr": "32-1",
+   "value": 31,
+   "source": null
+  },
+  {
+   "shown": "2,147,483,648",
+   "expr": "1024**3*2",
+   "value": 2147483648,
+   "source": null
+  },
+  {
+   "shown": "68",
+   "expr": "2147483647/(86400*365.2425)",
+   "value": 68,
+   "source": null
+  },
+  {
+   "shown": "13 December 1901",
+   "expr": null,
+   "value": null,
+   "source": 0,
+   "note": "Wikipedia: one second later the value overflows to -2^31, which systems read as 20:45:52 UTC on 13 December 1901"
+  },
+  {
+   "shown": "64-bit",
+   "expr": null,
+   "value": null,
+   "source": 0,
+   "note": "Wikipedia: a signed 64-bit integer pushes the wraparound out to about 292 billion years"
+  },
+  {
+   "shown": "292 billion",
+   "expr": null,
+   "value": null,
+   "source": 0,
+   "note": "Wikipedia: about 292 billion years to overflow"
+  }
+ ],
+ "facts": [
+  {
+   "claim": "Unix time counts seconds from 00:00:00 UTC on 1 January 1970",
+   "source": 0,
+   "note": "Wikipedia: 00:00:00 UTC on 1 January 1970, the Unix epoch"
+  },
+  {
+   "claim": "A signed 32-bit counter overflows after 2,147,483,647 seconds, at 03:14:07 UTC on 19 January 2038",
+   "source": 1,
+   "note": "Hackaday: overflows at 03:14:07 UTC on January 19, 2038, 2,147,483,647 seconds after the epoch; wraps to -2,147,483,648"
+  },
+  {
+   "claim": "Older embedded and unpatched systems remain at risk, while modern 64-bit systems are largely fine",
+   "source": 1,
+   "note": "Hackaday: unpatched software and older embedded or long-running systems are at risk; most modern 64-bit systems are fine"
+  }
+ ],
+ "copy_parts": {
+  "youtube": {
+   "hook": "Unix time stored in a signed 32-bit integer runs out at 03:14:07 UTC on 19 January 2038. One second later the value wraps negative, which some systems read as December 1901."
+  },
+  "instagram": {
+   "caption": "2,147,483,647 seconds after 1970, a 32-bit clock runs out. The fix exists. The old systems remain."
+  },
+  "tiktok": {
+   "caption": "In 2038, some computers will think it's 1901."
+  },
+  "hashtags": {
+   "youtube": [
+    "#tech",
+    "#unix",
+    "#y2038",
+    "#explained"
+   ],
+   "instagram": [
+    "#tech",
+    "#unix",
+    "#explained"
+   ],
+   "tiktok": [
+    "#tech",
+    "#unix"
+   ]
+  }
+ },
+ "authored": {
+  "by": "claude",
+  "date": "2026-11-06"
+ }
+}

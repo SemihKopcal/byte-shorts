@@ -1,0 +1,203 @@
+{
+ "id": "p007-six-fake-cases",
+ "series": "G",
+ "lang": "en",
+ "format": "story",
+ "theme": "ember",
+ "title": "A brief citing six cases that did not exist",
+ "summary": "In 2023 a New York federal judge fined lawyers $5,000 after a brief cited six cases that ChatGPT had made up.",
+ "tags": [
+  "chatgpt",
+  "hallucination",
+  "law",
+  "ai history"
+ ],
+ "sources": [
+  "https://thestar.com.my/tech/tech-news/2023/06/23/new-york-lawyers-sanctioned-for-using-fake-chatgpt-cases-in-legal-brief",
+  "https://www.businesstoday.in/technology/news/story/lawyers-sanctioned-for-filing-briefs-with-fictitious-ai-generated-citations-from-chatgpt-386810-2023-06-23"
+ ],
+ "beats": [
+  {
+   "id": "b1",
+   "role": "hook",
+   "say": "A lawyer asked Chat G.P.T. for cases. Six did not exist.",
+   "cap": "Six cases that never existed",
+   "scene": "title",
+   "data": {
+    "kicker": "new york, 2023",
+    "lines": [
+     "Six cases",
+     "that never existed"
+    ],
+    "accent": "bad"
+   }
+  },
+  {
+   "id": "b2",
+   "role": "why",
+   "say": "A New York law firm filed a brief in a federal court.",
+   "cap": "A brief filed in federal court",
+   "scene": "split",
+   "data": {
+    "a": {
+     "label": "The brief",
+     "sub": "filed in federal court",
+     "tone": "mid"
+    },
+    "b": {
+     "label": "The research",
+     "sub": "helped by ChatGPT",
+     "tone": "bad"
+    }
+   }
+  },
+  {
+   "id": "b3",
+   "role": "why",
+   "say": "One lawyer had used Chat G.P.T. to help research it.",
+   "cap": "ChatGPT helped with the research"
+  },
+  {
+   "id": "b4",
+   "role": "data",
+   "say": "The brief cited six cases that Chat G.P.T. made up.",
+   "cap": "6 fabricated cases",
+   "scene": "counter",
+   "data": {
+    "suffix": " fake cases",
+    "from": 0,
+    "to": 6,
+    "dp": 0,
+    "tone": "bad"
+   }
+  },
+  {
+   "id": "b5",
+   "role": "data",
+   "say": "The judge found the lawyers acted in bad faith.",
+   "cap": "Judge: bad faith"
+  },
+  {
+   "id": "b6",
+   "role": "data",
+   "say": "They had kept defending the fake opinions after the court questioned them.",
+   "cap": "They kept defending the cases"
+  },
+  {
+   "id": "b7",
+   "role": "data",
+   "say": "The fine was five thousand dollars, for the lawyers and their firm.",
+   "cap": "Fine: $5,000",
+   "scene": "counter",
+   "data": {
+    "prefix": "$",
+    "from": 0,
+    "to": 5000,
+    "dp": 0,
+    "tone": "bad",
+    "note": "lawyers and firm, together"
+   }
+  },
+  {
+   "id": "b8",
+   "role": "turn",
+   "say": "The judge also said using A.I. for assistance is not improper.",
+   "cap": "Using AI for assistance: not improper",
+   "scene": "byte_says",
+   "data": {
+    "pose": "idle",
+    "cursor": "mint",
+    "line": "Tool: allowed. Checking: required."
+   }
+  },
+  {
+   "id": "b9",
+   "role": "turn",
+   "say": "Lawyers still have to make sure the filing is accurate.",
+   "cap": "The lawyer still checks"
+  },
+  {
+   "id": "b10",
+   "role": "resolve",
+   "say": "The tool made up six cases. A person filed them.",
+   "cap": "The tool invented. A person filed."
+  },
+  {
+   "id": "b11",
+   "role": "resolve",
+   "say": "Six cases. None of them real.",
+   "cap": "Six cases. None real.",
+   "scene": "close",
+   "data": {
+    "lines": [
+     "Six cases.",
+     "None of them real."
+    ],
+    "accent": "bad"
+   }
+  }
+ ],
+ "claims": [
+  {
+   "shown": "$5,000",
+   "expr": null,
+   "value": null,
+   "source": 0,
+   "note": "The Star (Reuters, June 23, 2023): a total fine of $5,000 on the two lawyers and their firm"
+  }
+ ],
+ "facts": [
+  {
+   "claim": "A lawyer used ChatGPT to help research a brief, and the brief contained six fictitious case citations",
+   "source": 0,
+   "note": "The Star: one lawyer admitted using ChatGPT to help research the brief; six fictitious citations appeared in it"
+  },
+  {
+   "claim": "A Manhattan federal judge fined the lawyers and their firm $5,000 in June 2023",
+   "source": 0,
+   "note": "The Star: U.S. District Judge in Manhattan; $5,000 total fine imposed on two lawyers and their firm; Reuters dated June 23, 2023"
+  },
+  {
+   "claim": "The judge found the lawyers acted in bad faith and that they kept defending the fake opinions after being questioned",
+   "source": 1,
+   "note": "Business Today: 'guilty of acting in bad faith and making false and misleading statements to the court'; they kept defending the fake opinions after the court and the other side questioned them"
+  },
+  {
+   "claim": "The judge said there was nothing inherently improper about lawyers using AI for assistance, but lawyers must ensure filings are accurate",
+   "source": 1,
+   "note": "Business Today: 'nothing inherently improper about lawyers using AI tools for assistance'; attorneys must ensure their filings are accurate"
+  }
+ ],
+ "copy_parts": {
+  "youtube": {
+   "hook": "A New York law firm filed a brief that cited six cases ChatGPT had made up. A federal judge found bad faith and imposed a $5,000 fine, while noting that using AI for assistance is not improper in itself."
+  },
+  "instagram": {
+   "caption": "Six cases. None of them real. A brief written with ChatGPT's help ended in a $5,000 fine."
+  },
+  "tiktok": {
+   "caption": "A lawyer asked ChatGPT for cases. Six did not exist."
+  },
+  "hashtags": {
+   "youtube": [
+    "#ai",
+    "#chatgpt",
+    "#hallucination",
+    "#aihistory"
+   ],
+   "instagram": [
+    "#ai",
+    "#chatgpt",
+    "#aihistory"
+   ],
+   "tiktok": [
+    "#ai",
+    "#chatgpt"
+   ]
+  }
+ },
+ "authored": {
+  "by": "claude",
+  "date": "2026-11-06"
+ }
+}
