@@ -228,6 +228,15 @@ hesap bağlama.**
 - [ ] Günlük yedek cron'u (`README` bölüm 11) + haftalık sunucu dışı kopya
 - [ ] Yeni senaryo partisi `p038`+: kuyrukta ~33 senaryo var, günde 2 videoyla
       ~16 günlük. Panelde "kuyruk kaç gün yeter" uyarısı 6.1'de
+- [x] CI/CD sağlamlaştırma (9 Kasım): `check` artık panel imajını derleyip kısıtlı
+      konteynerde açıyor, secret taraması (`tools/secret_scan.py`, haftalık geçmiş
+      taraması `audit`'te), `render-smoke` (Dependabot güncellemeleri için gerçek render
+      kapısı), `panel/deploy/update.sh` (yedekli, sağlık kontrollü, geri alan), workflow
+      güvenlik testleri. Akış: README "Canlıya alma akışı".
+- [ ] `daily`'yi ikiye böl: sırsız + yazmasız **render** job'u (üçüncü taraf ffmpeg burada
+      çalışır) ve `contents: write` + sırları taşıyan **yayın/defter** job'u; ikisi artifact
+      ile konuşur. Neden: `ffmpeg` ikilisi pinli değil (README "Bilinen artık risk"). GitHub'da
+      denenmeden yapılmamalı: önce bir dalda `workflow_dispatch` ile.
 
 ### 6.1 Tasarım yenileme (detaylı)  ·  ⬜
 

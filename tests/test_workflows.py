@@ -246,12 +246,152 @@ class CheckAndAudit(unittest.TestCase):
         for f in ("panel/requirements.txt", "requirements.txt", "requirements-publish.txt"):
             self.assertIn(f, text)
 
+    def test_audit_scans_the_whole_git_history_for_secrets(self):
+        job = wf("audit.yml")["jobs"]["secrets"]
+        co = [st for st in job["steps"] if str(st.get("uses", "")).startswith("actions/checkout")][0]
+        self.assertEqual(co["with"]["fetch-depth"], 0)               # sig klon gecmisin cogunu gormez
+        self.assertTrue(any("secret_scan.py --history" in st.get("run", "") for st in job["steps"]))
+
     def test_dependabot_watches_pip_docker_and_actions(self):
         p = ROOT / ".github" / "dependabot.yml"
         if not p.exists():
             self.skipTest("bu agacta .github yok")
         eco = {(u["package-ecosystem"], u["directory"]) for u in yaml.safe_load(p.read_text())["updates"]}
         self.assertEqual(eco, {("pip", "/panel"), ("pip", "/"), ("docker", "/panel"), ("github-actions", "/")})
+
+
+def all_workflows():
+    return {f.name: yaml.safe_load(f.read_text()) for f in sorted((ROOT / "ci").glob("*.yml"))}
+
+
+@unittest.skipIf(yaml is None, "pyyaml yok")
+class WorkflowSecurity(unittest.TestCase):
+    """Public depoda workflow guvenligi: kim neyi tetikleyebilir, neyi gorur, neyi yazabilir."""
+
+    FIRST_PARTY = {"actions/checkout", "actions/setup-python", "actions/cache", "actions/upload-artifact"}
+    UNTRUSTED_TRIGGERS = {"pull_request", "pull_request_target", "push", "issues", "issue_comment", "fork"}
+
+    def test_every_workflow_states_its_permissions(self):
+        """Varsayilan token yetkisi depo ayarina bagli; acik yazmayan workflow belirsiz yetkiyle kosar."""
+        for name, d in all_workflows().items():
+            top = "permissions" in d
+            per_job = all("permissions" in j for j in d["jobs"].values())
+            self.assertTrue(top or per_job, f"{name}: permissions bildirilmemis")
+
+    def test_no_workflow_uses_pull_request_target(self):
+        for name, d in all_workflows().items():
+            self.assertNotIn("pull_request_target", triggers(d), f"{name}: forktan gelen kodla sir birlestirir")
+
+    def test_workflows_that_can_see_secrets_are_never_triggered_by_pushes_or_prs(self):
+        """Sirli workflow yalniz zamanlayici ya da elle (workflow_dispatch) calisir."""
+        for name, d in all_workflows().items():
+            text = (ROOT / "ci" / name).read_text()
+            if "secrets." in text:
+                bad = set(triggers(d)) & self.UNTRUSTED_TRIGGERS
+                self.assertEqual(bad, set(), f"{name}: sirlar {bad} ile tetiklenebiliyor")
+
+    def test_push_and_pr_workflows_are_read_only_and_leave_no_credentials(self):
+        seen = 0
+        for name, d in all_workflows().items():
+            if not (set(triggers(d)) & {"pull_request", "push"}):
+                continue
+            seen += 1
+            self.assertEqual(d.get("permissions"), {"contents": "read"}, name)
+            for jname, job in d["jobs"].items():
+                self.assertNotIn("permissions", job, f"{name}:{jname} yetki genisletiyor")
+                for st in job["steps"]:
+                    if str(st.get("uses", "")).startswith("actions/checkout"):
+                        self.assertIs(st.get("with", {}).get("persist-credentials"), False,
+                                      f"{name}:{jname} checkout kimlik bilgisini diskte birakiyor")
+        self.assertGreaterEqual(seen, 2)                      # check + render-smoke
+
+    def test_only_first_party_actions_pinned_to_a_version_tag(self):
+        for name, d in all_workflows().items():
+            for jname, job in d["jobs"].items():
+                for st in job.get("steps", []):
+                    if "uses" not in st:
+                        continue
+                    action, _, ref = st["uses"].partition("@")
+                    self.assertIn(action, self.FIRST_PARTY, f"{name}: izin verilmeyen action {action}")
+                    self.assertRegex(ref, r"^v\d+(\.\d+)*$", f"{name}: {action} bir surum etiketine bagli olmali")
+
+    def test_every_job_has_a_timeout(self):
+        for name, d in all_workflows().items():
+            for jname, job in d["jobs"].items():
+                self.assertIn("timeout-minutes", job, f"{name}:{jname} zaman asimi yok (takili is dakika yakar)")
+
+    def test_secrets_are_never_echoed_or_dumped(self):
+        for name in all_workflows():
+            for i, line in enumerate((ROOT / "ci" / name).read_text().splitlines(), 1):
+                if line.strip().startswith("#"):
+                    continue
+                self.assertFalse(re.search(r"(echo|printf|cat)\b.*\$\{\{\s*secrets\.", line), f"{name}:{i}")
+                self.assertNotRegex(line, r"(?<![\w.])(env|printenv)\s*(\||$)", f"{name}:{i} ortami dokuyor")
+                self.assertNotIn("set -x", line, f"{name}:{i}: set -x sirlari gunluge yazar")
+
+    def test_shell_scripts_are_all_linted_by_check(self):
+        text = (ROOT / "ci" / "check.yml").read_text()
+        tracked = subprocess.run(["git", "-C", str(ROOT), "ls-files", "*.sh"], capture_output=True, text=True)
+        if tracked.returncode != 0 or not tracked.stdout.strip():
+            self.skipTest("git yok")
+        for f in tracked.stdout.split():
+            self.assertIn(f, text, f"{f} check.yml'deki shell kontrolune eklenmemis")
+
+
+@unittest.skipIf(yaml is None, "pyyaml yok")
+class CheckJobsAndSmoke(unittest.TestCase):
+    def test_check_has_the_three_jobs_and_the_secret_scan(self):
+        d = wf("check.yml")
+        self.assertEqual(set(d["jobs"]), {"test", "panel", "docker"})
+        self.assertEqual(step(d, "secret taramasi", "test")["run"], "python tools/secret_scan.py")
+        self.assertTrue(d["concurrency"]["cancel-in-progress"])
+
+    def test_the_docker_job_builds_runs_hardened_and_validates_compose(self):
+        d = wf("check.yml")
+        run = step(d, "imajin icinde ice aktarma testi", "docker")["run"]
+        for flag in ("--network none", "--read-only", "--cap-drop ALL", "no-new-privileges", "--user 10001:10001"):
+            self.assertIn(flag, run)
+        self.assertIn("docker build", step(d, "imaji derle", "docker")["run"])
+        self.assertIn("docker compose config -q", step(d, "compose dosyasi gecerli mi", "docker")["run"])
+        text = json.dumps(d["jobs"]["docker"])
+        self.assertNotIn("docker push", text)                  # imaj hicbir yere gonderilmez
+        self.assertNotIn("secrets.", text)
+
+    def test_render_smoke_runs_the_real_pipeline_without_publishing(self):
+        d = wf("render-smoke.yml")
+        t = triggers(d)
+        self.assertEqual(set(t), {"pull_request", "schedule", "workflow_dispatch"})
+        paths = " ".join(t["pull_request"]["paths"])
+        for must in ("worker/**", "requirements.txt", "tools/setup_runner.sh", ".github/workflows/daily.yml"):
+            self.assertIn(must, paths)
+        text = (ROOT / "ci" / "render-smoke.yml").read_text()
+        for must in ("tools/setup_runner.sh", "tools/fetch_voice.sh", "python -m worker.build",
+                     "tests.test_scripts_draw", "REQUIRE_RENDER_DEPS"):
+            self.assertIn(must, text)
+        for bad in ("publish/", "panel_publish", "r2_push", "git push", "gh release", "secrets."):
+            self.assertNotIn(bad, text)
+
+    def test_render_smoke_shares_daily_cache_keys_so_it_never_downloads_cold(self):
+        def keys(name):
+            return {st["with"]["key"] for j in wf(name)["jobs"].values() for st in j["steps"]
+                    if str(st.get("uses", "")).startswith("actions/cache")}
+        self.assertEqual(keys("render-smoke.yml"), keys("daily.yml"))
+
+    def test_the_pins_inside_check_follow_requirements_txt(self):
+        """check.yml hizli olsun diye Pillow/numpy'yi satir ici kuruyor; uretimdeki surumle ayni olmali
+        (Dependabot requirements.txt'yi guncelleyince bu test kirilir: check.yml'i de ayni surume cek)."""
+        req = dict(re.findall(r"^([A-Za-z0-9_.-]+)==(\S+)", (ROOT / "requirements.txt").read_text(), re.M))
+        run = " ".join(st.get("run", "") for st in wf("check.yml")["jobs"]["test"]["steps"])
+        for pkg in ("Pillow", "numpy"):
+            self.assertIn(f"{pkg}=={req[pkg]}", run, f"check.yml'de {pkg}=={req[pkg]} olmali")
+
+    def test_the_smoke_script_exists_and_is_short_enough_to_be_fast(self):
+        smoke = wf("render-smoke.yml")["env"]["SMOKE_SCRIPT"]
+        path = ROOT / "content" / "scripts" / smoke
+        self.assertTrue(path.exists(), f"{smoke} yok: render-smoke.yml'deki SMOKE_SCRIPT'i guncelle")
+        spec = json.loads(path.read_text())
+        words = sum(len(b["say"].split()) for b in spec["beats"])
+        self.assertLess(words, 90)
 
 
 if __name__ == "__main__":

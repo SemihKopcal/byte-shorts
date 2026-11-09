@@ -215,11 +215,29 @@ curl -sI https://byte.semihkopcal.com | head -5      # 302 ve cloudflareaccess.c
 Son 14 yedek konteynerin `/data/backups` klasöründe (`panel-data` volume'u) tutulur. Haftada bir sunucudan çıkar: önce
 `docker compose cp panel:/data/backups /srv/www/byte/backups/yedek-$(date +%F)` ile `/srv/www/byte/backups` altına al, sonra o klasörü sunucunun **dışına** (kendi bilgisayarına ya da başka bir depolamaya) taşı; aynı sunucudaki kopya sunucuyla birlikte kaybolur. Panel kaybolsa bile videolar R2'de, yayınlar platformlarda durur; kayıt kaybı yalnız onay geçmişini ve takvimi etkiler.
 
-**Güncelleme:**
+**Güncelleme:** `main`'e giren değişiklikleri sunucuya güvenle almak için:
 
 ```bash
-cd /srv/www/byte/app && git pull --ff-only && cd panel/deploy && docker compose up -d --build
+cd /srv/www/byte/app/panel/deploy && ./update.sh        # ne değişeceğini gösterir, onay sorar
 ```
+
+Script sırayla şunları yapar, biri bozulursa durur: yerel değişiklik / yanlış dal / force-push
+varsa **reddeder**; `panel/` değişmediyse yeniden derlemez (yalnız kodu ilerletir); çalışan
+panelin veritabanı yedeğini alır; çalışan imajı `byte-panel:prev` olarak saklar; derler,
+başlatır ve konteynerin **sağlıklı** olmasını bekler (en çok 90 sn); sağlıklı olmazsa
+**kendiliğinden geri alır** (eski commit + eski imaj). Derleme hata verirse çalışan panele
+hiç dokunmaz. Yapılandırma: `BYTE_PULL=1 ./update.sh` taban imajı da çeker (ayda bir
+güvenlik yamaları için), `-y` onay sormaz. Sırlara (`.env`, `secrets/`) dokunmaz.
+
+Geri alma kodu ve imajı döndürür, **veritabanını döndürmez**. Panel şeması yalnız `CREATE TABLE
+IF NOT EXISTS` ile eklemeli büyüyor; bir sürüm şemayı bozucu biçimde değiştirirse geri
+almadan sonra yedeği (`/data/backups`) elle geri yükle. Elle eski yöntem de çalışır:
+`git pull --ff-only && docker compose up -d --build` (yedek ve geri alma YOK).
+
+**Kendiliğinden güncellenme yok (bilerek):** sunucuya dışarıdan bağlantı yolu olmadığı için
+GitHub oraya "deploy" edemez; ve yayın kararını veren panelin kodu gözetimsiz değişmesin.
+İstersen güvenilir bir zamanlayıcıyla `./update.sh -y` çalıştırabilirsin, ama öneri: PR'ı
+birleştirdikten sonra sen çalıştır.
 
 Dependabot haftalık PR açar (hiçbiri kendiliğinden birleşmez); `audit` workflow'u her pazartesi bilinen güvenlik açıklarına bakar ve açık varsa kırmızı yanar.
 

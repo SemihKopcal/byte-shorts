@@ -1,0 +1,116 @@
+name: render-smoke
+
+# "check" testleri GERCEK bir video uretmez. Bu workflow uretir: ses sentezi + kare cizimi +
+# ffmpeg + kalite kontrolu, tam `daily` hattiyla ayni kurulumla. Boylece su degisiklikler
+# gece 04:15'te daily'yi kirmizi yakmadan ONCE, PR'da yakalanir:
+#   - render/duzenleme kodu (worker/, editorial/)
+#   - bagimlilik surum atlamalari (Dependabot: numpy, Pillow, piper-tts ...)
+#   - Actions surum atlamalari (checkout, cache, setup-python, upload-artifact ...)
+#   - runner araclarinin degismesi (ffmpeg, font, ses modeli indirme adresleri): haftalik cron
+#
+# Dependabot PR'larini bu kapi yesil olmadan BIRLESTIRME. Yesil olunca PR'daki
+# "render-smoke" artifact'indan videoyu indirip izleyebilirsin (1 gun saklanir).
+#
+# GUVENLIK: yazma izni yok (contents: read), secret yok, yayin yok, kimlik bilgisi diskte
+# kalmaz. Ucuncu taraf ffmpeg ikilisi burada calisir ama dokunabilecegi bir sir yok.
+# (tests/test_workflows.py bunlari kilitliyor.)
+on:
+  pull_request:
+    paths:
+      - "worker/**"
+      - "editorial/**"
+      - "requirements.txt"
+      - "tools/setup_runner.sh"
+      - "tools/fetch_voice.sh"
+      - ".github/workflows/render-smoke.yml"
+      - ".github/workflows/daily.yml"
+      - ".github/workflows/check.yml"
+  schedule:
+    - cron: "23 5 * * 0"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: render-smoke-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  # Kisa (~27 sn) bir senaryo: en hizli render. Dosya adini degistirirsen testler uyarir.
+  SMOKE_SCRIPT: p031-genome-three-billion.json
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      # daily.yml ile AYNI anahtarlar: main'de isinmis cache'i okur, indirme beklemez.
+      - name: arac cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.local/bin
+            ~/.local/share/fonts/inter
+            ~/.local/share/fonts/cjk
+          key: runner-tools-ffmpeg-inter4-notojp-v2
+
+      - name: ffmpeg + fontlar
+        run: bash tools/setup_runner.sh
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - run: pip install -r requirements.txt
+
+      - name: ses modeli cache
+        id: voice
+        uses: actions/cache@v4
+        with:
+          path: voices
+          key: piper-en-us-ryan-high-v1
+
+      - name: ses modeli indir
+        if: steps.voice.outputs.cache-hit != 'true'
+        run: bash tools/fetch_voice.sh en-us-ryan-high
+
+      # Fontlar kurulduktan sonra: TUM senaryolar sessiz cizilir (REQUIRE_RENDER_DEPS=1:
+      # eksik font/bagimlilik burada atlama degil hata).
+      - name: tum senaryolari ciz (sessiz)
+        env:
+          REQUIRE_RENDER_DEPS: "1"
+        run: python -m unittest tests.test_scripts_draw -v
+
+      # QC "bu baslik daha once yayinlandi mi" diye content/published.json'a bakar. Smoke videosu
+      # yayinlanmis bir senaryo olabilir; kendi kendine "tekrar" demesin diye bu calisma
+      # kopyasinda (depoya yazilmaz) gunlugu bosaltiyoruz.
+      - name: yayin gunlugunu bosalt (yalniz bu kopyada)
+        run: echo '[]' > content/published.json
+
+      # Gercek hat: ses + kareler + ffmpeg + QC. QC basarisizsa build kirmizi biter.
+      - name: bir videoyu bastan sona uret
+        run: python -m worker.build "content/scripts/$SMOKE_SCRIPT"
+
+      - name: cikti dosyasi var mi
+        run: |
+          set -eu
+          id="${SMOKE_SCRIPT%.json}"
+          f="out/$id/$id.mp4"
+          test -s "$f"
+          ls -l "$f"
+          ffprobe -v error -show_entries stream=codec_name,width,height -of csv=p=0 "$f"
+
+      - name: videoyu artifact olarak sakla (yalniz PR)
+        if: github.event_name == 'pull_request'
+        uses: actions/upload-artifact@v4
+        with:
+          name: render-smoke
+          path: out/*/*.mp4
+          retention-days: 1
+          if-no-files-found: error

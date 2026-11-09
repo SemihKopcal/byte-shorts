@@ -6,6 +6,10 @@ name: gemini-check
 on:
   workflow_dispatch:
 
+# Depoya yazmaz; GEMINI_API_KEY yalniz asagidaki adimin ortaminda.
+permissions:
+  contents: read
+
 jobs:
   probe:
     runs-on: ubuntu-latest

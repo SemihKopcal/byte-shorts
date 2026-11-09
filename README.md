@@ -205,8 +205,54 @@ ci/          .github/workflows'un kopyasi (asagiya bak)
 python -m unittest discover -s tests -v
 ```
 
-Ag yok, Gemini yok, secret yok; saniyenin altinda biter. `check.yml` her
+Ag yok, Gemini yok, secret yok; birkac saniyede biter. `check.yml` her
 push'ta calistiriyor ve workflow YAML'larini da dogruluyor.
+
+## Canliya alma akisi (CI/CD)
+
+Hicbir sey `main`'e dogrudan gitmesin; once PR'da kontrol edilir. `main`'e girdigi
+an GitHub tarafindaki workflow'lar (`daily`, `panel-publish` ...) canli olur. Panel
+SUNUCUSU ise ayrica, elle guncellenir (adim 4).
+
+1. **Dal ac, push'la, PR ac:** `git switch -c ozellik && git push -u origin ozellik`
+2. **PR'daki kontroller** (hepsi yesil olmadan birlestirme):
+
+   | Kontrol | Ne bakar |
+   |---|---|
+   | `check / test` | birim testleri, senaryo kapisi, workflow YAML, shellcheck, **secret taramasi** |
+   | `check / panel` | panelin kendi testleri |
+   | `check / docker` | panel imaji derlenir, aga cikissiz/salt okunur/yetkisiz konteynerde acilir, compose dosyasi dogrulanir |
+   | `render-smoke` | `worker/`, `requirements.txt` ya da workflow degisince **gercek bir video** uretilir (ses + kareler + ffmpeg + QC). PR'dan mp4 artifact'ini indirip izleyebilirsin |
+
+3. **Birlestir** (Squash and merge). Workflow degisiklikleri hemen canli olur.
+4. **`panel/` degistiyse** sunucuda: `cd /srv/www/byte/app/panel/deploy && ./update.sh`
+   (yedek alir, derler, saglik bekler, saglikli degilse kendiliginden geri alir;
+   ayrintisi `panel/deploy/README.md` bolum 11). Yalniz icerik/workflow degistiyse
+   sunucuda yapilacak bir sey YOK.
+5. **Ilk kez deneme:** Actions > daily > Run workflow, panelde videoyu izle. Panelde
+   Ayarlar > YouTube gizliligini once `private` yap, YouTube Studio'da gor, sonra `public`.
+
+**Dependabot PR'lari** (haftalik, hicbiri kendiliginden birlesmez): birer birer, `check`
+yesilken birlestir. `numpy`, `Pillow`, `piper-tts` ve Actions surum atlamalari (`checkout`,
+`cache`, `setup-python`, `upload-artifact`) videoyu/hatti etkiler: `render-smoke` yesil olmali
+ve artifact'taki mp4'u bir kez izlemelisin. `Pillow`/`numpy` PR'inda `check.yml`'deki satir ici
+surumu de ayni surume cek (test seni uyarir).
+
+**Neden `main`'e dogrudan koruma kurali koymuyoruz:** `daily` bot'u her kosu sonunda
+`main`'e dogrudan commit atiyor (defter). "Require status checks" ya da "Require pull
+request" kurali bu push'u reddeder ve uretim durur. PR disiplini gonullu.
+
+**Guvenlik duvarlari** (hepsi `tests/` ile kilitli, biri bozulursa test kirmizi olur):
+`check`/`render-smoke` secret gormez ve depoya yazamaz (fork PR'lari da guvenle calisir);
+sirli workflow'lar yalniz zamanlayici ya da elle calisir, push/PR ile asla; yalniz
+GitHub'in kendi `actions/*` action'lari kullanilir; her workflow izinlerini bildirir;
+sirlar `echo` edilmez; depoda token/anahtar bulunursa (`tools/secret_scan.py`) CI kirmizi olur;
+panel konteyneri port yayinlamaz, root degildir, salt okunurdur.
+
+**Bilinen artik risk:** `ffmpeg` ikilisi `tools/setup_runner.sh` ile BtbN'nin "latest"
+surumunden iniyor ve `daily` kosusunda calisiyor (sabitlenmis degil: o proje eski surumleri
+tutmuyor). Ele gecirilirse `daily`'nin `contents: write` yetkisi riske girer. Azaltma plani:
+render'i sirsiz/yazmasiz ayri bir job'a bolmek (bkz. `PLAN.md`).
 
 ## Lokal render
 
