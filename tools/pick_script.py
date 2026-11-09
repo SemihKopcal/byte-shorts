@@ -13,6 +13,11 @@ IKI defter tutuluyor:
 Ikisi de atlaniyor. Sadece published'a bakmak bir hataydi: yayinlamayi
 bekledigin surece daily her gece AYNI videoyu uretiyordu.
 
+SIRA: varsayilan sira dosya adi sirasi. Istersen `content/order.json` (id listesi)
+koy: listedeki islenmemis senaryolar LISTE SIRASIYLA, hepsinden once secilir;
+listede olmayanlar dosya adi sirasiyla arkasindan gelir. Dosya yoksa ya da bozuksa
+hicbir sey degismez. A/B testinde kollari dosya adini degistirmeden dizmek icin.
+
 Kullanim:
     python tools/pick_script.py                 -> path=content/scripts/xxx.json
                                                    left=<bu dahil kalan senaryo sayisi>
@@ -47,6 +52,33 @@ def _spec_id(f: pathlib.Path) -> str:
     return json.loads(f.read_text())["id"]
 
 
+def _order() -> list:
+    """content/order.json: oncelikli id listesi (yoksa/bozuksa bos)."""
+    p = SCRIPTS.parent / "order.json"
+    if not p.exists():
+        return []
+    try:
+        d = json.loads(p.read_text())
+    except json.JSONDecodeError:
+        return []
+    return [x for x in d if isinstance(x, str)] if isinstance(d, list) else []
+
+
+def queue(done: set) -> list:
+    """Islenmemis senaryo dosyalari, secim sirasiyla."""
+    by_id = {}
+    for c in sorted(SCRIPTS.glob("*.json")):
+        sid = _spec_id(c)
+        if sid not in done:
+            by_id[sid] = c
+    first = []
+    for sid in _order():
+        if sid in by_id and by_id[sid] not in first:
+            first.append(by_id[sid])
+    rest = [c for c in by_id.values() if c not in first]
+    return first + rest
+
+
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("name", nargs="?", default="")
@@ -68,8 +100,7 @@ def main() -> None:
             sys.exit(f"script bulunamadi: {f}")
     else:
         done = _ids(PUBLISHED) | _ids(BUILT)
-        todo = [c for c in sorted(SCRIPTS.glob("*.json"))
-                if _spec_id(c) not in done]
+        todo = queue(done)
         left = len(todo)
         f = (todo[-1] if a.newest else todo[0]) if todo else None
         if f is None:

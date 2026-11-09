@@ -200,7 +200,7 @@ curl -sI https://byte.semihkopcal.com | head -5      # 302 ve cloudflareaccess.c
 - **Onay:** her video önce "bekliyor"dur (**Onayla**, **Reddet**, toplu için **Hepsini onayla**). Onaylayınca açık platformlar için takvimde bir saate (ayarlardaki saatlerden ilk boş olana) yerleşir.
 - **Otomasyon anahtarı** (Panel sayfasında; "Kapalı: aç" / "AÇIK: kapat"): açıksa yeni videolar onaysız onaylanmış sayılır ve takvime girer. Kapatınca yine onayına düşer. Zaten onaylanmışlar etkilenmez.
 - **Duraklat** (Panel sayfasında): tek tuşla hiçbir yeni yayın gönderilmez. Takvimdekiler bekler, silinmez.
-- **Yayın saatleri** UTC'dir (Türkiye saati − 3). Varsayılan `01:15,07:15,13:15,19:15` = TR 04:15, 10:15, 16:15, 22:15.
+- **Yayın saatleri** UTC'dir (Türkiye saati − 3). Varsayılan `01:15,07:15,13:15,19:15` = TR 04:15, 10:15, 16:15, 22:15. Günde 2 video için (üretim 04:15 ve 16:15 UTC) Ayarlar > Yayın saatleri'ni **`07:15,19:15`** yap (TR 10:15 ve 22:15).
 - **Saatlik üst sınır:** saatte en fazla 12 yayın emri gönderilir (`PANEL_MAX_DISPATCH_PER_HOUR`).
 - **Bir yayın "başarısız" olursa:** Takvim'de sebebi yazar. **Yeniden dene** elle yapılır; panel kendiliğinden tekrar denemez. Önce platformda video var mı diye bak. Zaten yayınlanmış bir videoyu iki kez yüklememek için yayın workflow'u R2'deki `ledger/` kaydına bakar.
 

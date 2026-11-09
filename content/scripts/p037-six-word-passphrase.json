@@ -1,0 +1,240 @@
+{
+ "id": "p037-six-word-passphrase",
+ "series": "G",
+ "lang": "en",
+ "format": "measured",
+ "theme": "moss",
+ "title": "A six-word passphrase is about 77 bits strong",
+ "summary": "EFF's long list has 7,776 words, about 12.9 bits each. Six words picked at random give about 77 bits.",
+ "tags": [
+  "passphrase",
+  "entropy",
+  "security",
+  "explained"
+ ],
+ "sources": [
+  "https://www.eff.org/deeplinks/2016/07/new-wordlists-random-passphrases",
+  "https://en.wikipedia.org/wiki/Diceware"
+ ],
+ "beats": [
+  {
+   "id": "b1",
+   "role": "hook",
+   "say": "Six random words give about seventy seven bits.",
+   "cap": "6 words ≈ 77 bits",
+   "scene": "contrast",
+   "data": {
+    "left": {
+     "label": "words",
+     "value": "6"
+    },
+    "right": {
+     "label": "strength",
+     "value": "77 bits",
+     "tone": "mid"
+    },
+    "verdict": "EFF's recommendation"
+   }
+  },
+  {
+   "id": "b2",
+   "role": "why",
+   "say": "The EFF list has seven thousand seven hundred seventy six words.",
+   "cap": "7,776 words"
+  },
+  {
+   "id": "b3",
+   "role": "why",
+   "say": "Five dice choose each word.",
+   "cap": "5 dice per word"
+  },
+  {
+   "id": "b4",
+   "role": "data",
+   "say": "Six to the fifth power gives that count.",
+   "cap": "6^5 = 7,776",
+   "scene": "equation",
+   "data": {
+    "terms": [
+     {
+      "value": "6",
+      "label": "sides"
+     },
+     {
+      "value": "5",
+      "label": "dice"
+     }
+    ],
+    "op": "^",
+    "result": {
+     "value": "7,776",
+     "label": "words",
+     "tone": "mid"
+    }
+   }
+  },
+  {
+   "id": "b5",
+   "role": "data",
+   "say": "Each word adds about twelve point nine bits.",
+   "cap": "≈ 12.9 bits per word"
+  },
+  {
+   "id": "b6",
+   "role": "data",
+   "say": "Six words add up to about seventy seven.",
+   "cap": "≈ 77 bits",
+   "scene": "counter",
+   "data": {
+    "suffix": " bits",
+    "from": 0,
+    "to": 77,
+    "dp": 0,
+    "tone": "mid",
+    "note": "six random words"
+   }
+  },
+  {
+   "id": "b7",
+   "role": "turn",
+   "say": "Every added word multiplies the guesses by the list size.",
+   "cap": "Guesses multiply per word",
+   "scene": "table",
+   "data": {
+    "unit": "combinations (bar = log scale)",
+    "rows": [
+     {
+      "name": "1 word",
+      "value": "7,776",
+      "ratio": 0.17
+     },
+     {
+      "name": "2 words",
+      "value": "60,466,176",
+      "ratio": 0.33
+     },
+     {
+      "name": "3 words",
+      "value": "470,184,984,576",
+      "ratio": 0.5
+     },
+     {
+      "name": "6 words",
+      "value": "2.2 × 10^23",
+      "ratio": 1.0,
+      "tone": "mid"
+     }
+    ]
+   }
+  },
+  {
+   "id": "b8",
+   "role": "turn",
+   "say": "Words must be chosen randomly, not by taste.",
+   "cap": "Random, not clever"
+  },
+  {
+   "id": "b9",
+   "role": "resolve",
+   "say": "Strength comes from list size and word count.",
+   "cap": "List size × word count"
+  },
+  {
+   "id": "b10",
+   "role": "resolve",
+   "say": "Six random words.",
+   "cap": "Six random words",
+   "scene": "close",
+   "data": {
+    "lines": [
+     "Six random words.",
+     "About 77 bits."
+    ],
+    "accent": "mid"
+   }
+  }
+ ],
+ "claims": [
+  {
+   "shown": "77",
+   "expr": "6*12.9",
+   "value": 77.4,
+   "source": null
+  },
+  {
+   "shown": "7,776",
+   "expr": "6**5",
+   "value": 7776.0,
+   "source": null
+  },
+  {
+   "shown": "12.9",
+   "expr": null,
+   "value": null,
+   "source": 0,
+   "note": "EFF: each additional word will strengthen the passphrase by about 12.9 bits"
+  },
+  {
+   "shown": "60,466,176",
+   "expr": "7776**2",
+   "value": 60466176.0,
+   "source": null
+  },
+  {
+   "shown": "470,184,984,576",
+   "expr": "7776**3",
+   "value": 470184984576.0,
+   "source": null
+  },
+  {
+   "shown": "2.2 × 10^23",
+   "expr": "(6**15)*(6**15)/(10**11)/(10**12)",
+   "value": 2.2107,
+   "source": null
+  }
+ ],
+ "facts": [
+  {
+   "claim": "EFF's long wordlist has 7776 words for use with five dice, and EFF recommends a six-word passphrase for about 77 bits of entropy, each added word adding about 12.9 bits",
+   "source": 0,
+   "note": "EFF, New Wordlists for Random Passphrases: list for use with five dice; six-word passphrase, 77 bits; 12.9 bits per additional word"
+  },
+  {
+   "claim": "A Diceware word list holds 6^5 = 7776 unique words, five rolls of a six-sided die choose each word, and each word adds 12.9 bits of entropy",
+   "source": 1,
+   "note": "Wikipedia, Diceware: 7776 unique words; five rolls per word; 12.9 bits per word"
+  }
+ ],
+ "copy_parts": {
+  "youtube": {
+   "hook": "EFF's long list has 7,776 words, about 12.9 bits each. Six words picked at random give about 77 bits of entropy."
+  },
+  "instagram": {
+   "caption": "A six-word passphrase from the EFF list is about 77 bits: 7,776 words, 12.9 bits each."
+  },
+  "tiktok": {
+   "caption": "A six-word passphrase is about 77 bits strong."
+  },
+  "hashtags": {
+   "youtube": [
+    "#tech",
+    "#security",
+    "#passwords",
+    "#explained"
+   ],
+   "instagram": [
+    "#tech",
+    "#security",
+    "#passwords"
+   ],
+   "tiktok": [
+    "#tech",
+    "#security"
+   ]
+  }
+ },
+ "authored": {
+  "by": "claude",
+  "date": "2026-11-08"
+ }
+}

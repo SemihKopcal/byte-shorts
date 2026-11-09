@@ -104,6 +104,26 @@ jobs:
           TIKTOK_NEW_REFRESH_FILE: ${{ runner.temp }}/tiktok-new-refresh
         run: python tools/panel_publish.py
 
+      # TikTok taslagina aciklama API ile yazilamiyor (telefonda yapistirilir).
+      # Metin burada koşu ozetine konur: Actions > bu kosu > Summary.
+      # Girdi yalniz ENV uzerinden, ad katı bicimle denetlenir (yol enjeksiyonu yok).
+      - name: tiktok aciklama
+        if: always() && inputs.platform == 'tiktok'
+        env:
+          SCRIPT_ID: ${{ inputs.script_id }}
+        run: |
+          case "$SCRIPT_ID" in
+            ""|*[!a-z0-9-]*) exit 0 ;;
+          esac
+          f="out/${SCRIPT_ID}/captions.md"
+          if [ -f "$f" ]; then
+            {
+              echo "### TikTok aciklamasi (${SCRIPT_ID})"
+              echo
+              sed -n '/^## TikTok/,/^## YouTube/p' "$f" | sed '1d;$d'
+            } >> "$GITHUB_STEP_SUMMARY"
+          fi
+
       # TikTok yeni bir refresh token dondurduyse eskisi gecersiz olabilir:
       # secret'i guncelle (daily ile ayni yol; GH_PAT gerekir).
       - name: tiktok yeni token

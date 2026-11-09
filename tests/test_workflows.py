@@ -118,6 +118,14 @@ class PanelPublish(unittest.TestCase):
             has = "GH_PAT" in s.get("env", {})
             self.assertEqual(has, s.get("name") == "tiktok yeni token", s.get("name"))
 
+    def test_the_tiktok_caption_goes_to_the_run_summary_safely(self):
+        s = step(self.d, "tiktok aciklama")
+        self.assertEqual(s["if"], "always() && inputs.platform == 'tiktok'")
+        self.assertEqual(set(s["env"]), {"SCRIPT_ID"})          # token yok, yalniz kimlik
+        self.assertNotIn("${{", s["run"])                       # girdi run: icine gomulmez
+        self.assertIn("GITHUB_STEP_SUMMARY", s["run"])
+        self.assertIn("*[!a-z0-9-]*", s["run"])                 # ad bicimi denetlenir
+
     def test_nothing_in_it_writes_to_the_repo(self):
         text = (ROOT / "ci" / "panel-publish.yml").read_text()
         for bad in ("git push", "git commit", "contents: write"):

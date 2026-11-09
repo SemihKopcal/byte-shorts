@@ -1,12 +1,16 @@
 name: daily
 
-# Gunde 4 video, 6 saatte bir (UTC 01:15 07:15 13:15 19:15; Turkiye 04:15 10:15
-# 16:15 22:15). TAM OTOMATIK, Gemini YOK:
+# Gunde 2 video, 12 saatte bir (UTC 04:15 16:15; Turkiye 07:15 19:15). Ilk 30 gun
+# 2/gun + A/B testi (kullanici karari, 8 Kasim); veri gelince 4/gune cikilabilir:
+# cron satirlarini 01:15 07:15 13:15 19:15 yap, tests/test_daily.py'deki sayiyi guncelle.
+# Panelde yayin saatleri (Ayarlar > Yayin saatleri) uretimden SONRAya denk gelmeli:
+# "07:15,19:15" (onay 04:15 uretimini 07:15'te, 16:15 uretimini 19:15'te yayinlar).
+# TAM OTOMATIK, Gemini YOK:
 #
 #   senaryo  content/scripts'teki siradaki islenmemis senaryo (plan: content/plan.md).
 #            Kuyruk bossa kosu ~15 saniyede KIRMIZI durur ("kuyruk bos"): hicbir
-#            sey kurulmaz, render edilmez, dakika yanmaz. Kuyrukta 8 ya da daha az
-#            senaryo kalinca (gunde 4 videoda 2 gun) uyari yazar.
+#            sey kurulmaz, render edilmez, dakika yanmaz. Kuyrukta 12 ya da daha az
+#            senaryo kalinca (gunde 2 videoda 6 gun) uyari yazar.
 #   render   kodla cizilir, QC'den gecer
 #   YouTube  AUTO_PRIVACY neyse o gizlilikle yuklenir
 #   defter   uretildi/yayinlandi kaydi repoya geri yazilir
@@ -26,10 +30,8 @@ name: daily
 # Kapatmak icin PANEL_MODE degiskenini sil (ya da off yap): eski dogrudan yayin geri gelir.
 on:
   schedule:
-    - cron: "15 1 * * *"
-    - cron: "15 7 * * *"
-    - cron: "15 13 * * *"
-    - cron: "15 19 * * *"
+    - cron: "15 4 * * *"
+    - cron: "15 16 * * *"
   workflow_dispatch:
     inputs:
       script:
@@ -78,7 +80,7 @@ jobs:
         env:
           LEFT: ${{ steps.pick.outputs.left }}
         run: |
-          if [ "$LEFT" -le 8 ]; then
+          if [ "$LEFT" -le 12 ]; then
             echo "::warning title=Kuyruk azaliyor::bu video dahil $LEFT senaryo kaldi; yeni parti yazilmali (content/plan.md)"
           fi
 
@@ -287,7 +289,7 @@ jobs:
           git push
 
       # retention-days: ucretsiz hesapta artifact kotasi 500 MB. Video ~39 MB,
-      # gunde 4 tane, 2 gun saklaniyor (~312 MB). Kalici kopya zaten release'te.
+      # gunde 2 tane, 2 gun saklaniyor (~156 MB). Kalici kopya zaten release'te.
       # Panel modunda yuklenmez: public depoda artifact'i de herhangi bir GitHub hesabi indirebilir.
       - name: artifact
         if: steps.render.outcome == 'success' && vars.PANEL_MODE != 'on'

@@ -10,7 +10,7 @@ sorduğumuzda cevap kodun içinde değil burada olsun.
 
 **Çalışıyor:** Piper sesi, 9 sahneli katalog, 8 tema, kapalı döngü
 (Gemini yazar → editör yargılar → kod aritmetiği hesaplar → render → QC →
-YouTube → defter → release). Günde 4 video, `AUTO_PRIVACY` değişkeniyle tek
+YouTube → defter → release). Günde 2 video (ilk 30 gün, A/B testi; sonra 4'e çıkılabilir), `AUTO_PRIVACY` değişkeniyle tek
 düğmeli yayın kontrolü.
 
 **Konu çeşitliliği (6 Kasım, kullanıcı isteği: "sadece bilgi değil ilgi çekici
@@ -226,8 +226,8 @@ hesap bağlama.**
       panelde onay bekleyen → onayla → `panel-publish` → YouTube. "Servisler"
       sayfasındaki "Yayın (panel-publish)" satırı yeşile dönmeli
 - [ ] Günlük yedek cron'u (`README` bölüm 11) + haftalık sunucu dışı kopya
-- [ ] Yeni senaryo partisi `p011`+: kuyrukta ~9 senaryo var, günde 4 videoyla
-      ~2 günlük. Panelde "kuyruk kaç gün yeter" uyarısı 6.1'de
+- [ ] Yeni senaryo partisi `p038`+: kuyrukta ~33 senaryo var, günde 2 videoyla
+      ~16 günlük. Panelde "kuyruk kaç gün yeter" uyarısı 6.1'de
 
 ### 6.1 Tasarım yenileme (detaylı)  ·  ⬜
 

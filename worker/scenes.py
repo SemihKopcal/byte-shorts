@@ -101,8 +101,19 @@ def contrast(d, t, t0, t1, data):
         s = D.punch(t, t0 + (0.28 if big else 0.0), amt=0.08)
         d.text((x, cy - (1 - al) * 20), str(it.get("value", "")), font=f,
                fill=D.fade(col, al), anchor="mm")
-        D.tracked(d, (x, cy + 110), str(it.get("label", "")).upper(),
-                  D.F_SEMI(32), D.fade(D.MUTE, al), track=6, anchor="mt")
+        # Iki etiket de uzunsa ortada birbirine degiyordu ("ATOMS IN THE
+        # UNIVERSELEGAL GO POSITIONS"): her biri kendi yarisina sigana kadar
+        # kuculur.
+        lab = str(it.get("label", "")).upper()
+        size, trk = 32, 6.0
+        while size > 22:
+            wd = sum(d.textlength(ch, font=D.F_SEMI(size)) for ch in lab)
+            if wd + trk * (len(lab) - 1) <= D.W * 0.43:
+                break
+            size -= 1
+            trk = max(2.5, trk - 0.35)
+        D.tracked(d, (x, cy + 110), lab, D.F_SEMI(size), D.fade(D.MUTE, al),
+                  track=trk, anchor="mt")
     # ayirici
     if b > 0.1:
         d.rectangle((MIDX - 2, cy - 110, MIDX + 2, cy + 90), fill=D.fade(D.LINE, b))

@@ -4,7 +4,9 @@ Bu dosya kanalin yol haritasi. Videolar Gemini olmadan, **yazilmis senaryolardan
 uretiliyor: `content/scripts/pNNN-*.json` dosyalari dosya adi sirasiyla alinir
 (`tools/pick_script.py`), render edilir, yayinlanir. Siradaki senaryo kalmayinca
 daily ~15 saniyede "Kuyruk bos" diye kirmizi durur (Gemini'ye dusmez), yani
-**kuyruk bos kalmamali**; kalan 8 ya da daha azsa uyari yazar.
+**kuyruk bos kalmamali**; kalan 12 ya da daha azsa uyari yazar. Sirayi dosya adini
+degistirmeden ayarlamak icin `content/order.json` (id listesi) var: listedekiler,
+liste sirasiyla, once alinir.
 
 Bu tablo **konu listesi ve ipucu**dur, dogrulanmis bilgi degil. Bir satir senaryoya
 donusurken "Dogrulanacak" sutunundaki sayfalar gercekten acilip okunur; sayi ya da
@@ -19,6 +21,45 @@ Hicbir sayi buradan videoya kopyalanmaz.
 - Yasayan ozel kisi adi yok; kurum, sirket ve tarihi kisiler olabilir.
 - Hook soru degil, <= 12 kelime. `say` icinde rakam yok, rakam yalniz `cap`te.
 - Kapi: `python -m editorial.authored` (CI'da `check.yml` calistirir).
+
+## Ilk 30 gun: gunde 2 video + A/B testi
+
+Karar (8 Kasim): ilk 30 gun gunde **2 video** (cron 04:15 ve 16:15 UTC; panelde yayin
+saatleri `07:15,19:15`, Turkiye 10:15 ve 22:15) ve ayni sirada bir deney. Veri gelince
+gunde 4'e cikilabilir (`daily.yml` cron satirlari + `tests/test_daily.py`).
+
+**Deney `e1-length`** (`content/experiments.json`): ayni bicimde (measured) **kisa
+(~25 sn)** videolar mi, **standart (~36 sn)** videolar mi daha cok izleniyor ve
+izleyiciyi daha cok tutuyor? 7 + 7 video. Ciftler **ayni gun** yayinlanir, hangi
+kolun ilk saate dusecegi gunden gune degisir (saat etkisi kola binmesin):
+
+| Gun | 07:15 UTC (TR 10:15) | 19:15 UTC (TR 22:15) |
+|---|---|---|
+| 1 | kisa `p031-genome-three-billion` | standart `p008-whisper-77-years` |
+| 2 | standart `p010-unix-2038` | kisa `p032-cd-audio-1411` |
+| 3 | kisa `p033-go-more-than-atoms` | standart `p012-one-token-four-characters` |
+| 4 | standart `p016-seven-billion-parameters-memory` | kisa `p034-ascii-128` |
+| 5 | kisa `p035-kilobyte-gap-grows` | standart `p020-4k-is-four-1080p` |
+| 6 | standart `p023-a-billion-seconds` | kisa `p036-humaneval-164` |
+| 7 | kisa `p037-six-word-passphrase` | standart `p027-24-bit-colour` |
+
+Bu sira `content/order.json`'da. **Videolari panelde geldikleri sirayla onayla**: yayin
+sirasini onay sirasi belirler, sira bozulursa cift ayni gune dusmeyebilir.
+
+**Nasil okunur:** 14. video yayinlandiktan en az 72 saat sonra YouTube Studio'da
+Analytics > Advanced mode > Content > disa aktar (CSV) (ekran adlari degisebilir),
+sonra `python tools/ab_report.py studio.csv`. Rapor kollari karsilastirir ve
+`yetersiz veri` / `fark ayirt edilemiyor` / `isaret var` / `belirgin fark` yazar.
+Kol basina 7 video ile yalniz BUYUK farklar ayirt edilir; kucuk farki "kazandi"
+diye okuma. Shorts'ta "ortalama izlenme %" kisa videoda kendiliginden yuksek cikar,
+ana olcut "izlemeye devam" (yoksa izlenme sayisi). Ayni rapor ayrica tema, ilk sahne,
+sure ve sahne turune gore "ne tutuyor" tablosu verir.
+
+**Karar kurali (onceden):** kisa kol ana olcutte "belirgin" kazanirsa sonraki
+partilerde kisa videonun payi artar; "belirgin" kaybederse standartta kalinir;
+"belirsiz" ise uzunluk kanala fark ettirmiyor demektir, sure konunun gerektirdigi
+kadar olur. Sonraki deney adaylari (veri gelince sirayla): kanca bicimi (rakamla
+baslayan / olguyla baslayan), tema ailesi (koyu sicak / koyu soguk), kapanis karti.
 
 ## Yazildi (gun 1-30)
 
@@ -55,10 +96,22 @@ Hicbir sayi buradan videoya kopyalanmaz.
 | 29 | `p029-why-models-hallucinate` | explain | A language model can state a false fact in a confident tone. |
 | 30 | `p030-the-context-window` | explain | A chatbot's working memory is a window of fixed size. |
 
+### Kisa seri (deney kolu, ~25 sn)
+
+| Gun | Dosya | Bicim | Acilis cumlesi |
+|---|---|---|---|
+| deney | `p031-genome-three-billion` | measured | A human genome is about three billion letters long. |
+| deney | `p032-cd-audio-1411` | measured | Every second of CD audio is over a million bits. |
+| deney | `p033-go-more-than-atoms` | measured | A Go board has more positions than the universe has atoms. |
+| deney | `p034-ascii-128` | measured | ASCII has exactly one hundred twenty eight characters. |
+| deney | `p035-kilobyte-gap-grows` | measured | A kilobyte can mean one thousand or one thousand twenty four. |
+| deney | `p036-humaneval-164` | measured | GPT three solved none of one hundred sixty four problems. |
+| deney | `p037-six-word-passphrase` | measured | Six random words give about seventy seven bits. |
+
 ## Siradaki (gun 11-100)
 
 S = hikaye, M = olcum, E = aciklama. Gun numarasi kuyruktaki sirayi gosterir; gunde
-1 video ise takvim gunu, gunde 4 video ise dortte biri kadar.
+1 video ise takvim gunu, gunde 2 video ise yarisi, gunde 4 video ise dortte biri kadar.
 
 | Gun | Bicim | Konu | Acilis fikri | Dogrulanacak |
 |---|---|---|---|---|
@@ -67,7 +120,6 @@ S = hikaye, M = olcum, E = aciklama. Gun numarasi kuyruktaki sirayi gosterir; gu
 | 32 | M | IPv4 against IPv6 | Two to the 32nd against two to the 128th | RFC 791 and RFC 8200; arithmetic |
 | 34 | E | Training versus inference | One costs a cluster, the other costs a request | use the GPT-3 figures already verified in day 2; provider docs for the definitions |
 | 35 | S | Eugene Goostman | A claimed Turing test pass in 2014 | the organizer's announcement, the percentage, and researchers' objections |
-| 36 | M | The genome on a USB stick | 3.1 billion bases at two bits each | NHGRI for the base-pair count; arithmetic |
 | 37 | S | Attention Is All You Need | Eight GPUs and three and a half days | the paper's training section: hardware, time, and the benchmark it reports |
 | 38 | E | Attention in one minute | Every word asks the others for context | the paper; no claims about any one product |
 | 39 | S | The hiring tool that learned the wrong thing | A recruiting model scrapped in 2018 | Reuters report and the company's response; what exactly it penalized |

@@ -1,0 +1,219 @@
+{
+ "id": "p034-ascii-128",
+ "series": "G",
+ "lang": "en",
+ "format": "measured",
+ "theme": "moss",
+ "title": "ASCII has 128 characters because it uses 7 bits",
+ "summary": "Seven bits give 2 to the 7 = 128 codes: 33 control codes and 95 printable characters.",
+ "tags": [
+  "ascii",
+  "text encoding",
+  "bits",
+  "explained"
+ ],
+ "sources": [
+  "https://developer.mozilla.org/en-US/docs/Glossary/ASCII",
+  "https://en.wikipedia.org/wiki/Extended_ASCII"
+ ],
+ "beats": [
+  {
+   "id": "b1",
+   "role": "hook",
+   "say": "ASCII has exactly one hundred twenty eight characters.",
+   "cap": "128 characters",
+   "scene": "title",
+   "data": {
+    "kicker": "ASCII",
+    "lines": [
+     "128 characters",
+     "7 bits each"
+    ],
+    "accent": "mid"
+   }
+  },
+  {
+   "id": "b2",
+   "role": "why",
+   "say": "Each one is stored in seven bits.",
+   "cap": "7 bits per character"
+  },
+  {
+   "id": "b3",
+   "role": "why",
+   "say": "Seven bits make one hundred twenty eight patterns.",
+   "cap": "2^7 = 128",
+   "scene": "equation",
+   "data": {
+    "terms": [
+     {
+      "value": "2",
+      "label": "values per bit"
+     },
+     {
+      "value": "7",
+      "label": "bits"
+     }
+    ],
+    "op": "^",
+    "result": {
+     "value": "128",
+     "label": "patterns",
+     "tone": "mid"
+    }
+   }
+  },
+  {
+   "id": "b4",
+   "role": "data",
+   "say": "The first thirty three are control codes.",
+   "cap": "33 control codes"
+  },
+  {
+   "id": "b5",
+   "role": "data",
+   "say": "The other ninety five are printable.",
+   "cap": "95 of 128 are printable",
+   "scene": "dots",
+   "data": {
+    "total": 128,
+    "hit": 95,
+    "cols": 16,
+    "label": "95 printable",
+    "sub": "33 are control codes",
+    "tone": "good"
+   }
+  },
+  {
+   "id": "b6",
+   "role": "data",
+   "say": "Digits, letters and punctuation fill those ninety five.",
+   "cap": "Digits · letters · punctuation"
+  },
+  {
+   "id": "b7",
+   "role": "turn",
+   "say": "A byte has eight bits, so one is spare.",
+   "cap": "8 − 7 = 1 spare bit",
+   "scene": "bits",
+   "data": {
+    "bits": "0 1 0 0 0 0 0 1",
+    "flip_to": "1 1 0 0 0 0 0 1",
+    "label": "7 bits + 1 spare",
+    "flip_label": "The spare bit doubles the codes",
+    "tone": "mid"
+   }
+  },
+  {
+   "id": "b8",
+   "role": "turn",
+   "say": "Extended sets used it for more characters.",
+   "cap": "Up to 128 more"
+  },
+  {
+   "id": "b9",
+   "role": "resolve",
+   "say": "One more bit doubles the count.",
+   "cap": "8 bits = 256",
+   "scene": "split",
+   "data": {
+    "a": {
+     "label": "7 bits",
+     "sub": "128 characters",
+     "tone": "mid"
+    },
+    "b": {
+     "label": "8 bits",
+     "sub": "256 characters",
+     "tone": "good"
+    }
+   }
+  },
+  {
+   "id": "b10",
+   "role": "resolve",
+   "say": "Seven bits, one hundred twenty eight characters.",
+   "cap": "Seven bits. 128 characters.",
+   "scene": "close",
+   "data": {
+    "lines": [
+     "7 bits.",
+     "128 characters."
+    ],
+    "accent": "mid"
+   }
+  }
+ ],
+ "claims": [
+  {
+   "shown": "128",
+   "expr": "2**7",
+   "value": 128.0,
+   "source": null
+  },
+  {
+   "shown": "33",
+   "expr": null,
+   "value": null,
+   "source": 0,
+   "note": "MDN, ASCII: the first 33 code points are non-printing control codes"
+  },
+  {
+   "shown": "95",
+   "expr": null,
+   "value": null,
+   "source": 0,
+   "note": "MDN, ASCII: the other 95 are printable characters"
+  },
+  {
+   "shown": "256",
+   "expr": "2**8",
+   "value": 256.0,
+   "source": null
+  }
+ ],
+ "facts": [
+  {
+   "claim": "ASCII uses 7 bits to represent 128 characters; the first 33 code points are non-printing control codes and the other 95 are printable characters",
+   "source": 0,
+   "note": "MDN Glossary, ASCII: '7-bit to represent 128 characters'; first 33 control codes, other 95 printable"
+  },
+  {
+   "claim": "When computers standardized on eight-bit bytes the unused eighth bit doubled the code space: ASCII stays the lower half and 8-bit sets add up to 128 more characters, 256 in all",
+   "source": 1,
+   "note": "Wikipedia, Extended ASCII: of the 2^7 = 128 codes, 33 controls and 95 printable; the eighth bit doubled the code space"
+  }
+ ],
+ "copy_parts": {
+  "youtube": {
+   "hook": "ASCII has 128 characters because it uses 7 bits: 2 to the 7 is 128. 33 are control codes and 95 are printable."
+  },
+  "instagram": {
+   "caption": "ASCII has 128 characters because it uses 7 bits. 33 control codes, 95 printable."
+  },
+  "tiktok": {
+   "caption": "ASCII has 128 characters because it uses 7 bits."
+  },
+  "hashtags": {
+   "youtube": [
+    "#tech",
+    "#ascii",
+    "#bits",
+    "#explained"
+   ],
+   "instagram": [
+    "#tech",
+    "#ascii",
+    "#bits"
+   ],
+   "tiktok": [
+    "#tech",
+    "#ascii"
+   ]
+  }
+ },
+ "authored": {
+  "by": "claude",
+  "date": "2026-11-08"
+ }
+}

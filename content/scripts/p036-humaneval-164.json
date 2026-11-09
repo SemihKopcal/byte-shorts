@@ -1,0 +1,202 @@
+{
+ "id": "p036-humaneval-164",
+ "series": "G",
+ "lang": "en",
+ "format": "measured",
+ "theme": "deep",
+ "title": "HumanEval: 164 coding problems that tested Codex",
+ "summary": "GPT-3 solved 0 percent of the 164 HumanEval problems, GPT-J 11.4 percent and Codex 28.8 percent, judged by unit tests.",
+ "tags": [
+  "humaneval",
+  "codex",
+  "benchmark",
+  "ai coding"
+ ],
+ "sources": [
+  "https://arxiv.org/pdf/2107.03374",
+  "https://arxiv.org/abs/2107.03374"
+ ],
+ "beats": [
+  {
+   "id": "b1",
+   "role": "hook",
+   "say": "GPT three solved none of one hundred sixty four problems.",
+   "cap": "0 of 164",
+   "scene": "title",
+   "data": {
+    "kicker": "HumanEval",
+    "lines": [
+     "0 of 164",
+     "GPT-3"
+    ],
+    "accent": "bad"
+   }
+  },
+  {
+   "id": "b2",
+   "role": "why",
+   "say": "Researchers wrote the problems by hand.",
+   "cap": "Hand-written, not copied"
+  },
+  {
+   "id": "b3",
+   "role": "why",
+   "say": "Each has a docstring and unit tests.",
+   "cap": "≈ 7.7 tests per problem"
+  },
+  {
+   "id": "b4",
+   "role": "data",
+   "say": "A solution counts only if tests pass.",
+   "cap": "Pass the tests or fail",
+   "scene": "terminal",
+   "data": {
+    "title": "check",
+    "lines": [
+     "$ run problem tests",
+     {
+      "text": "all tests passed",
+      "kind": "hl",
+      "tone": "good"
+     }
+    ]
+   }
+  },
+  {
+   "id": "b5",
+   "role": "data",
+   "say": "GPT J solved eleven point four percent.",
+   "cap": "GPT-J: 11.4%",
+   "scene": "bars",
+   "data": {
+    "rows": [
+     {
+      "name": "GPT-3",
+      "v": 0,
+      "label": "0%",
+      "tone": "bad"
+     },
+     {
+      "name": "GPT-J",
+      "v": 11.4,
+      "label": "11.4%",
+      "tone": "base"
+     },
+     {
+      "name": "Codex",
+      "v": 28.8,
+      "label": "28.8%",
+      "tone": "mid"
+     }
+    ]
+   }
+  },
+  {
+   "id": "b6",
+   "role": "data",
+   "say": "Codex solved twenty eight point eight percent.",
+   "cap": "Codex: 28.8%"
+  },
+  {
+   "id": "b7",
+   "role": "turn",
+   "say": "About forty seven of one hundred sixty four.",
+   "cap": "≈ 47 of 164"
+  },
+  {
+   "id": "b8",
+   "role": "turn",
+   "say": "Those numbers are for a single attempt.",
+   "cap": "One sample per problem"
+  },
+  {
+   "id": "b9",
+   "role": "resolve",
+   "say": "Tests turned fluent code into a score.",
+   "cap": "Tests make a score"
+  },
+  {
+   "id": "b10",
+   "role": "resolve",
+   "say": "A pass or a fail, problem by problem.",
+   "cap": "Pass or fail",
+   "scene": "close",
+   "data": {
+    "lines": [
+     "Pass or fail.",
+     "Problem by problem."
+    ],
+    "accent": "mid"
+   }
+  }
+ ],
+ "claims": [
+  {
+   "shown": "164",
+   "expr": null,
+   "value": null,
+   "source": 0,
+   "note": "Chen et al.: 'we create a dataset of 164 original programming problems with unit tests'"
+  },
+  {
+   "shown": "7.7",
+   "expr": null,
+   "value": null,
+   "source": 0,
+   "note": "Chen et al., Section 2.2: HumanEval problems average 7.7 tests per problem"
+  },
+  {
+   "shown": "11.4",
+   "expr": null,
+   "value": null,
+   "source": 1,
+   "note": "Abstract: GPT-J solves 11.4% of the HumanEval problems"
+  },
+  {
+   "shown": "28.8",
+   "expr": null,
+   "value": null,
+   "source": 1,
+   "note": "Abstract: Codex solves 28.8% of the problems"
+  },
+  {
+   "shown": "47",
+   "expr": "164*0.288",
+   "value": 47.232,
+   "source": null
+  }
+ ],
+ "facts": [],
+ "copy_parts": {
+  "youtube": {
+   "hook": "GPT-3 solved 0% of the 164 HumanEval problems, GPT-J 11.4% and Codex 28.8%, judged by unit tests."
+  },
+  "instagram": {
+   "caption": "HumanEval: 164 hand-written coding problems. GPT-3 solved 0%, GPT-J 11.4%, Codex 28.8%."
+  },
+  "tiktok": {
+   "caption": "HumanEval: 164 coding problems that tested Codex."
+  },
+  "hashtags": {
+   "youtube": [
+    "#tech",
+    "#ai",
+    "#coding",
+    "#benchmark"
+   ],
+   "instagram": [
+    "#tech",
+    "#ai",
+    "#coding"
+   ],
+   "tiktok": [
+    "#tech",
+    "#ai"
+   ]
+  }
+ },
+ "authored": {
+  "by": "claude",
+  "date": "2026-11-08"
+ }
+}

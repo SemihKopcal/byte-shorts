@@ -1,0 +1,232 @@
+{
+ "id": "p035-kilobyte-gap-grows",
+ "series": "G",
+ "lang": "en",
+ "format": "measured",
+ "theme": "ice",
+ "title": "The 1,000 versus 1,024 gap grows with every prefix",
+ "summary": "Kilo is 1,000 and kibi is 1,024: a 2.4 percent gap at the first step, 4.9 at the second, 7.4 at the third.",
+ "tags": [
+  "kibibyte",
+  "units",
+  "binary prefix",
+  "explained"
+ ],
+ "sources": [
+  "https://physics.nist.gov/cuu/Units/binary.html",
+  "https://en.wikipedia.org/wiki/Kilobyte"
+ ],
+ "beats": [
+  {
+   "id": "b1",
+   "role": "hook",
+   "say": "A kilobyte can mean one thousand or one thousand twenty four.",
+   "cap": "1,000 vs 1,024",
+   "scene": "contrast",
+   "data": {
+    "left": {
+     "label": "kilo (SI)",
+     "value": "1,000"
+    },
+    "right": {
+     "label": "computer habit",
+     "value": "1,024",
+     "tone": "mid"
+    },
+    "verdict": "Same word, two sizes"
+   }
+  },
+  {
+   "id": "b2",
+   "role": "why",
+   "say": "SI says kilo is exactly one thousand.",
+   "cap": "SI: kilo = 1,000"
+  },
+  {
+   "id": "b3",
+   "role": "why",
+   "say": "Computers borrowed it for two to the tenth.",
+   "cap": "2^10 = 1,024",
+   "scene": "equation",
+   "data": {
+    "terms": [
+     {
+      "value": "2",
+      "label": "base"
+     },
+     {
+      "value": "10",
+      "label": "power"
+     }
+    ],
+    "op": "^",
+    "result": {
+     "value": "1,024",
+     "label": "the computer kilo",
+     "tone": "mid"
+    }
+   }
+  },
+  {
+   "id": "b4",
+   "role": "data",
+   "say": "Kibi, mebi and gibi name the binary sizes.",
+   "cap": "Ki · Mi · Gi",
+   "scene": "bars",
+   "data": {
+    "rows": [
+     {
+      "name": "kilo vs kibi",
+      "v": 2.4,
+      "label": "2.4%",
+      "tone": "base"
+     },
+     {
+      "name": "mega vs mebi",
+      "v": 4.9,
+      "label": "4.9%",
+      "tone": "base"
+     },
+     {
+      "name": "giga vs gibi",
+      "v": 7.4,
+      "label": "7.4%",
+      "tone": "mid"
+     },
+     {
+      "name": "tera vs tebi",
+      "v": 10.0,
+      "label": "10%",
+      "tone": "bad"
+     }
+    ]
+   }
+  },
+  {
+   "id": "b5",
+   "role": "data",
+   "say": "The gap starts at two point four percent.",
+   "cap": "kilo vs kibi: 2.4%"
+  },
+  {
+   "id": "b6",
+   "role": "data",
+   "say": "By giga it is seven point four percent.",
+   "cap": "giga vs gibi: 7.4%"
+  },
+  {
+   "id": "b7",
+   "role": "data",
+   "say": "By tera it reaches almost ten percent.",
+   "cap": "tera vs tebi: ≈ 10%"
+  },
+  {
+   "id": "b8",
+   "role": "turn",
+   "say": "Kibi means exactly one thousand twenty four.",
+   "cap": "Kibi = 1,024 exactly"
+  },
+  {
+   "id": "b9",
+   "role": "resolve",
+   "say": "Kilo keeps meaning one thousand.",
+   "cap": "Kilo stays 1,000"
+  },
+  {
+   "id": "b10",
+   "role": "resolve",
+   "say": "Each step multiplies the gap.",
+   "cap": "The gap compounds",
+   "scene": "close",
+   "data": {
+    "lines": [
+     "Kilo is 1,000.",
+     "Kibi is 1,024."
+    ],
+    "accent": "mid"
+   }
+  }
+ ],
+ "claims": [
+  {
+   "shown": "1,000",
+   "expr": "10**3",
+   "value": 1000.0,
+   "source": null
+  },
+  {
+   "shown": "1,024",
+   "expr": "2**10",
+   "value": 1024.0,
+   "source": null
+  },
+  {
+   "shown": "2.4",
+   "expr": "(1024/1000-1)*100",
+   "value": 2.4,
+   "source": null
+  },
+  {
+   "shown": "4.9",
+   "expr": "((1024**2)/(1000**2)-1)*100",
+   "value": 4.8576,
+   "source": null
+  },
+  {
+   "shown": "7.4",
+   "expr": "((1024**3)/(1000**3)-1)*100",
+   "value": 7.3742,
+   "source": null
+  },
+  {
+   "shown": "10",
+   "expr": "((1024**4)/(1000**4)-1)*100",
+   "value": 9.9512,
+   "source": null
+  }
+ ],
+ "facts": [
+  {
+   "claim": "NIST defines the binary prefix kibi as 2^10 = 1024, and in the SI one kilo means 1000 (1 kbit = 1000 bit)",
+   "source": 0,
+   "note": "NIST, Definitions of the SI units: the binary prefixes: Ki = 2^10 = 1024; 1 kbit = 10^3 bit = 1000 bit"
+  },
+  {
+   "claim": "The SI kilobyte is 1000 bytes, while in some contexts such as RAM kilobyte often meant 1024 bytes; the kibibyte (1024 bytes) was created to remove the ambiguity",
+   "source": 1,
+   "note": "Wikipedia, Kilobyte: SI 1000 bytes; kibibyte defined as 1024 bytes avoiding the ambiguity"
+  }
+ ],
+ "copy_parts": {
+  "youtube": {
+   "hook": "Kilo is 1,000 and kibi is 1,024. The gap is 2.4 percent for kilo, 4.9 for mega, 7.4 for giga and almost 10 for tera."
+  },
+  "instagram": {
+   "caption": "Kilo is 1,000, kibi is 1,024. The gap grows from 2.4% to nearly 10% by tera."
+  },
+  "tiktok": {
+   "caption": "The 1,000 vs 1,024 gap grows with every prefix."
+  },
+  "hashtags": {
+   "youtube": [
+    "#tech",
+    "#units",
+    "#data",
+    "#explained"
+   ],
+   "instagram": [
+    "#tech",
+    "#units",
+    "#data"
+   ],
+   "tiktok": [
+    "#tech",
+    "#units"
+   ]
+  }
+ },
+ "authored": {
+  "by": "claude",
+  "date": "2026-11-08"
+ }
+}

@@ -1,0 +1,218 @@
+{
+ "id": "p032-cd-audio-1411",
+ "series": "G",
+ "lang": "en",
+ "format": "measured",
+ "theme": "deep",
+ "title": "CD audio runs at 1,411,200 bits per second",
+ "summary": "44,100 samples per second, 16 bits per sample, 2 channels: multiplied, that is 1,411,200 bits per second.",
+ "tags": [
+  "cd",
+  "audio",
+  "bit rate",
+  "explained"
+ ],
+ "sources": [
+  "https://en.wikipedia.org/wiki/Compact_Disc_Digital_Audio",
+  "https://en.wikipedia.org/wiki/Compact_disc"
+ ],
+ "beats": [
+  {
+   "id": "b1",
+   "role": "hook",
+   "say": "Every second of CD audio is over a million bits.",
+   "cap": "1,411,200 bits per second",
+   "scene": "title",
+   "data": {
+    "kicker": "CD audio",
+    "lines": [
+     "1,411,200",
+     "bits per second"
+    ],
+    "accent": "mid"
+   }
+  },
+  {
+   "id": "b2",
+   "role": "why",
+   "say": "Sound is measured thousands of times a second.",
+   "cap": "Sampling"
+  },
+  {
+   "id": "b3",
+   "role": "why",
+   "say": "A CD takes forty four thousand one hundred samples.",
+   "cap": "44,100 samples per second",
+   "scene": "counter",
+   "data": {
+    "suffix": " /s",
+    "from": 0,
+    "to": 44100,
+    "dp": 0,
+    "tone": "mid",
+    "note": "samples per second"
+   }
+  },
+  {
+   "id": "b4",
+   "role": "data",
+   "say": "Each sample is sixteen bits.",
+   "cap": "16 bits each"
+  },
+  {
+   "id": "b5",
+   "role": "data",
+   "say": "Stereo means two channels.",
+   "cap": "2 channels"
+  },
+  {
+   "id": "b6",
+   "role": "data",
+   "say": "Multiply the three numbers together.",
+   "cap": "44,100 × 16 × 2",
+   "scene": "equation",
+   "data": {
+    "terms": [
+     {
+      "value": "44,100",
+      "label": "samples/s"
+     },
+     {
+      "value": "16",
+      "label": "bits"
+     },
+     {
+      "value": "2",
+      "label": "channels"
+     }
+    ],
+    "op": "×",
+    "result": {
+     "value": "1,411,200",
+     "label": "bits per second",
+     "tone": "mid"
+    }
+   }
+  },
+  {
+   "id": "b7",
+   "role": "turn",
+   "say": "That is about one point four megabits per second.",
+   "cap": "≈ 1.4 Mbit/s"
+  },
+  {
+   "id": "b8",
+   "role": "turn",
+   "say": "The original standard allowed seventy four minutes.",
+   "cap": "Up to 74 minutes",
+   "scene": "split",
+   "data": {
+    "a": {
+     "label": "Original standard",
+     "sub": "74 minutes",
+     "tone": "mid"
+    },
+    "b": {
+     "label": "Later discs",
+     "sub": "up to 80 minutes",
+     "tone": "good"
+    }
+   }
+  },
+  {
+   "id": "b9",
+   "role": "resolve",
+   "say": "A format is numbers multiplied together.",
+   "cap": "Numbers, multiplied"
+  },
+  {
+   "id": "b10",
+   "role": "resolve",
+   "say": "Three numbers set the data rate.",
+   "cap": "Samples × bits × channels",
+   "scene": "close",
+   "data": {
+    "lines": [
+     "Three numbers.",
+     "One data rate."
+    ],
+    "accent": "mid"
+   }
+  }
+ ],
+ "claims": [
+  {
+   "shown": "1,411,200",
+   "expr": "44100*16*2",
+   "value": 1411200.0,
+   "source": null
+  },
+  {
+   "shown": "44,100",
+   "expr": null,
+   "value": null,
+   "source": 0,
+   "note": "Wikipedia, Compact Disc Digital Audio: sampling rate 44.1 kHz per channel"
+  },
+  {
+   "shown": "16",
+   "expr": null,
+   "value": null,
+   "source": 0,
+   "note": "Wikipedia, Compact Disc Digital Audio: 16-bit PCM samples"
+  },
+  {
+   "shown": "1.4",
+   "expr": "44100*16*2/10**6",
+   "value": 1.4112,
+   "source": null
+  },
+  {
+   "shown": "74",
+   "expr": null,
+   "value": null,
+   "source": 1,
+   "note": "Wikipedia, Compact disc: standard discs hold up to 74 minutes of audio"
+  },
+  {
+   "shown": "80",
+   "expr": null,
+   "value": null,
+   "source": 1,
+   "note": "Wikipedia, Compact disc: later extended to 80 minutes"
+  }
+ ],
+ "facts": [],
+ "copy_parts": {
+  "youtube": {
+   "hook": "CD audio is 44,100 samples per second, 16 bits per sample, 2 channels. Multiplied, that is 1,411,200 bits per second, about 1.4 megabits."
+  },
+  "instagram": {
+   "caption": "CD audio runs at 1,411,200 bits per second: 44,100 samples, 16 bits, 2 channels."
+  },
+  "tiktok": {
+   "caption": "CD audio is 1,411,200 bits per second."
+  },
+  "hashtags": {
+   "youtube": [
+    "#tech",
+    "#audio",
+    "#cd",
+    "#explained"
+   ],
+   "instagram": [
+    "#tech",
+    "#audio",
+    "#cd"
+   ],
+   "tiktok": [
+    "#tech",
+    "#audio"
+   ]
+  }
+ },
+ "authored": {
+  "by": "claude",
+  "date": "2026-11-08"
+ }
+}

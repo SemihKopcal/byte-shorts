@@ -1,0 +1,207 @@
+{
+ "id": "p031-genome-three-billion",
+ "series": "G",
+ "lang": "en",
+ "format": "measured",
+ "theme": "moss",
+ "title": "A human genome is about 750 megabytes raw",
+ "summary": "About 3 billion base pairs, each one of four letters, take 2 bits each: 6 billion bits, 750 million bytes.",
+ "tags": [
+  "genome",
+  "dna",
+  "data size",
+  "explained"
+ ],
+ "sources": [
+  "https://www.genome.gov/genetics-glossary/base-pair",
+  "https://www.genome.gov/Pages/Education/Smithsonian_Exhibition/Human_Genome_Project_FAQ.pdf"
+ ],
+ "beats": [
+  {
+   "id": "b1",
+   "role": "hook",
+   "say": "A human genome is about three billion letters long.",
+   "cap": "≈ 3 billion base pairs",
+   "scene": "contrast",
+   "data": {
+    "left": {
+     "label": "base pairs",
+     "value": "3 billion"
+    },
+    "right": {
+     "label": "stored at 2 bits each",
+     "value": "750 MB",
+     "tone": "mid"
+    },
+    "verdict": "Raw, before any compression"
+   }
+  },
+  {
+   "id": "b2",
+   "role": "why",
+   "say": "Each position holds one of four bases.",
+   "cap": "A, C, G or T"
+  },
+  {
+   "id": "b3",
+   "role": "why",
+   "say": "Four options need exactly two bits.",
+   "cap": "4 options = 2 bits",
+   "scene": "bits",
+   "data": {
+    "bits": "0 0 0 1 1 0 1 1",
+    "label": "A · C · G · T",
+    "tone": "mid"
+   }
+  },
+  {
+   "id": "b4",
+   "role": "data",
+   "say": "Three billion letters at two bits each.",
+   "cap": "3 billion × 2 bits",
+   "scene": "equation",
+   "data": {
+    "terms": [
+     {
+      "value": "3 billion",
+      "label": "letters"
+     },
+     {
+      "value": "2",
+      "label": "bits each"
+     }
+    ],
+    "op": "×",
+    "result": {
+     "value": "6 billion",
+     "label": "bits",
+     "tone": "mid"
+    }
+   }
+  },
+  {
+   "id": "b5",
+   "role": "data",
+   "say": "Divide by eight bits per byte.",
+   "cap": "6 billion ÷ 8 = 750 million bytes"
+  },
+  {
+   "id": "b6",
+   "role": "data",
+   "say": "That comes to about seven hundred fifty megabytes.",
+   "cap": "≈ 750 MB",
+   "scene": "counter",
+   "data": {
+    "suffix": " MB",
+    "from": 0,
+    "to": 750,
+    "dp": 0,
+    "tone": "mid",
+    "note": "one set, raw, 2 bits per base"
+   }
+  },
+  {
+   "id": "b7",
+   "role": "turn",
+   "say": "That counts one set of chromosomes.",
+   "cap": "One set"
+  },
+  {
+   "id": "b8",
+   "role": "turn",
+   "say": "Most cells carry two sets, so double it.",
+   "cap": "Two sets: ≈ 1.5 GB",
+   "scene": "split",
+   "data": {
+    "a": {
+     "label": "One set",
+     "sub": "≈ 750 MB",
+     "tone": "mid"
+    },
+    "b": {
+     "label": "Both sets",
+     "sub": "≈ 1.5 GB",
+     "tone": "good"
+    }
+   }
+  },
+  {
+   "id": "b9",
+   "role": "resolve",
+   "say": "Letters in, bits out. Plain arithmetic.",
+   "cap": "Letters in, bits out"
+  },
+  {
+   "id": "b10",
+   "role": "resolve",
+   "say": "Four letters cost two bits each.",
+   "cap": "4 letters, 2 bits each",
+   "scene": "close",
+   "data": {
+    "lines": [
+     "3 billion letters",
+     "750 MB raw"
+    ],
+    "accent": "mid"
+   }
+  }
+ ],
+ "claims": [
+  {
+   "shown": "750",
+   "expr": "3*10**9*2/8/10**6",
+   "value": 750.0,
+   "source": null
+  },
+  {
+   "shown": "1.5",
+   "expr": "3*10**9*2*2/8/10**9",
+   "value": 1.5,
+   "source": null
+  }
+ ],
+ "facts": [
+  {
+   "claim": "One copy of the human genome contains approximately 3 billion base pairs of DNA, and adenine pairs with thymine while cytosine pairs with guanine",
+   "source": 0,
+   "note": "NHGRI Talking Glossary, Base Pair: approximately 3 billion base pairs; A pairs with T, C with G"
+  },
+  {
+   "claim": "The human genome contains approximately 3 billion base pairs spread across 23 pairs of chromosomes, and one complete set of genomic instructions is about 3 billion base pairs",
+   "source": 1,
+   "note": "NHGRI Human Genome Project FAQ: 'approximately 3 billion of these base pairs' and 'one complete set ... is about 3 billion base pairs'"
+  }
+ ],
+ "copy_parts": {
+  "youtube": {
+   "hook": "A human genome is about 3 billion base pairs. Each base is one of four letters, so 2 bits each: 6 billion bits, about 750 megabytes raw."
+  },
+  "instagram": {
+   "caption": "A human genome is about 750 megabytes raw: 3 billion letters, 2 bits each, 8 bits to the byte."
+  },
+  "tiktok": {
+   "caption": "A human genome is about 750 MB raw."
+  },
+  "hashtags": {
+   "youtube": [
+    "#tech",
+    "#genome",
+    "#data",
+    "#explained"
+   ],
+   "instagram": [
+    "#tech",
+    "#genome",
+    "#data"
+   ],
+   "tiktok": [
+    "#tech",
+    "#genome"
+   ]
+  }
+ },
+ "authored": {
+  "by": "claude",
+  "date": "2026-11-08"
+ }
+}

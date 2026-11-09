@@ -1,0 +1,30 @@
+{
+ "e1-length": {
+  "title": "Kisa (~25 sn) mi, standart (~36 sn) mi?",
+  "hypothesis": "Ayni bicimde (measured) ama yarim kisa videolar daha cok izleniyor ve izleyiciyi daha cok tutuyor mu?",
+  "start": "2026-11-09",
+  "arms": {
+   "short": [
+    "p031-genome-three-billion",
+    "p032-cd-audio-1411",
+    "p033-go-more-than-atoms",
+    "p034-ascii-128",
+    "p035-kilobyte-gap-grows",
+    "p036-humaneval-164",
+    "p037-six-word-passphrase"
+   ],
+   "standard": [
+    "p008-whisper-77-years",
+    "p010-unix-2038",
+    "p012-one-token-four-characters",
+    "p016-seven-billion-parameters-memory",
+    "p020-4k-is-four-1080p",
+    "p023-a-billion-seconds",
+    "p027-24-bit-colour"
+   ]
+  },
+  "primary": "stayed",
+  "min_per_arm": 6,
+  "note": "Shorts'ta 'ortalama izlenme %' kisa videoda kendiliginden yuksek cikar; ana olcut 'izlemeye devam' (kaydirilmadan izlenen oran), o yoksa izlenme sayisi. Videolara en az 72 saat gecmeden CSV indirme. Ciftler ayni gun yayinlanir, sira gunler arasinda degisir (content/order.json)."
+ }
+}

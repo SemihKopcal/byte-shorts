@@ -1,6 +1,6 @@
 # byte-shorts
 
-BYTE kanalinin uretim hatti. Gunde 4 video, hepsi kodla ciziliyor, konular
+BYTE kanalinin uretim hatti. Gunde 2 video (ilk 30 gun, A/B testiyle; veri gelince 4'e cikilabilir), hepsi kodla ciziliyor, konular
 `content/scripts` kuyrugundaki yazilmis senaryolardan geliyor (Gemini yok),
 YouTube'a kendiliginden yukleniyor; Instagram Reels'e kendiliginden, TikTok'a
 taslak olarak gidiyor.
@@ -23,14 +23,14 @@ sinyal ─┤   5 konu    senaryo   yargi + sayi/olay        revize    tema     
         publish/instagram.py  Reels (video GitHub Pages'ten)   publish/tiktok.py  gelen kutusu taslagi
 ```
 
-## Gunluk akis (`daily.yml`, 04:15 ve 13:15 UTC)
+## Gunluk akis (`daily.yml`, 04:15 ve 16:15 UTC)
 
 1. `content/scripts/` icindeki siradaki islenmemis senaryo alinir (asagida
    "Yazilmis senaryolar"). Bu, kosunun **ilk isi**: ffmpeg/font/pip/ses modeli
    kurulumundan once. Gemini yok, API anahtari gerekmez.
 2. Kuyruk bossa kosu ~15 saniyede **kirmizi** durur ("Kuyruk bos"), hicbir sey
    kurulmaz, dakika yanmaz; yeni parti yazilana kadar her kosu boyle biter.
-   Kuyrukta 8 ya da daha az senaryo kalinca uyari yazar (kirmizi degil).
+   Kuyrukta 12 ya da daha az senaryo kalinca uyari yazar (kirmizi degil).
 3. Video cizilir, `worker/qc.py` kontrol eder (sure, en-boy, ses, tekrar,
    kaynak, yayin metni).
 4. `AUTO_PRIVACY` ne diyorsa o gizlilikle YouTube'a yuklenir.
@@ -67,6 +67,31 @@ dogrulama kodda degil, yazarin okudugu sayfada. Kontrol:
 python -m editorial.authored          # hepsi, sorun varsa cikis kodu 1
 python -m editorial.authored p003-air-canada-chatbot
 ```
+
+**Kuyruk sirasi.** Varsayilan sira dosya adi sirasidir. `content/order.json` (id
+listesi) varsa listedeki islenmemis senaryolar liste sirasiyla, hepsinden once alinir;
+listede olmayanlar dosya adi sirasiyla arkasindan gelir. Dosya yoksa ya da bozuksa
+hicbir sey degismez. Listeyi A/B testinde kollari dizmek icin kullaniyoruz.
+
+## A/B testi (`content/experiments.json`, `tools/ab_report.py`)
+
+Hangi videolar ne kadar tutuyor? `experiments.json` her deneyin kollarini (senaryo
+id'leri), ana olcutu ve en az video sayisini tutar; su an `e1-length` (kisa ~25 sn
+karsi standart ~36 sn, 7 + 7 video, plan: `content/plan.md`). Yayindan en az 72 saat
+sonra YouTube Studio'dan Analytics > Advanced mode > Content > disa aktar (CSV);
+
+```bash
+python tools/ab_report.py studio.csv                  # tum deneyler + "ne tutuyor" tablosu
+python tools/ab_report.py studio.csv --exp e1-length --md rapor.md
+python tools/ab_report.py --status                    # hangi video uretildi, YouTube kimligi
+```
+
+Video <-> senaryo eslestirmesi YouTube kimligiyle (`published.json` ya da
+`--map {"senaryo-id": "youtube-id"}`), olmazsa baslikla yapilir; Studio'nun
+Turkce ya da Ingilizce sutun adlari taninir, taninmazsa `--col views=<sutun adi>`.
+Panel modunda `published.json` guncellenmedigi icin eslestirme cogu zaman baslikla
+olur. Rapor kucuk n'de dogru olsun diye siralama (Mann-Whitney) permutasyon testi
+kullanir; kol basina 7 videoyla yalniz buyuk farklar "belirgin" cikar.
 
 Kuyruk 100 senaryoda biter: gunde 1 videoyla 100 gun, gunde 2 videoyla 50 gun, gunde 4 videoyla 25 gun.
 Bitince daily "Kuyruk bos" diye kirmizi durur (Gemini'ye dusmez); yeni parti

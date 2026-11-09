@@ -66,6 +66,58 @@ class PickScript(unittest.TestCase):
         out = self.run_pick(self.SCRIPTS, built=["p001-a", "p002-b", "p003-c"])
         self.assertEqual(out, {"path": "", "left": "0"})
 
+    def run_with_order(self, order, built=(), argv=(), raw=None):
+        """run_pick'in order.json'lu hali (order.json scripts klasorunun yaninda)."""
+        pick = load_pick()
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "content" / "scripts").mkdir(parents=True)
+            for name, sid in self.SCRIPTS:
+                (root / "content" / "scripts" / name).write_text(
+                    json.dumps({"id": sid}))
+            (root / "content" / "built.json").write_text(json.dumps(list(built)))
+            if raw is not None:
+                (root / "content" / "order.json").write_text(raw)
+            elif order is not None:
+                (root / "content" / "order.json").write_text(json.dumps(order))
+            pick.ROOT = root
+            pick.SCRIPTS = root / "content" / "scripts"
+            pick.PUBLISHED = root / "content" / "published.json"
+            pick.BUILT = root / "content" / "built.json"
+            buf, old = io.StringIO(), sys.argv
+            sys.argv = ["pick_script.py", *argv]
+            try:
+                with contextlib.redirect_stdout(buf):
+                    pick.main()
+            finally:
+                sys.argv = old
+        return dict(line.split("=", 1) for line in buf.getvalue().splitlines())
+
+    def test_order_json_puts_listed_scripts_first_in_list_order(self):
+        out = self.run_with_order(["p003-c", "p002-b"])
+        self.assertEqual(out["path"], "content/scripts/p003-c.json")
+        self.assertEqual(out["left"], "3")
+
+    def test_order_json_skips_built_unknown_and_duplicate_ids(self):
+        out = self.run_with_order(["nope", "p003-c", "p003-c", "p002-b"],
+                                  built=["p003-c"])
+        self.assertEqual(out["path"], "content/scripts/p002-b.json")
+        self.assertEqual(out["left"], "2")
+
+    def test_unlisted_scripts_follow_in_file_order(self):
+        out = self.run_with_order(["p003-c"], built=["p003-c"])
+        self.assertEqual(out["path"], "content/scripts/p001-a.json")
+
+    def test_a_broken_or_wrong_shape_order_file_changes_nothing(self):
+        for raw in ("{not json", '{"a": 1}', '[1, null, {"x": 2}]', "[]"):
+            out = self.run_with_order(None, raw=raw)
+            self.assertEqual(out["path"], "content/scripts/p001-a.json", raw)
+            self.assertEqual(out["left"], "3", raw)
+
+    def test_newest_still_takes_the_last_of_the_queue(self):
+        out = self.run_with_order(["p002-b"], argv=["--newest"])
+        self.assertEqual(out["path"], "content/scripts/p003-c.json")
+
     def test_a_named_script_reports_no_queue_length(self):
         out = self.run_pick(self.SCRIPTS, argv=["p003-c.json"])
         self.assertEqual(out["path"], "content/scripts/p003-c.json")
@@ -116,13 +168,14 @@ class Daily(unittest.TestCase):
         env = self.step("uret")["env"]
         self.assertEqual(env["SCRIPT"], "${{ steps.pick.outputs.path }}")
 
-    def test_four_runs_a_day_six_hours_apart(self):
-        # Kullanici karari (8 Kasim): gunde 4 video. Saat :15 (tam saat
-        # GitHub'da en kalabalik), aralar esit; fazla/eksik satir sessizce
-        # sayiyi degistirmesin.
+    def test_two_runs_a_day_twelve_hours_apart(self):
+        # Kullanici karari (8 Kasim): ilk 30 gun gunde 2 video + A/B testi.
+        # Saat :15 (tam saat GitHub'da en kalabalik), aralar esit; fazla/eksik
+        # satir sessizce sayiyi degistirmesin. 4/gune donmek icin buradaki
+        # sayilari ve workflow'daki cron satirlarini birlikte degistir.
         crons = [c["cron"] for c in self.y[True]["schedule"]]
-        self.assertEqual(len(crons), 4)
-        self.assertEqual(len(set(crons)), 4)
+        self.assertEqual(len(crons), 2)
+        self.assertEqual(len(set(crons)), 2)
         hours = []
         for c in crons:
             minute, hour, *rest = c.split()
@@ -131,13 +184,13 @@ class Daily(unittest.TestCase):
             hours.append(int(hour))
         hours.sort()
         gaps = [(b - a) % 24 for a, b in zip(hours, hours[1:] + hours[:1])]
-        self.assertEqual(gaps, [6, 6, 6, 6])
+        self.assertEqual(gaps, [12, 12])
 
     def test_a_short_queue_raises_a_warning_not_an_error(self):
         s = self.step("kuyruk az kaldi mi")
         self.assertIn("::warning", s["run"])
-        # gunde 4 videoda 8 senaryo = 2 gun onceden haber
-        self.assertIn('"$LEFT" -le 8', s["run"])
+        # gunde 2 videoda 12 senaryo = 6 gun onceden haber
+        self.assertIn('"$LEFT" -le 12', s["run"])
         self.assertNotIn("exit 1", s["run"])
 
 

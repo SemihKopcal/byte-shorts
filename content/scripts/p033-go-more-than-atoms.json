@@ -1,0 +1,223 @@
+{
+ "id": "p033-go-more-than-atoms",
+ "series": "G",
+ "lang": "en",
+ "format": "measured",
+ "theme": "ice",
+ "title": "Go has more positions than the universe has atoms",
+ "summary": "A 19 by 19 Go board has about 2.08 times 10 to the 170 legal positions. The observable universe holds roughly 10 to the 80 atoms.",
+ "tags": [
+  "go",
+  "combinatorics",
+  "scale",
+  "explained"
+ ],
+ "sources": [
+  "https://www.usgo-archive.org/files/pdf/TROMPFINAL5-6-16.pdf",
+  "https://en.wikipedia.org/wiki/Go_and_mathematics"
+ ],
+ "beats": [
+  {
+   "id": "b1",
+   "role": "hook",
+   "say": "A Go board has more positions than the universe has atoms.",
+   "cap": "10^170 vs 10^80",
+   "scene": "contrast",
+   "data": {
+    "left": {
+     "label": "atoms in the universe",
+     "value": "10^80"
+    },
+    "right": {
+     "label": "legal Go positions",
+     "value": "2.08 × 10^170",
+     "tone": "mid"
+    },
+    "verdict": "On a 19 × 19 board"
+   }
+  },
+  {
+   "id": "b2",
+   "role": "why",
+   "say": "Nineteen lines by nineteen lines.",
+   "cap": "19 × 19 = 361 points"
+  },
+  {
+   "id": "b3",
+   "role": "why",
+   "say": "Each point is empty, black or white.",
+   "cap": "3 states per point",
+   "scene": "equation",
+   "data": {
+    "terms": [
+     {
+      "value": "3",
+      "label": "states per point"
+     },
+     {
+      "value": "361",
+      "label": "points"
+     }
+    ],
+    "op": "^",
+    "result": {
+     "value": "1.74 × 10^172",
+     "label": "colorings",
+     "tone": "base"
+    }
+   }
+  },
+  {
+   "id": "b4",
+   "role": "data",
+   "say": "Many arrangements break the rules.",
+   "cap": "Not every coloring is legal"
+  },
+  {
+   "id": "b5",
+   "role": "data",
+   "say": "Legal positions were counted in twenty sixteen.",
+   "cap": "Counted: 2016"
+  },
+  {
+   "id": "b6",
+   "role": "data",
+   "say": "About two times ten to the power one hundred seventy.",
+   "cap": "2.08 × 10^170 legal positions"
+  },
+  {
+   "id": "b7",
+   "role": "turn",
+   "say": "Atoms in the universe: about ten to the eighty.",
+   "cap": "≈ 10^80 atoms",
+   "scene": "scale",
+   "data": {
+    "items": [
+     {
+      "label": "atoms, observable universe",
+      "exp": 80,
+      "text": "10^80"
+     },
+     {
+      "label": "legal Go positions",
+      "exp": 170,
+      "text": "10^170",
+      "tone": "mid"
+     }
+    ]
+   }
+  },
+  {
+   "id": "b8",
+   "role": "turn",
+   "say": "Ninety powers of ten more.",
+   "cap": "≈ 10^90 times more"
+  },
+  {
+   "id": "b9",
+   "role": "resolve",
+   "say": "One position per atom would fall short.",
+   "cap": "Atoms run out first"
+  },
+  {
+   "id": "b10",
+   "role": "resolve",
+   "say": "More positions than atoms.",
+   "cap": "More positions than atoms",
+   "scene": "close",
+   "data": {
+    "lines": [
+     "More positions",
+     "than atoms."
+    ],
+    "accent": "mid"
+   }
+  }
+ ],
+ "claims": [
+  {
+   "shown": "19",
+   "expr": null,
+   "value": null,
+   "source": 1,
+   "note": "Wikipedia, Go and mathematics: the standard board is 19 by 19"
+  },
+  {
+   "shown": "361",
+   "expr": "19*19",
+   "value": 361.0,
+   "source": null
+  },
+  {
+   "shown": "2.08 × 10^170",
+   "expr": null,
+   "value": null,
+   "source": 0,
+   "note": "Tromp: the number of legal 19x19 positions was determined to be 2081681993819799846..., about 2.08 x 10^170"
+  },
+  {
+   "shown": "10^80",
+   "expr": null,
+   "value": null,
+   "source": 0,
+   "note": "Tromp: the number of atoms in the universe is only 10^80; Wikipedia gives about 10^80 for the observable universe"
+  },
+  {
+   "shown": "10^90",
+   "expr": "170-80",
+   "value": 90.0,
+   "source": null
+  },
+  {
+   "shown": "1.74 × 10^172",
+   "expr": null,
+   "value": null,
+   "source": 1,
+   "note": "Wikipedia, Go and mathematics: 3^361, about 1.74 x 10^172 possible colorings of the board"
+  }
+ ],
+ "facts": [
+  {
+   "claim": "John Tromp's count of legal positions on a 19x19 Go board is about 2.08 x 10^170, and the number of atoms in the universe is given as 10^80",
+   "source": 0,
+   "note": "Tromp (2016): L19 determined to be 2081681993819799846...; 'the number of atoms in the universe is only 10^80'"
+  },
+  {
+   "claim": "About 2.08 x 10^170 of the roughly 1.74 x 10^172 possible colorings of a 19x19 board are legal positions, about 1.2 percent, and the atom count in the observable universe is about 10^80",
+   "source": 1,
+   "note": "Wikipedia, Go and mathematics: legal positions are 1.20% of the 3^361 colorings; observable universe about 10^80 atoms"
+  }
+ ],
+ "copy_parts": {
+  "youtube": {
+   "hook": "A 19 by 19 Go board has about 2.08 times 10 to the 170 legal positions. The observable universe holds roughly 10 to the 80 atoms."
+  },
+  "instagram": {
+   "caption": "Go has more positions than the universe has atoms: about 10^170 against 10^80."
+  },
+  "tiktok": {
+   "caption": "Go has more positions than the universe has atoms."
+  },
+  "hashtags": {
+   "youtube": [
+    "#tech",
+    "#go",
+    "#math",
+    "#scale"
+   ],
+   "instagram": [
+    "#tech",
+    "#go",
+    "#math"
+   ],
+   "tiktok": [
+    "#tech",
+    "#go"
+   ]
+  }
+ },
+ "authored": {
+  "by": "claude",
+  "date": "2026-11-08"
+ }
+}

@@ -106,6 +106,34 @@ class NewScenes(unittest.TestCase):
             CATALOG[name](d, 5.0, 0.0, 6.0, data2)
 
 
+@unittest.skipUnless(_OK, f"render bagimliliklari yok: {_WHY}")
+class ContrastLabels(unittest.TestCase):
+    """Iki uzun etiket ortada birbirine degmemeli ("ATOMS IN THE UNIVERSE" +
+    "LEGAL GO POSITIONS" bitisik cikiyordu)."""
+
+    def _ink_in_gap(self, left, right):
+        from worker import scenes as S
+        im = Image.new("RGB", (D.W, D.H), (0, 0, 0))
+        S.contrast(ImageDraw.Draw(im), 2.0, 0.0, 3.0,
+                   {"left": {"label": left, "value": "10^80"},
+                    "right": {"label": right, "value": "2.08 x 10^170"}})
+        y0, y1 = int(S.MID + 110), int(S.MID + 150)
+        x0, x1 = int(S.MIDX - 8), int(S.MIDX + 8)
+        gap = im.crop((x0, y0, x1, y1)).convert("L")
+        side = im.crop((0, y0, D.W, y1)).convert("L")
+        return max(gap.getdata()), max(side.getdata())
+
+    def test_long_labels_leave_a_gap_in_the_middle(self):
+        gap, side = self._ink_in_gap("atoms in the universe", "legal Go positions")
+        self.assertGreater(side, 60, "etiketler hic cizilmedi")
+        self.assertLess(gap, 40, "iki etiket ortada birbirine degiyor")
+
+    def test_short_labels_still_drawn(self):
+        gap, side = self._ink_in_gap("before", "after")
+        self.assertGreater(side, 60)
+        self.assertLess(gap, 40)
+
+
 class ShapeRules(unittest.TestCase):
     def test_good_samples_pass(self):
         for name, data in SAMPLES.items():
