@@ -260,8 +260,11 @@ R2 sunucusundan. Tasarım bunların içinde kalacak.
       yan yana düzenlenebilir, üç net eylem: **Onayla ve planla · Hemen yayınla ·
       Reddet**; sonraki bekleyene geçiş; klavye kısayolları (A / R / →);
       toplu onay
-- [ ] **Takvim:** hafta ve ay görünümü, gün başına kutu, tıkla → saat seç,
-      duraklatılmış ve geciken yayınlar ayrı renkte
+- [x] **Takvim:** ay ızgarası + gün sayfası (Türkiye saati), tıkla → video/saat seç,
+      sürükle-bırak, otomatik doldur, haftalık şablon, üretim tahmini, A/B kolları,
+      kuyruk kaç güne yeter
+- [ ] **Takvim (kalan):** hafta görünümü; duraklatılmış ve geciken yayınlar ayrı renkte;
+      dokunmatikte sürükleme (şimdilik gün sayfasındaki "Taşı")
 - [ ] **Servisler:** her satırda durum rengi + kısa neden + "ne yapmalı"
       (örn. "GitHub token süresi doluyor → yenile"); token bitiş tarihleri
 - [ ] **Açık/koyu tema** (`prefers-color-scheme`), tek tutarlı renk sistemi,

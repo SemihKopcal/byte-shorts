@@ -366,3 +366,8 @@ Videoları görmek, onaylamak, takvime koymak ve servislerin sağlığını izle
 panel var. Kod `panel/`, kurulum ve işletme rehberi `panel/deploy/README.md`. Video üretimi
 yine GitHub Actions'ta; `PANEL_MODE=on` değişkeniyle `daily` videoyu yayınlamak yerine R2'ye
 koyar, yayını panel `panel-publish` workflow'uyla yönetir.
+
+**Takvim:** panelde ay ızgarası (Türkiye saati) hangi videonun ne zaman yayınlanacağını,
+geçmiş/tahmini üretimleri, A/B deney kollarını ve kuyruğun kaç güne yettiğini gösterir.
+Güne tıklayıp video+saat seçerek ya da yayını başka güne sürükleyerek planlanır; ayrıca
+otomatik doldurma ve haftalık saat şablonu var. Ayrıntı: `panel/deploy/README.md` §10.

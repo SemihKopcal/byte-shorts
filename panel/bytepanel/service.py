@@ -16,9 +16,10 @@ from __future__ import annotations
 import json
 import re
 import uuid
-from datetime import datetime, timedelta
+from datetime import date, datetime, timedelta
 from urllib.parse import urlparse
 
+from . import plan
 from .config import PLATFORMS, SLUG
 from .db import Db, iso, parse_iso, utcnow
 from .github import GitHubError
@@ -46,7 +47,12 @@ DEFAULTS = {
     "youtube_privacy": "public",
     "retention_count": "100",
     "slots_utc": "01:15,07:15,13:15,19:15",
+    "week_tr": "",                   # haftalik sablon (Turkiye saati); bos = slots_utc her gun
+    "runs_utc": "04:15,16:15",       # daily workflow'un cron saatleri (takvimde uretim tahmini icin)
 }
+MAX_AHEAD = timedelta(days=400)
+AUTOFILL_MAX = 60
+WARN_DAYS = 6
 
 
 class Invalid(ValueError):
@@ -85,6 +91,7 @@ class Service:
     def __init__(self, db: Db, storage, github, cfg, clock=utcnow):
         self.db, self.storage, self.gh, self.cfg, self.now = db, storage, github, cfg, clock
         self.last_errors: dict[str, str] = {}
+        self._extras = None               # (gecerlilik sonu, sonuc): GitHub'dan gelen takvim bilgisi
 
     # ── ayarlar ──────────────────────────────────────────────────────
     def setting(self, key: str) -> str:
@@ -111,8 +118,16 @@ class Service:
             if not value.isdigit() or not 10 <= int(value) <= 1000:
                 raise Invalid("10..1000 arasi sayi olmali")
             value = str(int(value))
-        elif key == "slots_utc":
+        elif key in ("slots_utc", "runs_utc"):
             value = ",".join(parse_slots(value))
+        elif key == "week_tr":
+            if value:
+                try:
+                    value = plan.format_week(plan.parse_week(value))
+                except ValueError as e:
+                    raise Invalid(str(e)) from None
+                if not plan.week_is_configured(plan.parse_week(value)):
+                    value = ""
         with self.db.tx() as c:
             c.execute("INSERT INTO settings(key,value) VALUES(?,?) "
                       "ON CONFLICT(key) DO UPDATE SET value=excluded.value", (key, value))
@@ -129,28 +144,45 @@ class Service:
                        clean(action, 60), clean(detail, 400)))
 
     # ── takvim ───────────────────────────────────────────────────────
+    def week(self) -> list[list[str]] | None:
+        """Haftalik sablon (Turkiye saati) ya da None (tanimsiz)."""
+        raw = self.setting("week_tr")
+        if not raw:
+            return None
+        try:
+            w = plan.parse_week(raw)
+        except ValueError:
+            return None
+        return w if plan.week_is_configured(w) else None
+
+    def week_rows(self) -> list[dict]:
+        """Sablon formu icin 7 satir: sablon yoksa gecerli olan UTC saatlerinin Turkiye karsiligi."""
+        w = self.week()
+        eff = plan.day_times_tr(date(2026, 1, 5), None, parse_slots(self.setting("slots_utc")))
+        return [{"i": i, "name": plan.WEEKDAYS[i],
+                 "value": ", ".join(w[i] if w is not None else eff)} for i in range(7)]
+
     def next_free_slot(self, platform: str, after: datetime) -> datetime:
         slots = parse_slots(self.setting("slots_utc"))
         taken = {r["scheduled_at"] for r in self.db.all(
             "SELECT scheduled_at FROM publications WHERE platform=? "
             "AND status IN ('planned','dispatched')", (platform,))}
-        day = after.date()
-        for d in range(0, 400):
-            for s in slots:
-                hh, mm = int(s[:2]), int(s[3:])
-                cand = datetime(day.year, day.month, day.day, hh, mm,
-                                tzinfo=after.tzinfo) + timedelta(days=d)
-                if cand > after + timedelta(minutes=2) and iso(cand) not in taken:
-                    return cand
+        for cand in plan.iter_slots(after + timedelta(minutes=2), self.week(), slots):
+            if iso(cand) not in taken:
+                return cand
         raise Invalid("bos slot bulunamadi")
 
     def _plan(self, c, script_id: str, platform: str) -> None:
         """Bir yayin satiri acar (varsa dokunmaz). tx icinde cagrilir."""
-        row = c.execute("SELECT 1 FROM publications WHERE script_id=? AND platform=?",
+        row = c.execute("SELECT id,status FROM publications WHERE script_id=? AND platform=?",
                         (script_id, platform)).fetchone()
-        if row:
+        if row and row["status"] != "canceled":
             return
         when = self.next_free_slot(platform, self.now())
+        if row:        # onay = "takvime koy": red/geri alma ile iptal olmus satir yeniden planlanir
+            c.execute("UPDATE publications SET status='planned',scheduled_at=?,request_id=NULL,"
+                      "dispatched_at=NULL,finished_at=NULL,error=NULL WHERE id=?", (iso(when), row["id"]))
+            return
         c.execute("INSERT INTO publications(script_id,platform,status,scheduled_at) "
                   "VALUES(?,?,'planned',?)", (script_id, platform, iso(when)))
 
@@ -335,20 +367,95 @@ class Service:
                           "VALUES(?,?,'planned',?)", (script_id, platform, when))
         self.audit(actor, ip, "yayin planlandi", f"{script_id}/{platform}")
 
-    def reschedule(self, pub_id: int, when: datetime, actor: str, ip: str = "") -> None:
+    def _check_when(self, when: datetime) -> None:
         if when < self.now() - timedelta(minutes=1):
             raise Invalid("gecmis bir zaman secilemez")
-        if when > self.now() + timedelta(days=400):
+        if when > self.now() + MAX_AHEAD:
             raise Invalid("cok uzak bir tarih")
+
+    @staticmethod
+    def _conflict(c, platform: str, when: datetime, skip_id: int = 0) -> bool:
+        return c.execute("SELECT 1 FROM publications WHERE platform=? AND scheduled_at=? "
+                         "AND status IN ('planned','dispatched') AND id<>?",
+                         (platform, iso(when), skip_id)).fetchone() is not None
+
+    def reschedule(self, pub_id: int, when: datetime, actor: str, ip: str = "",
+                   check_conflict: bool = True) -> None:
+        self._check_when(when)
         with self.db.tx() as c:
-            r = c.execute("UPDATE publications SET scheduled_at=? WHERE id=? AND status='planned'",
-                          (iso(when), pub_id))
-            if r.rowcount != 1:
+            row = c.execute("SELECT platform FROM publications WHERE id=? AND status='planned'",
+                            (pub_id,)).fetchone()
+            if not row:
                 raise Invalid("yalniz 'planli' yayinin zamani degisir")
+            if check_conflict and self._conflict(c, row["platform"], when, pub_id):
+                raise Invalid("bu saatte bu platformda baska bir yayin var")
+            c.execute("UPDATE publications SET scheduled_at=? WHERE id=?", (iso(when), pub_id))
         self.audit(actor, ip, "zaman degisti", f"#{pub_id} -> {iso(when)}")
 
+    def move_pub(self, pub_id: int, day: date, actor: str, ip: str = "") -> None:
+        """Surukle-birak: saati (Turkiye) AYNI kalir, yalniz gun degisir."""
+        row = self.db.one("SELECT scheduled_at FROM publications WHERE id=? AND status='planned'",
+                          (pub_id,))
+        if not row:
+            raise Invalid("yalniz 'planli' yayin tasinir")
+        hhmm = f"{plan.to_tr(parse_iso(row['scheduled_at'])):%H:%M}"
+        self.reschedule(pub_id, plan.tr_to_utc(day, hhmm), actor, ip)
+
+    def plan_at(self, script_id: str, platform: str, when: datetime, actor: str, ip: str = "") -> None:
+        """Takvimden elle: bu videoyu bu platforma su zamana planla."""
+        v = self._video(script_id)
+        if platform not in PLATFORMS:
+            raise Invalid("bilinmeyen platform")
+        if not self.flag(f"platform_{platform}"):
+            raise Invalid("bu platform Ayarlar'da kapali")
+        if v["approval"] != "approved" or v["files_deleted_at"]:
+            raise Invalid("video onayli ve dosyalari duruyor olmali")
+        self._check_when(when)
+        with self.db.tx() as c:
+            old = c.execute("SELECT id,status FROM publications WHERE script_id=? AND platform=?",
+                            (script_id, platform)).fetchone()
+            if old and old["status"] in ("planned", "dispatched", "published"):
+                raise Invalid("bu platform icin yayin zaten var (planliysa takvimden tasi)")
+            if self._conflict(c, platform, when):
+                raise Invalid("bu saatte bu platformda baska bir yayin var")
+            if old:
+                c.execute("UPDATE publications SET status='planned',scheduled_at=?,request_id=NULL,"
+                          "dispatched_at=NULL,finished_at=NULL,error=NULL WHERE id=?",
+                          (iso(when), old["id"]))
+            else:
+                c.execute("INSERT INTO publications(script_id,platform,status,scheduled_at) "
+                          "VALUES(?,?,'planned',?)", (script_id, platform, iso(when)))
+        self.audit(actor, ip, "yayin planlandi (takvim)", f"{script_id}/{platform} -> {iso(when)}")
+
+    def _unplanned(self) -> list[tuple[str, str]]:
+        """Onayli, dosyasi duran, acik platformda HIC yayin satiri olmayan (video, platform) ciftleri.
+        Iptal/basarisiz satirlar bilerek disarida: iptal bilincli bir karar, basarisizi elle denersin."""
+        have = {(r["script_id"], r["platform"]) for r in self.db.all(
+            "SELECT script_id,platform FROM publications")}
+        out = []
+        for v in self.db.all("SELECT script_id FROM videos WHERE approval='approved' "
+                             "AND files_deleted_at IS NULL ORDER BY rendered_at,script_id"):
+            for pf in self.enabled_platforms():
+                if (v["script_id"], pf) not in have:
+                    out.append((v["script_id"], pf))
+        return out
+
+    def autofill_count(self) -> int:
+        return min(len(self._unplanned()), AUTOFILL_MAX)
+
+    def autofill(self, actor: str, ip: str = "") -> int:
+        """Takvimde yeri olmayan onayli videolari bos saatlere (eskiden yeniye) dizer."""
+        n = 0
+        for sid, pf in self._unplanned()[:AUTOFILL_MAX]:
+            with self.db.tx() as c:
+                self._plan(c, sid, pf)
+            n += 1
+        if n:
+            self.audit(actor, ip, "otomatik dolduruldu", f"{n} yayin")
+        return n
+
     def publish_now(self, pub_id: int, actor: str, ip: str = "") -> None:
-        self.reschedule(pub_id, self.now(), actor, ip)
+        self.reschedule(pub_id, self.now(), actor, ip, check_conflict=False)
 
     def cancel_publication(self, pub_id: int, actor: str, ip: str = "") -> None:
         with self.db.tx() as c:
@@ -503,6 +610,87 @@ class Service:
             "stored": q("SELECT COUNT(*) n FROM videos WHERE files_deleted_at IS NULL"),
             "total": q("SELECT COUNT(*) n FROM videos"),
         }
+
+    # ── takvim (okuma) ───────────────────────────────────────────────
+    def extras(self) -> dict:
+        """GitHub'dan: siradaki senaryolar + A/B kollari. AG ISTEGI: web tarafi thread havuzunda cagirir.
+        Hata takvimi BOZMAZ (bos doner, 'error' dolar); sonuc onbellekte (5 dk, hatada 1 dk)."""
+        now = self.now()
+        hit = self._extras
+        if hit and hit[0] > now:
+            return hit[1]
+        out = {"queue": [], "total": 0, "arm_info": {}, "legend": [], "error": "", "ok": False}
+        errs = []
+        try:
+            q = self.gh.queue_info()
+            out["queue"], out["total"] = list(q["queue"]), int(q["total"])
+            out["ok"] = True
+        except Exception as e:                           # takvim GitHub yuzunden dusmesin
+            errs.append(f"kuyruk: {type(e).__name__}: {str(e)[:120]}")
+        try:
+            e = self.gh.experiments()
+            out["arm_info"], out["legend"] = e["arm_info"], e["legend"]
+        except Exception as ex:
+            errs.append(f"deney: {type(ex).__name__}: {str(ex)[:120]}")
+        out["error"] = clean("; ".join(errs), 300)
+        self._extras = (now + timedelta(seconds=60 if errs else 300), out)
+        return out
+
+    def queue_summary(self, extras: dict) -> dict:
+        runs = parse_slots(self.setting("runs_utc"))
+        left = len(extras["queue"])
+        days = plan.queue_days(left, len(runs))
+        now = self.now()
+        sched = plan.predict_runs(now, runs, now + timedelta(days=days + 2), extras["queue"]) if left else []
+        real = [r for r in sched if r["script_id"]]
+        return {"known": extras["ok"], "left": left, "per_day": len(runs), "days": days,
+                "warn": extras["ok"] and days <= WARN_DAYS,
+                "last_run": f"{plan.to_tr(real[-1]['at']):%d.%m %H:%M}" if real else "",
+                "next_id": real[0]["script_id"] if real else "",
+                "next_run": f"{plan.to_tr(real[0]['at']):%d.%m %H:%M}" if real else ""}
+
+    def _grid_events(self, lo: datetime, hi: datetime, extras: dict):
+        pubs = [dict(r) for r in self.db.all(
+            "SELECT p.*,v.title FROM publications p JOIN videos v USING(script_id) "
+            "WHERE p.scheduled_at>=? AND p.scheduled_at<? AND p.status<>'canceled' "
+            "ORDER BY p.scheduled_at", (iso(lo), iso(hi)))]
+        made = [dict(r) for r in self.db.all(
+            "SELECT script_id,title,rendered_at,approval FROM videos "
+            "WHERE rendered_at>=? AND rendered_at<? ORDER BY rendered_at", (iso(lo), iso(hi)))]
+        now = self.now()
+        runs = (plan.predict_runs(now, parse_slots(self.setting("runs_utc")), hi, extras["queue"])
+                if hi > now else [])
+        return pubs, made, runs
+
+    def month_model(self, y: int, m: int, extras: dict) -> dict:
+        lo, hi = plan.grid_bounds_utc(y, m)
+        pubs, made, runs = self._grid_events(lo, hi, extras)
+        today = plan.to_tr(self.now()).date()
+        return plan.build_month(y, m, today, pubs, made, runs, extras["arm_info"])
+
+    def day_model(self, day: date, extras: dict) -> dict:
+        lo, hi = plan.day_bounds_utc(day)
+        pubs, made, runs = self._grid_events(lo, hi, extras)
+        events = plan.events_for(pubs, made, runs, extras["arm_info"]).get(day, [])
+        canceled = [dict(r) for r in self.db.all(
+            "SELECT p.*,v.title FROM publications p JOIN videos v USING(script_id) "
+            "WHERE p.scheduled_at>=? AND p.scheduled_at<? AND p.status='canceled' "
+            "ORDER BY p.scheduled_at", (iso(lo), iso(hi)))]
+        have = {(r["script_id"], r["platform"]): r["status"] for r in self.db.all(
+            "SELECT script_id,platform,status FROM publications")}
+        options = []
+        for v in self.db.all("SELECT script_id,title FROM videos WHERE approval='approved' "
+                             "AND files_deleted_at IS NULL ORDER BY rendered_at DESC,script_id DESC LIMIT 200"):
+            for pf in self.enabled_platforms():
+                if have.get((v["script_id"], pf)) in (None, "canceled", "failed"):
+                    options.append({"value": f"{v['script_id']}:{pf}", "label": f"{v['title']} · {pf}"})
+        today = plan.to_tr(self.now()).date()
+        py, nx = day - timedelta(days=1), day + timedelta(days=1)
+        return {"date": day, "iso": day.isoformat(), "past": day < today, "today": day == today,
+                "title": f"{day.day} {plan.MONTHS[day.month - 1]} {day.year}, {plan.WEEKDAYS[day.weekday()]}",
+                "events": events, "canceled": canceled, "options": options[:300],
+                "times": plan.day_times_tr(day, self.week(), parse_slots(self.setting("slots_utc"))),
+                "prev": py.isoformat(), "next": nx.isoformat(), "month": f"{day:%Y-%m}"}
 
     def audit_log(self, limit: int = 100):
         return self.db.all("SELECT * FROM audit ORDER BY id DESC LIMIT ?", (limit,))

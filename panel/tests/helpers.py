@@ -26,6 +26,11 @@ class FakeGitHub:
         self.calls: list[dict] = []
         self.fail: Exception | None = None
         self.on_dispatch = None            # (inputs) -> None, DB durumunu denetlemek icin
+        # takvim icin: siradaki senaryolar (secim sirasiyla) ve A/B kollari
+        self.queue = [f"p{n:03d}-sira-{n}" for n in range(40, 49)]
+        self.arm_info: dict[str, dict] = {}
+        self.legend: list[dict] = []
+        self.fail_queue: Exception | None = None
 
     def dispatch(self, inputs):
         if self.on_dispatch:
@@ -43,6 +48,14 @@ class FakeGitHub:
 
     def queue_left(self):
         return {"total": 10, "left": 9}
+
+    def queue_info(self):
+        if self.fail_queue:
+            raise self.fail_queue
+        return {"total": len(self.queue) + 3, "queue": list(self.queue)}
+
+    def experiments(self):
+        return {"arm_info": dict(self.arm_info), "legend": list(self.legend)}
 
 
 def test_config(**over):

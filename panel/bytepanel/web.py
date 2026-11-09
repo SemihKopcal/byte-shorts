@@ -8,9 +8,9 @@ from __future__ import annotations
 import base64
 import contextlib
 import logging
+import re
 import threading
 from collections import namedtuple
-from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 from fastapi import FastAPI, Request
@@ -19,6 +19,7 @@ from fastapi.responses import HTMLResponse, JSONResponse, PlainTextResponse, Red
 from fastapi.templating import Jinja2Templates
 
 from . import config as cfgmod
+from . import plan
 from .config import PLATFORMS, SLUG
 from .db import Db, iso, parse_iso
 from .github import GitHub
@@ -32,7 +33,7 @@ log = logging.getLogger("bytepanel")
 HERE = Path(__file__).parent
 Actor = namedtuple("Actor", "email ip")
 MAX_BODY = 64 * 1024
-TR = timezone(timedelta(hours=3))             # Turkiye: sabit UTC+3 (yaz saati yok)
+TR = plan.TR                                  # Turkiye: sabit UTC+3 (yaz saati yok)
 
 
 class LimitBody:
@@ -80,6 +81,11 @@ def fmt_ts(ts) -> str:
     return f"{d:%d.%m %H:%M} UTC · TR {d.astimezone(TR):%H:%M}"
 
 
+def tr_input(ts) -> str:
+    """ISO UTC -> 'YYYY-AA-GG SS:DD' (Turkiye): 'Tasi' kutusunun on degeri."""
+    return f"{parse_iso(ts).astimezone(TR):%Y-%m-%d %H:%M}" if ts else ""
+
+
 def build_service(cfg) -> Service:
     db = Db(cfg.db_path)
     gh = GitHub(cfg.gh_repo, cfg.gh_token, cfg.gh_workflow, cfg.gh_ref)
@@ -95,6 +101,7 @@ def create_app(cfg=None, *, service=None, access=None, monitor=None, start_worke
     headers = security_headers(cfg.media_host, https=cfg.is_prod or cfg.origin.startswith("https://"))
     templates = Jinja2Templates(directory=str(HERE / "templates"))
     templates.env.filters["ts"] = fmt_ts
+    templates.env.filters["trin"] = tr_input
     css = (HERE / "static" / "app.css").read_bytes()
     js = (HERE / "static" / "app.js").read_bytes()
     stop = threading.Event()
@@ -212,6 +219,40 @@ def create_app(cfg=None, *, service=None, access=None, monitor=None, start_worke
         except Invalid as e:
             return go(back, f"Hata: {e}")
 
+    def cal_back(form) -> str:
+        """Takvim islemlerinden sonra donulecek adres: formdan gelen deger YENIDEN INSA edilir
+        (regex'ten gecen parcalardan), ham metin hic yonlendirmeye girmez."""
+        m = plan.MONTH_RX.match(str(form.get("m", "")))
+        if m:
+            return f"/calendar?m={m[1]}-{m[2]}"
+        m = plan.DAY_RX.match(str(form.get("d", "")))
+        if m:
+            return f"/calendar?d={m[1]}-{m[2]}-{m[3]}"
+        return "/calendar?view=list" if form.get("view") == "list" else "/calendar"
+
+    async def act_cal(request, do, ok_msg):
+        """do(actor, form) bir mesaj dondurebilir (yoksa ok_msg)."""
+        actor, form = await guarded_post(request)
+        back = cal_back(form)
+        try:
+            return go(back, do(actor, form) or ok_msg)
+        except Invalid as e:
+            return go(back, f"Hata: {e}")
+
+    def need_int(form, key: str) -> int:
+        v = str(form.get(key, ""))
+        if not re.fullmatch(r"[0-9]{1,9}", v):          # str.isdigit() "²" gibi karakterleri de kabul eder
+            raise Invalid("gecersiz kayit")
+        return int(v)
+
+    def need_day(form, key: str = "d"):
+        try:
+            d = plan.parse_day(str(form.get(key, "")))
+            plan.parse_month(f"{d:%Y-%m}", plan.to_tr(svc.now()).date())     # +-3 yil siniri
+            return d
+        except ValueError as e:
+            raise Invalid(str(e)) from None
+
     # ── sayfalar ─────────────────────────────────────────────────────
     @app.get("/healthz", include_in_schema=False)
     async def healthz():
@@ -279,7 +320,7 @@ def create_app(cfg=None, *, service=None, access=None, monitor=None, start_worke
                          lambda a, f: svc.unapprove(sid_or_404(sid), a.email, a.ip), "Onay geri alindi.", sid=sid)
 
     @app.post("/videos/{sid}/plan", include_in_schema=False)
-    async def plan(request: Request, sid: str):
+    async def plan_video(request: Request, sid: str):
         return await act(request, f"/videos/{sid}",
                          lambda a, f: svc.plan_platform(sid_or_404(sid), str(f.get("platform", "")),
                                                         a.email, a.ip), "Yayin planlandi.", sid=sid)
@@ -293,13 +334,70 @@ def create_app(cfg=None, *, service=None, access=None, monitor=None, start_worke
     @app.get("/calendar", response_class=HTMLResponse, include_in_schema=False)
     async def calendar(request: Request):
         actor = authenticate(request)
-        return render(request, actor, "calendar.html", upcoming=svc.upcoming(200),
-                      recent=svc.recent_results(30))
+        q = request.query_params
+        if q.get("view") == "list":
+            return render(request, actor, "calendar_list.html", upcoming=svc.upcoming(200),
+                          recent=svc.recent_results(30))
+        today = plan.to_tr(svc.now()).date()
+        try:
+            if q.get("d"):
+                day = plan.parse_day(q["d"])
+                plan.parse_month(f"{day:%Y-%m}", today)
+            else:
+                y, mo = plan.parse_month(q.get("m"), today)
+        except ValueError as e:
+            return go("/calendar", f"Hata: {e}")
+        extras = await run_in_threadpool(svc.extras)          # GitHub istegi: olay dongusunu tutma
+        if q.get("d"):
+            return render(request, actor, "calendar_day.html", d=svc.day_model(day, extras),
+                          extras=extras)
+        return render(request, actor, "calendar.html", mm=svc.month_model(y, mo, extras),
+                      qs=svc.queue_summary(extras), extras=extras, unplanned=svc.autofill_count(),
+                      week=svc.week_rows(), week_set=svc.week() is not None, today_iso=today.isoformat())
+
+    @app.post("/calendar/plan", include_in_schema=False)
+    async def cal_plan(request: Request):
+        def do(a, f):
+            sid, _, pf = str(f.get("choice", "")).partition(":")
+            if not SLUG.match(sid):
+                raise Invalid("video secilmedi")
+            try:
+                when = plan.tr_to_utc(need_day(f), str(f.get("time", "")).strip())
+            except ValueError as e:
+                raise Invalid(str(e)) from None
+            svc.plan_at(sid, pf, when, a.email, a.ip)
+        return await act_cal(request, lambda a, f: do(a, f), "Takvime eklendi.")
+
+    @app.post("/calendar/move", include_in_schema=False)
+    async def cal_move(request: Request):
+        return await act_cal(request, lambda a, f: svc.move_pub(need_int(f, "pub"), need_day(f),
+                                                                 a.email, a.ip), "Yayin tasindi.")
+
+    @app.post("/calendar/autofill", include_in_schema=False)
+    async def cal_autofill(request: Request):
+        def do(a, f):
+            n = svc.autofill(a.email, a.ip)
+            return f"{n} yayin bos saatlere dizildi." if n else "Dizilecek video yok."
+        return await act_cal(request, do, "")
+
+    @app.post("/calendar/template", include_in_schema=False)
+    async def cal_template(request: Request):
+        def do(a, f):
+            if f.get("clear") == "1":
+                value = ""
+            else:
+                parts = [str(f.get(f"d{i}", "")).strip() for i in range(7)]
+                if any("|" in x for x in parts):
+                    raise Invalid("Saatlerde '|' kullanilamaz")
+                value = "|".join(parts)
+            svc.set_setting("week_tr", value, a.email, a.ip)
+            return "Haftalik sablon kaydedildi." if value else "Haftalik sablon kapatildi (Ayarlar'daki UTC saatleri gecerli)."
+        return await act_cal(request, do, "")
 
     def pub_action(path, fn, msg):
         @app.post(f"/pubs/{{pid}}/{path}", include_in_schema=False, name=f"pub_{path}")
         async def handler(request: Request, pid: int):
-            return await act(request, "/calendar", lambda a, f: fn(pid, a, f), msg)
+            return await act_cal(request, lambda a, f: fn(pid, a, f), msg)
 
     pub_action("now", lambda pid, a, f: svc.publish_now(pid, a.email, a.ip), "Simdi yayinlanacak.")
     pub_action("cancel", lambda pid, a, f: svc.cancel_publication(pid, a.email, a.ip), "Iptal edildi.")
@@ -308,10 +406,9 @@ def create_app(cfg=None, *, service=None, access=None, monitor=None, start_worke
 
     def _resched(pid, a, f):
         try:
-            when = datetime.strptime(str(f.get("when", "")).strip(), "%Y-%m-%d %H:%M") \
-                .replace(tzinfo=timezone.utc)
-        except ValueError:
-            raise Invalid("Zaman 'YYYY-AA-GG SS:DD' (UTC) biciminde olmali") from None
+            when = plan.parse_tr_datetime(str(f.get("when", "")))
+        except ValueError as e:
+            raise Invalid(str(e)) from None
         svc.reschedule(pid, when, a.email, a.ip)
     pub_action("reschedule", _resched, "Zaman guncellendi.")
 

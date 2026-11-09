@@ -90,7 +90,8 @@ class Auth(Base):
             "/health", "/audit", "/static/app.css", "/static/app.js"]
     POSTS = [f"/videos/{A}/approve", f"/videos/{A}/reject", f"/videos/{A}/unapprove",
              f"/videos/{A}/plan", "/approve-all", "/pubs/1/now", "/pubs/1/cancel",
-             "/pubs/1/retry", "/pubs/1/reschedule", "/settings"]
+             "/pubs/1/retry", "/pubs/1/reschedule", "/settings", "/calendar/plan",
+             "/calendar/move", "/calendar/autofill", "/calendar/template"]
 
     def test_every_route_refuses_requests_without_a_token(self):
         self.add()
@@ -358,10 +359,10 @@ class Flows(Base):
         self.add()
         self.svc.approve(A, ME)
         pid = self.svc.publications(A)[0]["id"]
-        self.post(f"/pubs/{pid}/reschedule", {"when": "2026-11-12 08:15"})
-        self.assertEqual(self.svc.publications(A)[0]["scheduled_at"], "2026-11-12T08:15:00Z")
+        self.post(f"/pubs/{pid}/reschedule", {"when": "2026-11-12 08:15"})      # Turkiye saati
+        self.assertEqual(self.svc.publications(A)[0]["scheduled_at"], "2026-11-12T05:15:00Z")
         self.post(f"/pubs/{pid}/reschedule", {"when": "tomorrow"})
-        self.assertEqual(self.svc.publications(A)[0]["scheduled_at"], "2026-11-12T08:15:00Z")
+        self.assertEqual(self.svc.publications(A)[0]["scheduled_at"], "2026-11-12T05:15:00Z")
 
     def test_preview_returns_a_short_lived_signed_url_only_when_the_file_exists(self):
         self.add()
