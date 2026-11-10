@@ -275,6 +275,10 @@ R2 sunucusundan. Tasarım bunların içinde kalacak.
       ortak, `yt-analytics.readonly`)
 - [x] **Begen / takip CTA'si:** kapanis karti + sesli cumle + kose etiketi + aciklama satiri
       + sabitlenecek yorum metni; deney kollarina da ayni (README "Begen / takip CTA'si")
+- [x] **Video stili:** kamera hareketi (5), gecis efekti (5), doku, anlatim temposu; senaryo
+      kimliginden deterministik (README "Video stili")
+- [ ] **Cesitlilik (kalan):** yeni sahne turleri (acilis/kapanis varyantlari), ses efektleri
+      (gecis "whoosh", chip tiki), ikinci ses; yeni senaryo partisinde bicim/acilis kotalari
 - [ ] **CTA (kalan):** panelde sabitlenecek yorumu video sayfasinda goster + kopyala;
       CTA'li / CTA'siz videolari olcum sayfasinda ayri izle
 - [ ] **Erişilebilirlik:** kontrast WCAG AA, görünür odak halkası, klavye ile

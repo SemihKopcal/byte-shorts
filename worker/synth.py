@@ -96,9 +96,9 @@ def _piper_flags() -> tuple:
     return tuple(out)
 
 
-def _piper(text: str, path: Path, voice: Path, i: int = 0) -> float:
+def _piper(text: str, path: Path, voice: Path, i: int = 0, shift: float = 0.0) -> float:
     cmd = ["piper", "-m", str(voice), "-c", str(voice) + ".json"]
-    ls = LENGTH_SCALE + JITTER[i % len(JITTER)]
+    ls = LENGTH_SCALE + JITTER[i % len(JITTER)] + shift     # shift: videoya ozgu tempo (style.py)
     for f in _piper_flags():
         k = f.lstrip("-").replace("_", "-")
         v = f"{ls:.3f}" if k.startswith("length") else \
@@ -116,14 +116,17 @@ def synthesize(spec: dict, out_dir: Path, voice: Path) -> dict:
     seg.mkdir(parents=True, exist_ok=True)
 
     beats = spec["beats"]
-    gaps = [_gap_after(b, beats[i + 1] if i + 1 < len(beats) else None)
+    pace = (spec.get("_style") or {}).get("pace") or {}
+    shift = float(pace.get("length_delta", 0.0))
+    gscale = float(pace.get("gap_scale", 1.0))
+    gaps = [round(_gap_after(b, beats[i + 1] if i + 1 < len(beats) else None) * gscale, 3)
             for i, b in enumerate(beats)]
 
     t = 0.0
     timeline, parts = [], []
     for i, beat in enumerate(beats):
         p = seg / f"{i:02d}.wav"
-        dur = _piper(beat["say"], p, voice, i)
+        dur = _piper(beat["say"], p, voice, i, shift) if shift else _piper(beat["say"], p, voice, i)
         parts.append(p)
 
         words = beat.get("cap", beat["say"]).split()
