@@ -89,7 +89,7 @@ jobs:
       # geliyor, cache'lenince hic inmiyor.
       - name: arac cache
         id: tools
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: |
             ~/.local/bin
@@ -110,7 +110,7 @@ jobs:
       # 120 MB model her kosuda indirilmesin
       - name: ses modeli cache
         id: voice
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: voices
           key: piper-en-us-ryan-high-v1
