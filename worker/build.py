@@ -21,6 +21,7 @@ from PIL import Image, ImageDraw
 
 from . import draw as D
 from .byte import draw_byte_badge, MINT as B_MINT
+from . import cta as CTA
 from .qc import check
 from .synth import synthesize
 
@@ -79,6 +80,13 @@ def render(spec, tl, series_mod, out_path: Path, parallel: bool = False) -> None
     # kapanista baslik zaten ekranda metin; altyazi onun uzerine binmesin
     close_t0 = stages[-1][0] if stages else duration
 
+    # CTA kose etiketi (yalniz CTA'li videolarda; kapanis kartiyla cakisirsa hic cikmaz)
+    corner, corner_text = None, ""
+    if CTA.active(spec):
+        cc = spec["_cta"]["corner"]
+        corner = CTA.corner_window(duration, close_t0, cc)
+        corner_text = cc.get("text", "")
+
     bg = D.build_bg()
     grain = D.build_grain()
     nframes = int(duration * D.FPS)
@@ -117,6 +125,8 @@ def render(spec, tl, series_mod, out_path: Path, parallel: bool = False) -> None
         if t < close_t0 - 0.1:
             D.draw_caption(d, t, chunks)
         D.draw_chrome(d, t, duration, badge_font)
+        if corner:
+            D.draw_cta_corner(d, t, corner, corner_text)
 
         arr = np.asarray(img, dtype=np.int16) + grain[i % len(grain)]
         enc.stdin.write(np.clip(arr, 0, 255).astype(np.uint8).tobytes())
@@ -149,7 +159,10 @@ def main() -> None:
     args = ap.parse_args()
 
     spec = json.loads(Path(args.script).read_text())
-    _inject_brand(spec, load_brand(ROOT))
+    brand = load_brand(ROOT)
+    _inject_brand(spec, brand)
+    if CTA.apply(spec, brand, ROOT):
+        print("  CTA: begen/takip cumlesi + kapanis chip'leri eklendi")
     out_dir = ROOT / args.out / spec["id"]
     out_dir.mkdir(parents=True, exist_ok=True)
 

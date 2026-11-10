@@ -24,5 +24,28 @@
   "max_chars": 60,
   "_note": "Mobilde ~40 karakterden sonrasi kirpiliyor; carpici kismi basa koy. Buyuk harfle BAGIRMA, clickbait isaretleyicisi.",
   "ban": ["SHOCKING", "YOU WON'T BELIEVE", "INSANE", "!!!"]
+ },
+
+ "cta": {
+  "_note": "Begen/takip CTA'si. enabled=false -> hic eklenmez. skip_experiment_scripts=true -> content/experiments.json'daki kollarin senaryolari CTA'siz (temiz kol); false (varsayilan) -> deney videolari da CTA'li, iki kola da ayni. voice = videonun sonunda okunan TEK cumle (Piper icin 'Byte' yaz). Senaryolara CTA yazma: editorial/rules.py yasak, hat ekliyor.",
+  "enabled": true,
+  "skip_experiment_scripts": false,
+  "voice": "Like it, and follow Byte for more.",
+  "card": {
+   "like": "LIKE",
+   "follow": "FOLLOW BYTE"
+  },
+  "corner": {
+   "enabled": true,
+   "text": "LIKE · FOLLOW",
+   "at": 0.42,
+   "seconds": 2.6
+  },
+  "description": {
+   "youtube": "Like it? Subscribe to BYTE for a new measured number every day.",
+   "instagram": "Follow {handle} for a new measured number every day.",
+   "tiktok": "Follow {handle} for more."
+  },
+  "pinned_comment": "Every number in this video is sourced in the description. A new one every day: subscribe to BYTE."
  }
 }

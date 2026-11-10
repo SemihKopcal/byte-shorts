@@ -273,6 +273,10 @@ R2 sunucusundan. Tasarım bunların içinde kalacak.
       mesajları toast olarak (ekrandan kendiliğinden kaybolur)
 - [ ] **Ölçüm sayfası:** yayınlananların izlenme/tutma verisi (bölüm 5 ile
       ortak, `yt-analytics.readonly`)
+- [x] **Begen / takip CTA'si:** kapanis karti + sesli cumle + kose etiketi + aciklama satiri
+      + sabitlenecek yorum metni; deney kollarina da ayni (README "Begen / takip CTA'si")
+- [ ] **CTA (kalan):** panelde sabitlenecek yorumu video sayfasinda goster + kopyala;
+      CTA'li / CTA'siz videolari olcum sayfasinda ayri izle
 - [ ] **Erişilebilirlik:** kontrast WCAG AA, görünür odak halkası, klavye ile
       tam kullanım
 - [ ] **Gerçek tarayıcı testi** (Playwright): giriş sonrası gerçek form POST'u,

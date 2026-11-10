@@ -98,6 +98,36 @@ Bitince daily "Kuyruk bos" diye kirmizi durur (Gemini'ye dusmez); yeni parti
 zamaninda yazilmali. Kuyruk sirasi dosya adi sirasidir, bu yuzden `pNNN-`
 numarasi plandaki siradir.
 
+## Begen / takip CTA'si (`brand.json` > `cta`, `worker/cta.py`)
+
+Videolarin sonunda sakin ve kisa bir "begen, takip et" cagrisi var; hepsini hat ekler,
+senaryoya yazilmaz (`editorial/rules.py` senaryo metnindeki "subscribe / like and / follow
+us" kaliplarini hala yasaklar, yoksa iki kez soylenirdi). Dort yerde gorunur:
+
+1. **Kapanis karti + ses:** son sesli cumle ("Like it, and follow Byte for more.") ve
+   `LIKE` / `FOLLOW BYTE` chip'leri; chip'ler cumle baslayinca cikar, sirayla "basilir"
+   (dolar), BYTE sagi gosterir (Shorts'un dugmeleri sagda). Kapanista altyazi zaten kapali.
+2. **Kose etiketi:** videonun ~%42'sinde 2.6 sn sol ustte kucuk `LIKE · FOLLOW`. Kapanis
+   kartiyla ya da ilk 3 sn ile cakisacaksa hic cikmaz.
+3. **Aciklama:** platforma ozel satir (YouTube "Subscribe", Instagram/TikTok "Follow
+   @handle"); ilk paragrafin arkasina, TikTok'ta hashtag'lerden once. TikTok 300 karakteri
+   asacaksa eklenmez.
+4. **Sabitlenecek yorum:** `captions.md` ve `manifest.json > cta.pinned_comment`. YouTube API
+   yorum sabitlemeye izin vermiyor: yayindan sonra elle yaz, uc nokta > Sabitle.
+
+**Hangi videoda?** Karar yalniz senaryoya ve depodaki dosyalara bagli (id, seri `G`, son
+beat `close`, `brand.json`, `content/experiments.json`); zamana ya da `built.json`'a
+bagli degil. `publish.yml` bazi akislarda videoyu yeniden uretiyor ve iki render birebir
+ayni cikmali. A/B deneyindeki videolar da CTA'li: iki kola da ayni +~3 sn eklenir ve
+deneyin ana olcutu `stayed` (ilk saniyelerde kaydirmama) videonun sonundan etkilenmez.
+Kol uzunluklari buna gore ~28 sn / ~39 sn olur. Deney videolarini CTA'siz tutmak
+istersen `skip_experiment_scripts: true` yap. Kapatmak icin `"enabled": false`; metinler ve
+zamanlama ayni blokta. Uyari: sesli cumlede "Byte" yaz (Piper "BYTE"i harf harf okur).
+CTA'li video ~3 sn uzar; `editorial.authored` kapisi 52 sn'de durur, QC 59 sn'de.
+
+**Video sonu:** video, son kelimeden 0,45 sn sonra biter (`worker/synth.py` `END_PAD`);
+eskiden 0,18 sn once bitiyor ve son kelimenin sonu kesiliyordu.
+
 ## Konu bicimleri: bilgi + ilgi
 
 Kanal sadece olcum yapmiyor; dort bicim donuyor (`editorial/roles.py`):
@@ -357,8 +387,8 @@ yaparken ikisini de guncelle ya da `cp ci/*.yml .github/workflows/`.
 
 ## brand.json
 
-Isim, handle, aciklama altbilgisi, hashtag'ler, baslik kurallari. Handle
-degisirse burasi degisiyor; kapanis kartina da buradan giriyor.
+Isim, handle, aciklama altbilgisi, hashtag'ler, baslik kurallari, begen/takip CTA'si
+(`cta`, yukaridaki bolum). Handle degisirse burasi degisiyor; kapanis kartina da buradan giriyor.
 
 ## Panel (byte.semihkopcal.com)
 

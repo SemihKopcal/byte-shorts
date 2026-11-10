@@ -139,14 +139,45 @@ def validate_copy(copy: dict, brand: dict) -> list[str]:
     return p
 
 
+HASHTAG_START = re.compile(r"(?<!\w)#\w")
+
+
+def with_cta(copy: dict, brand: dict, cfg: dict) -> dict:
+    """Aciklamalara platforma ozel CTA satiri: YouTube/Instagram'da ilk paragrafin (kanca) hemen
+    arkasina, TikTok'ta hashtag'lerin onune. Zaten varsa ya da TikTok 300 karakteri asacaksa
+    eklemez (hat durmasin, metin bozulmasin)."""
+    from worker.cta import line_for
+    out = dict(copy)
+    for plat in ("youtube", "instagram", "tiktok"):
+        line, text = line_for(cfg, plat, brand), out.get(plat, "")
+        if not line or line in text:
+            continue
+        if plat == "tiktok":
+            m = HASHTAG_START.search(text)
+            new = (f"{text[:m.start()].rstrip()} {line} {text[m.start():]}" if m
+                   else f"{text} {line}").strip()
+            if len(new) > 300:
+                continue
+        else:
+            head, sep, rest = text.partition("\n\n")
+            new = f"{head}\n\n{line}{sep}{rest}" if sep else f"{text}\n\n{line}"
+        out[plat] = new
+    return out
+
+
 def build_manifest(spec: dict, tl: dict, video: Path,
                    root: Path = ROOT) -> dict:
     """Yayin adiminin okuyacagi metadata."""
     brand = load_brand(root)
     copy = spec.get("copy") or compose(brand, spec, spec.get("copy_parts"))
+    cta_on = bool(spec.get("_cta"))
+    if cta_on:
+        from worker.cta import settings as cta_settings
+        cfg = cta_settings(brand)
+        copy = with_cta(copy, brand, cfg)
     tags = [t for t in brand.get("tags_base", []) + spec.get("tags", [])
             if len(t) <= 30]
-    return {
+    man = {
         "id": spec["id"],
         "series": spec["series"],
         "title": copy["title"],
@@ -160,6 +191,19 @@ def build_manifest(spec: dict, tl: dict, video: Path,
                      "instagram": copy["instagram"],
                      "tiktok": copy["tiktok"]},
     }
+    if cta_on:       # YouTube sabitlenmis yorumu API ile pinlenemiyor: panelde/captions.md'de kopyala, elle sabitle
+        man["cta"] = {"pinned_comment": cfg["pinned_comment"]}
+    return man
+
+
+def _pinned_section(man: dict) -> str:
+    pc = (man.get("cta") or {}).get("pinned_comment", "")
+    if not pc:
+        return ""
+    return ("\n## YouTube sabitlenecek yorum (elle)\n\n"
+            "Yayinlandiktan sonra YouTube'da yorum olarak yaz, uc nokta > Sabitle. "
+            "API yorum sabitlemeye izin vermiyor.\n\n"
+            f"```\n{pc}\n```\n")
 
 
 def captions_markdown(man: dict) -> str:
@@ -170,4 +214,5 @@ def captions_markdown(man: dict) -> str:
             f"_{man['duration']:.0f} sn, tema: {man.get('theme') or '-'}_\n\n"
             f"## Instagram\n\n```\n{c['instagram']}\n```\n\n"
             f"## TikTok\n\n```\n{c['tiktok']}\n```\n\n"
-            f"## YouTube\n\n```\n{c['youtube']}\n```\n")
+            f"## YouTube\n\n```\n{c['youtube']}\n```\n"
+            + _pinned_section(man))

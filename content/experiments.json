@@ -25,6 +25,6 @@
   },
   "primary": "stayed",
   "min_per_arm": 6,
-  "note": "Shorts'ta 'ortalama izlenme %' kisa videoda kendiliginden yuksek cikar; ana olcut 'izlemeye devam' (kaydirilmadan izlenen oran), o yoksa izlenme sayisi. Videolara en az 72 saat gecmeden CSV indirme. Ciftler ayni gun yayinlanir, sira gunler arasinda degisir (content/order.json)."
+  "note": "Shorts'ta 'ortalama izlenme %' kisa videoda kendiliginden yuksek cikar; ana olcut 'izlemeye devam' (kaydirilmadan izlenen oran), o yoksa izlenme sayisi. Videolara en az 72 saat gecmeden CSV indirme. Begen/takip CTA'si (brand.json) iki kola da ayni eklenir: gercek sureler ~3 sn uzar (kisa ~28 sn, standart ~39 sn); 'stayed' videonun sonundan etkilenmez. Ciftler ayni gun yayinlanir, sira gunler arasinda degisir (content/order.json)."
  }
 }

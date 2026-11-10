@@ -24,6 +24,7 @@ REQUIRED = os.environ.get("REQUIRE_RENDER_DEPS") == "1"
 try:
     from PIL import Image, ImageChops, ImageDraw
     from worker import draw as D
+    from worker import cta as CTA
     from worker import themes as T
     import importlib
     D.F_DISP(20)                       # font yoksa burada patlar
@@ -44,10 +45,13 @@ def fake_timeline(spec):
     return S, t + 1.0
 
 
-def draw_script(spec):
-    """(sahne sayisi, ornek sayisi, bos kalan sahne adlari)"""
+def draw_script(spec, with_cta=True):
+    """(sahne sayisi, ornek sayisi, bos kalan sahne adlari). Gecede render edildigi gibi, begen/takip
+    CTA'si (brand.json) varsa onunla birlikte cizilir."""
     theme = D.use_theme(T.pick(spec, []))
     spec["_theme"] = theme
+    if with_cta:
+        CTA.apply(spec, json.loads((ROOT / "brand.json").read_text()), ROOT)
     mod = importlib.import_module(f"worker.series_{spec['series'].lower()}")
     S, duration = fake_timeline(spec)
     blank = []
@@ -92,6 +96,21 @@ class EveryScriptDraws(unittest.TestCase):
             if blank:
                 problems.append(f"{path.name}: bos kalan pencereler {blank}")
         self.assertEqual(problems, [], "\n".join(problems))
+
+    def test_cta_adds_a_little_time_and_every_cta_script_stays_under_the_qc_limit(self):
+        """CTA ~3 sn ekler: tahmini sure QC'nin 59 sn sinirinin altinda kalmali (gercek sure sesle
+        ayni degil; burada kaba bir emniyet payi)."""
+        brand = json.loads((ROOT / "brand.json").read_text())
+        longest = 0.0
+        for path in SCRIPTS:
+            spec = json.loads(path.read_text())
+            plain_dur = fake_timeline(spec)[1]
+            if CTA.apply(spec, brand, ROOT):
+                dur = fake_timeline(spec)[1]
+                self.assertGreater(dur, plain_dur, path.name)
+                self.assertLess(dur - plain_dur, 4.5, f"{path.name}: CTA cok uzun")
+                longest = max(longest, dur)
+        self.assertLess(longest, 57.0, "CTA'li tahmini sure QC'ye cok yakin")
 
 
 if __name__ == "__main__":
