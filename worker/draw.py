@@ -306,3 +306,69 @@ def draw_chrome(d, t, dur, badge_font):
     d.rectangle((0, 0, W, 6), fill=(20, 20, 32))
     d.rectangle((0, 0, W * p, 6), fill=VIOLET)
     draw_byte_badge(d, 72, 150, badge_font, 0.15, B_MINT)
+
+
+# ── CTA (begen / takip) ──────────────────────────────────────────────────────
+HEART = (255, 104, 132)       # tema paletinden bagimsiz: "begen" her yerde ayni kirmizimsi
+
+
+def heart(d, cx, cy, w, fill):
+    """Kalp simgesi: iki daire + ucgen. w = genislik, (cx, cy) = merkez."""
+    r = w / 4
+    d.ellipse((cx - w / 2, cy - w * 0.46, cx, cy - w * 0.46 + 2 * r), fill=fill)
+    d.ellipse((cx, cy - w * 0.46, cx + w / 2, cy - w * 0.46 + 2 * r), fill=fill)
+    d.polygon([(cx - w * 0.495, cy - w * 0.14), (cx + w * 0.495, cy - w * 0.14), (cx, cy + w * 0.46)],
+              fill=fill)
+
+
+def plus(d, cx, cy, w, fill, thick=None):
+    th = thick or max(3, int(w * 0.16))
+    d.rounded_rectangle((cx - w / 2, cy - th / 2, cx + w / 2, cy + th / 2), radius=th / 2, fill=fill)
+    d.rounded_rectangle((cx - th / 2, cy - w / 2, cx + th / 2, cy + w / 2), radius=th / 2, fill=fill)
+
+
+def cta_pill(d, box, kind, label, fnt, a, filled, track=4):
+    """Tek chip: simge + yazi. a = gorunurluk (0-1); filled = 'basildi' hali."""
+    x0, y0, x1, y1 = box
+    cy = (y0 + y1) / 2
+    accent = HEART if kind == "like" else VIOLET
+    d.rounded_rectangle(box, radius=(y1 - y0) / 2, fill=fade(accent if filled else (22, 22, 36), a),
+                        outline=fade(accent, a), width=3)
+    ink = fade((10, 10, 18) if filled else INK, a)
+    icon = fade((10, 10, 18) if filled else accent, a)
+    sz = (y1 - y0) * 0.40
+    ix = x0 + (y1 - y0) * 0.55
+    if kind == "like":
+        heart(d, ix, cy + 2, sz, icon)
+    else:
+        plus(d, ix, cy, sz, icon)
+    tracked(d, (ix + sz * 0.9, cy), label, fnt, ink, track=track, anchor="lm")
+
+
+def cta_row_width(d, labels, fnt, h, gap, track=4):
+    ws = []
+    for lb in labels:
+        tw = sum(d.textlength(ch, font=fnt) for ch in lb) + track * (len(lb) - 1)
+        ws.append(h * 0.55 + h * 0.40 * 0.9 + tw + h * 0.55)
+    return ws, sum(ws) + gap * (len(ws) - 1)
+
+
+def draw_cta_corner(d, t, window, text):
+    """Videonun ortasinda sessiz kucuk etiket: sol ust, BYTE rozetinin altinda (guvenli alan:
+    ust ~300px sahnelere kapali, Shorts arayuzu sag ustte). window = (bas, bit) saniye."""
+    if not window or not text:
+        return
+    t0, t1 = window
+    a = min(clamp01((t - t0) / 0.35), clamp01((t1 - t) / 0.35))
+    if a <= 0.01:
+        return
+    fnt = F_SEMI(26)
+    track = 4
+    tw = sum(d.textlength(ch, font=fnt) for ch in text) + track * (len(text) - 1)
+    h = 54
+    x0, y0 = 72, 214 + (1 - a) * 10
+    x1 = x0 + h * 0.55 + 28 + tw + h * 0.5
+    d.rounded_rectangle((x0, y0, x1, y0 + h), radius=h / 2, fill=fade((16, 16, 28), a),
+                        outline=fade(MUTE, a * 0.8), width=2)
+    heart(d, x0 + h * 0.55, y0 + h / 2 + 1, 22, fade(HEART, a))
+    tracked(d, (x0 + h * 0.55 + 22, y0 + h / 2), text, fnt, fade(INK, a), track=track, anchor="lm")

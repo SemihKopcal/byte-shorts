@@ -98,6 +98,36 @@ Bitince daily "Kuyruk bos" diye kirmizi durur (Gemini'ye dusmez); yeni parti
 zamaninda yazilmali. Kuyruk sirasi dosya adi sirasidir, bu yuzden `pNNN-`
 numarasi plandaki siradir.
 
+## Begen / takip CTA'si (`brand.json` > `cta`, `worker/cta.py`)
+
+Videolarin sonunda sakin ve kisa bir "begen, takip et" cagrisi var; hepsini hat ekler,
+senaryoya yazilmaz (`editorial/rules.py` senaryo metnindeki "subscribe / like and / follow
+us" kaliplarini hala yasaklar, yoksa iki kez soylenirdi). Dort yerde gorunur:
+
+1. **Kapanis karti + ses:** son sesli cumle ("Like it, and follow Byte for more.") ve
+   `LIKE` / `FOLLOW BYTE` chip'leri; chip'ler cumle baslayinca cikar, sirayla "basilir"
+   (dolar), BYTE sagi gosterir (Shorts'un dugmeleri sagda). Kapanista altyazi zaten kapali.
+2. **Kose etiketi:** videonun ~%42'sinde 2.6 sn sol ustte kucuk `LIKE · FOLLOW`. Kapanis
+   kartiyla ya da ilk 3 sn ile cakisacaksa hic cikmaz.
+3. **Aciklama:** platforma ozel satir (YouTube "Subscribe", Instagram/TikTok "Follow
+   @handle"); ilk paragrafin arkasina, TikTok'ta hashtag'lerden once. TikTok 300 karakteri
+   asacaksa eklenmez.
+4. **Sabitlenecek yorum:** `captions.md` ve `manifest.json > cta.pinned_comment`. YouTube API
+   yorum sabitlemeye izin vermiyor: yayindan sonra elle yaz, uc nokta > Sabitle.
+
+**Hangi videoda?** Karar yalniz senaryoya ve depodaki dosyalara bagli (id, seri `G`, son
+beat `close`, `brand.json`, `content/experiments.json`); zamana ya da `built.json`'a
+bagli degil. `publish.yml` bazi akislarda videoyu yeniden uretiyor ve iki render birebir
+ayni cikmali. A/B deneyindeki videolar da CTA'li: iki kola da ayni +~3 sn eklenir ve
+deneyin ana olcutu `stayed` (ilk saniyelerde kaydirmama) videonun sonundan etkilenmez.
+Kol uzunluklari buna gore ~28 sn / ~39 sn olur. Deney videolarini CTA'siz tutmak
+istersen `skip_experiment_scripts: true` yap. Kapatmak icin `"enabled": false`; metinler ve
+zamanlama ayni blokta. Uyari: sesli cumlede "Byte" yaz (Piper "BYTE"i harf harf okur).
+CTA'li video ~3 sn uzar; `editorial.authored` kapisi 52 sn'de durur, QC 59 sn'de.
+
+**Video sonu:** video, son kelimeden 0,45 sn sonra biter (`worker/synth.py` `END_PAD`);
+eskiden 0,18 sn once bitiyor ve son kelimenin sonu kesiliyordu.
+
 ## Konu bicimleri: bilgi + ilgi
 
 Kanal sadece olcum yapmiyor; dort bicim donuyor (`editorial/roles.py`):
@@ -205,8 +235,54 @@ ci/          .github/workflows'un kopyasi (asagiya bak)
 python -m unittest discover -s tests -v
 ```
 
-Ag yok, Gemini yok, secret yok; saniyenin altinda biter. `check.yml` her
+Ag yok, Gemini yok, secret yok; birkac saniyede biter. `check.yml` her
 push'ta calistiriyor ve workflow YAML'larini da dogruluyor.
+
+## Canliya alma akisi (CI/CD)
+
+Hicbir sey `main`'e dogrudan gitmesin; once PR'da kontrol edilir. `main`'e girdigi
+an GitHub tarafindaki workflow'lar (`daily`, `panel-publish` ...) canli olur. Panel
+SUNUCUSU ise ayrica, elle guncellenir (adim 4).
+
+1. **Dal ac, push'la, PR ac:** `git switch -c ozellik && git push -u origin ozellik`
+2. **PR'daki kontroller** (hepsi yesil olmadan birlestirme):
+
+   | Kontrol | Ne bakar |
+   |---|---|
+   | `check / test` | birim testleri, senaryo kapisi, workflow YAML, shellcheck, **secret taramasi** |
+   | `check / panel` | panelin kendi testleri |
+   | `check / docker` | panel imaji derlenir, aga cikissiz/salt okunur/yetkisiz konteynerde acilir, compose dosyasi dogrulanir |
+   | `render-smoke` | `worker/`, `requirements.txt` ya da workflow degisince **gercek bir video** uretilir (ses + kareler + ffmpeg + QC). PR'dan mp4 artifact'ini indirip izleyebilirsin |
+
+3. **Birlestir** (Squash and merge). Workflow degisiklikleri hemen canli olur.
+4. **`panel/` degistiyse** sunucuda: `cd /srv/www/byte/app/panel/deploy && ./update.sh`
+   (yedek alir, derler, saglik bekler, saglikli degilse kendiliginden geri alir;
+   ayrintisi `panel/deploy/README.md` bolum 11). Yalniz icerik/workflow degistiyse
+   sunucuda yapilacak bir sey YOK.
+5. **Ilk kez deneme:** Actions > daily > Run workflow, panelde videoyu izle. Panelde
+   Ayarlar > YouTube gizliligini once `private` yap, YouTube Studio'da gor, sonra `public`.
+
+**Dependabot PR'lari** (haftalik, hicbiri kendiliginden birlesmez): birer birer, `check`
+yesilken birlestir. `numpy`, `Pillow`, `piper-tts` ve Actions surum atlamalari (`checkout`,
+`cache`, `setup-python`, `upload-artifact`) videoyu/hatti etkiler: `render-smoke` yesil olmali
+ve artifact'taki mp4'u bir kez izlemelisin. `Pillow`/`numpy` PR'inda `check.yml`'deki satir ici
+surumu de ayni surume cek (test seni uyarir).
+
+**Neden `main`'e dogrudan koruma kurali koymuyoruz:** `daily` bot'u her kosu sonunda
+`main`'e dogrudan commit atiyor (defter). "Require status checks" ya da "Require pull
+request" kurali bu push'u reddeder ve uretim durur. PR disiplini gonullu.
+
+**Guvenlik duvarlari** (hepsi `tests/` ile kilitli, biri bozulursa test kirmizi olur):
+`check`/`render-smoke` secret gormez ve depoya yazamaz (fork PR'lari da guvenle calisir);
+sirli workflow'lar yalniz zamanlayici ya da elle calisir, push/PR ile asla; yalniz
+GitHub'in kendi `actions/*` action'lari kullanilir; her workflow izinlerini bildirir;
+sirlar `echo` edilmez; depoda token/anahtar bulunursa (`tools/secret_scan.py`) CI kirmizi olur;
+panel konteyneri port yayinlamaz, root degildir, salt okunurdur.
+
+**Bilinen artik risk:** `ffmpeg` ikilisi `tools/setup_runner.sh` ile BtbN'nin "latest"
+surumunden iniyor ve `daily` kosusunda calisiyor (sabitlenmis degil: o proje eski surumleri
+tutmuyor). Ele gecirilirse `daily`'nin `contents: write` yetkisi riske girer. Azaltma plani:
+render'i sirsiz/yazmasiz ayri bir job'a bolmek (bkz. `PLAN.md`).
 
 ## Lokal render
 
@@ -311,8 +387,8 @@ yaparken ikisini de guncelle ya da `cp ci/*.yml .github/workflows/`.
 
 ## brand.json
 
-Isim, handle, aciklama altbilgisi, hashtag'ler, baslik kurallari. Handle
-degisirse burasi degisiyor; kapanis kartina da buradan giriyor.
+Isim, handle, aciklama altbilgisi, hashtag'ler, baslik kurallari, begen/takip CTA'si
+(`cta`, yukaridaki bolum). Handle degisirse burasi degisiyor; kapanis kartina da buradan giriyor.
 
 ## Panel (byte.semihkopcal.com)
 
@@ -320,3 +396,8 @@ Videoları görmek, onaylamak, takvime koymak ve servislerin sağlığını izle
 panel var. Kod `panel/`, kurulum ve işletme rehberi `panel/deploy/README.md`. Video üretimi
 yine GitHub Actions'ta; `PANEL_MODE=on` değişkeniyle `daily` videoyu yayınlamak yerine R2'ye
 koyar, yayını panel `panel-publish` workflow'uyla yönetir.
+
+**Takvim:** panelde ay ızgarası (Türkiye saati) hangi videonun ne zaman yayınlanacağını,
+geçmiş/tahmini üretimleri, A/B deney kollarını ve kuyruğun kaç güne yettiğini gösterir.
+Güne tıklayıp video+saat seçerek ya da yayını başka güne sürükleyerek planlanır; ayrıca
+otomatik doldurma ve haftalık saat şablonu var. Ayrıntı: `panel/deploy/README.md` §10.

@@ -28,6 +28,8 @@ MAX_BEAT_WORDS = 16
 MAX_HOOK_WORDS = 12
 
 # Kanalin sesine yakismayan kaliplar: harekete cagri, soru, abartı, tavsiye.
+# Begen/abone CTA'sini senaryo yazmaz: hat ekler (worker/cta.py, brand.json "cta"); senaryoda
+# yazilirsa iki kez soylenir, o yuzden hala yasak.
 BANNED = [
     r"\bsubscribe\b", r"\blike and\b", r"\bfollow (me|us|for)\b",
     r"\blink in\b", r"\bcomment below\b", r"\bdon'?t forget\b",

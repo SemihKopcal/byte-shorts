@@ -44,8 +44,11 @@ def stages(spec, S, duration):
         t0 = S[ids[0]][0]
         t1 = duration if i == len(groups) - 1 else S[ids[-1]][1] + 0.30
 
-        def fn(d, t, S_, spec_, _f=CATALOG[name], _d=data, _a=t0, _b=t1):
-            _f(d, t, _a, _b, _d)
+        def fn(d, t, S_, spec_, _f=CATALOG[name], _d=data, _a=t0, _b=t1, _n=name):
+            dd = _d
+            if _n == "close" and "cta" in S_ and isinstance(_d.get("cta"), dict):
+                dd = {**_d, "cta_t0": S_["cta"][0]}     # CTA cumlesi baslayinca chip'ler cikar
+            _f(d, t, _a, _b, dd)
 
         out.append((t0, t1, fn))
     return out

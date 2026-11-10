@@ -1,0 +1,66 @@
+{% extends "base.html" %}{% import "_m.html" as m %}
+{% block body %}
+<div class="calbar">
+<h1>{{ d.title }}{% if d.today %} · bugun{% endif %}</h1>
+<div class="calnav">
+<a class="btn" href="/calendar?m={{ d.month }}">&larr; Ay</a>
+<a class="btn" href="/calendar?d={{ d.prev }}">&lsaquo; Onceki</a><a class="btn" href="/calendar?d={{ d.next }}">Sonraki &rsaquo;</a>
+</div>
+</div>
+<p class="mut small">Saatler Turkiye saati.</p>
+
+<h2>Yayinlar</h2>
+<div class="card">
+{% set ns = namespace(n=0) %}
+{% for e in d.events if e.kind == 'pub' %}{% set ns.n = ns.n + 1 %}
+<div class="evrow">
+<span class="tm">{{ e.hhmm }}</span><span class="pfdot pf-{{ e.platform }}">{{ e.platform }}</span>
+<span class="grow"><a href="/videos/{{ e.script_id }}">{{ e.title }}</a>{% if e.arm %} <i class="arm arm-{{ e.arm_n }}" title="{{ e.arm_name }}">{{ e.arm }}</i>{% endif %}
+{% if e.error %}<div class="small mut">{{ e.error }}</div>{% endif %}</span>
+{{ m.badge(e.status) }}
+{% if e.status == 'planned' %}
+{{ m.post('/pubs/' ~ e.id ~ '/now', 'Simdi', csrf, 'Hemen yayinlansin mi?', fields={'d': d.iso}) }}
+{{ m.post('/pubs/' ~ e.id ~ '/cancel', 'Iptal', csrf, 'Bu yayin iptal edilsin mi?', cls='dng', fields={'d': d.iso}) }}
+<form class="inline" method="post" action="/pubs/{{ e.id }}/reschedule"><input type="hidden" name="csrf" value="{{ csrf }}"><input type="hidden" name="d" value="{{ d.iso }}">
+<input name="when" size="16" value="{{ d.iso }} {{ e.hhmm }}" aria-label="Yeni zaman (Turkiye saati)"><button type="submit">Tasi</button></form>
+{% elif e.status == 'failed' %}
+{{ m.post('/pubs/' ~ e.id ~ '/retry', 'Yeniden dene', csrf, 'Platformda zaten var mi diye baktin mi? Ayni video iki kez yuklenebilir.', fields={'d': d.iso}) }}
+{% elif e.status == 'published' and e.remote_url.startswith('https://') %}<a href="{{ e.remote_url }}" rel="noopener noreferrer" target="_blank">ac</a>
+{% endif %}
+</div>
+{% endfor %}
+{% if ns.n == 0 %}<span class="mut">Bu gun icin yayin yok.</span>{% endif %}
+</div>
+
+<h2>Uretim</h2>
+<div class="card">
+{% set ns2 = namespace(n=0) %}
+{% for e in d.events if e.kind != 'pub' %}{% set ns2.n = ns2.n + 1 %}
+<div class="evrow"><span class="tm">{{ e.hhmm }}</span>
+<span class="grow">{% if e.kind == 'made' %}uretildi · <a href="/videos/{{ e.script_id }}">{{ e.title }}</a> {{ m.badge(e.approval) }}{% else %}tahmini uretim · {{ e.title }}{% endif %}
+{% if e.arm %} <i class="arm arm-{{ e.arm_n }}" title="{{ e.arm_name }}">{{ e.arm }}</i>{% endif %}</span></div>
+{% endfor %}
+{% if ns2.n == 0 %}<span class="mut">Bu gun uretim yok.</span>{% endif %}
+{% if extras.error %}<div class="small mut">Kuyruk bilgisi alinamadi ({{ extras.error }}).</div>{% endif %}
+</div>
+
+<h2>Plana ekle</h2>
+<div class="card">
+{% if d.past %}<span class="mut">Gecmis bir gune yayin eklenemez.</span>
+{% elif d.options %}
+<form method="post" action="/calendar/plan" class="row">
+<input type="hidden" name="csrf" value="{{ csrf }}"><input type="hidden" name="d" value="{{ d.iso }}">
+<select name="choice" aria-label="Video ve platform">{% for o in d.options %}<option value="{{ o.value }}">{{ o.label }}</option>{% endfor %}</select>
+<input name="time" size="6" maxlength="5" placeholder="SS:DD" list="slot-times" autocomplete="off" aria-label="Saat (Turkiye)" required>
+<datalist id="slot-times">{% for t in d.times %}<option value="{{ t }}">{% endfor %}</datalist>
+<button class="pri" type="submit">Ekle</button>
+</form>
+<p class="mut small">Yalniz onayli videolar ve Ayarlar'da acik platformlar listelenir. Ayni platformda ayni saate ikinci yayin konamaz.</p>
+{% else %}<span class="mut">Eklenebilecek onayli video yok (hepsi planli ya da onay bekliyor).</span>{% endif %}
+</div>
+
+{% if d.canceled %}
+<h2>Iptal edilenler</h2>
+<div class="card small mut">{% for e in d.canceled %}<div>{{ e.title }} · {{ e.platform }} · {{ e.scheduled_at|ts }}</div>{% endfor %}</div>
+{% endif %}
+{% endblock %}

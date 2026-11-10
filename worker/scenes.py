@@ -342,11 +342,42 @@ def close(d, t, t0, t1, data):
         col = _tone(data.get("accent", "base")) if last else D.MUTE
         d.text((MIDX, y + i * 120), ln, font=f, fill=D.fade(col, a), anchor="mt")
     h = D.appear(t, t0 + 0.9)
+    cta = data.get("cta") if isinstance(data.get("cta"), dict) else None
+    cta_t0 = data.get("cta_t0") if cta else None
+    # CTA konusulurken BYTE sagi gosterir (Shorts'un begen/abone dugmeleri sagda)
+    pose = "point_r" if cta_t0 is not None and t >= cta_t0 else "idle"
     # BYTE once, handle en altta: ikisi de 1400'un (altyazi bandi) ustunde kalmali
-    draw_byte(d, MIDX, y + 480 + D.bob(t, 4), 0.62, "idle", B_MINT, D.blink_on(t))
+    draw_byte(d, MIDX, y + 480 + D.bob(t, 4), 0.62, pose, B_MINT, D.blink_on(t))
     if h > 0.01 and data.get("handle"):
         D.tracked(d, (MIDX, y + 690), str(data["handle"]).upper(), D.F_SEMI(36),
                   D.fade(D.MUTE, h), track=8, anchor="mt")
+    if cta_t0 is not None:
+        _cta_row(d, t, cta_t0, y + 760, cta)
+
+
+def _cta_row(d, t, t0, y, cta):
+    """Begen + takip chip'leri. Ses cumlesi baslayinca belirir; sonra sirayla 'basilir'
+    (dolar): begen +0.9 sn, takip +1.6 sn. Hepsi 1430'un (altyazi bandi) ustunde."""
+    a = D.appear(t, t0)
+    if a <= 0.01:
+        return
+    h = 84
+    labels = [str(cta.get("like", "LIKE")), str(cta.get("follow", "FOLLOW"))]
+    # Etiketler brand.json'dan geliyor (en fazla 24 karakter): uzunsa yazi tipi kuculur, satir
+    # kenar bosluguna (MARGIN) tasmaz.
+    for size in (36, 32, 28, 24, 20, 18):
+        fnt = D.F_SEMI(size)
+        ws, total = D.cta_row_width(d, labels, fnt, h, 24)
+        if total <= D.W - 2 * MARGIN:
+            break
+    x = MIDX - total / 2
+    yy = y + (1 - a) * 22
+    for kind, lb, w, press in (("like", labels[0], ws[0], 0.9), ("follow", labels[1], ws[1], 1.6)):
+        scale = D.punch(t, t0 + press, 0.22, 0.07)
+        cx, cy = x + w / 2, yy + h / 2
+        box = (cx - w * scale / 2, cy - h * scale / 2, cx + w * scale / 2, cy + h * scale / 2)
+        D.cta_pill(d, box, kind, lb, fnt, a, filled=t >= t0 + press)
+        x += w + 24
 
 
 CATALOG = {

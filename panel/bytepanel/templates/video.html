@@ -5,10 +5,10 @@
 <div class="card">
 <div class="row">{{ m.badge(v.approval) }}<span class="mut small">{{ v.script_id }} · {{ '%.1f'|format(v.duration) }} sn · {{ (v.size_bytes / 1048576)|round(1) }} MB</span></div>
 {% if not v.files_deleted_at %}
-<button type="button" data-preview="/videos/{{ v.script_id }}/preview" style="margin-top:8px">Onizle</button>
+<button type="button" data-preview="/videos/{{ v.script_id }}/preview" class="mt8">Onizle</button>
 <video id="player" controls playsinline preload="none" hidden></video>
 {% else %}<p class="mut">Dosyalar 100'luk dongude silindi; kayit arsivde.</p>{% endif %}
-<div style="margin-top:8px">
+<div class="mt8">
 {% if v.approval == 'pending' %}
 {{ m.post('/videos/' ~ v.script_id ~ '/approve', 'Onayla', csrf, cls='pri') }}
 {{ m.post('/videos/' ~ v.script_id ~ '/reject', 'Reddet', csrf, 'Bu video reddedilsin mi?', cls='dng') }}

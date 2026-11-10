@@ -1,6 +1,7 @@
 name: audit
 
-# Haftada bir: sabitlenmis bagimliliklarda bilinen guvenlik acigi var mi.
+# Haftada bir: (1) sabitlenmis bagimliliklarda bilinen guvenlik acigi var mi,
+# (2) TUM commit gecmisinde sir (token/anahtar) var mi.
 # Acik varsa kosu KIRMIZI olur; kimse bakmasa da GitHub sana bildirir.
 on:
   schedule:
@@ -34,3 +35,15 @@ jobs:
           python-version: "3.11"
       - run: pip install pip-audit
       - run: pip-audit --no-deps --disable-pip -r requirements.txt -r requirements-publish.txt
+
+  # Depo PUBLIC: bir commit'e girmis sir silinse bile gecmiste kalir. Gecmisin tamami
+  # (fetch-depth: 0) taranir; bulunan degerler gunluge YAZILMAZ, yalniz dosya@commit ve tur.
+  secrets:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - run: python3 tools/secret_scan.py --history

@@ -10,6 +10,10 @@ on:
     - cron: "17 6 * * 1"
   workflow_dispatch:
 
+# Secret'i GITHUB_TOKEN degil GH_PAT yazar; bu workflow'un depoya yazma izni YOK.
+permissions:
+  contents: read
+
 concurrency:
   group: tokens
   cancel-in-progress: false

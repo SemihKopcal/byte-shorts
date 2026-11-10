@@ -29,7 +29,7 @@ GitHub Actions "panel-publish" ◄──workflow_dispatch── PANEL           
 |---|---|
 | Panel (ana sayfa) | Onay bekleyenler, yaklaşan yayınlar, **otomasyon** (onaysız yayın) anahtarı, **Duraklat** (acil durdurma) |
 | Videolar | Tüm videolar, önizleme, onayla/reddet/onayı geri al, platform bazında durum |
-| Takvim | Yaklaşan yayınlar: saati değiştir (Taşı), **Şimdi** yayınla, İptal, Yeniden dene |
+| Takvim | **Ay ızgarası** (Türkiye saati): hangi video hangi gün/saatte yayınlanacak, geçmiş üretimler ve **sıradaki üretim tahmini**, A/B deney kolları (K/S renkli kenar), kuyruk kaç güne yeter. Güne tıkla → o günün sayfası. Yayını başka güne **sürükle**. **Liste** düğmesi eski tabloyu açar |
 | Ayarlar | Platformları aç/kapat, YouTube gizliliği, yayın saatleri (UTC), saklanacak video sayısı (varsayılan 100) |
 | Servisler | "Her şey yolunda mı?" sayfası: R2, GitHub, son üretim ve yayın koşuları, senaryo kuyruğu, platform durumu |
 | Kayıt | Kim ne zaman ne yaptı (denetim kaydı) |
@@ -201,6 +201,13 @@ curl -sI https://byte.semihkopcal.com | head -5      # 302 ve cloudflareaccess.c
 - **Otomasyon anahtarı** (Panel sayfasında; "Kapalı: aç" / "AÇIK: kapat"): açıksa yeni videolar onaysız onaylanmış sayılır ve takvime girer. Kapatınca yine onayına düşer. Zaten onaylanmışlar etkilenmez.
 - **Duraklat** (Panel sayfasında): tek tuşla hiçbir yeni yayın gönderilmez. Takvimdekiler bekler, silinmez.
 - **Yayın saatleri** UTC'dir (Türkiye saati − 3). Varsayılan `01:15,07:15,13:15,19:15` = TR 04:15, 10:15, 16:15, 22:15. Günde 2 video için (üretim 04:15 ve 16:15 UTC) Ayarlar > Yayın saatleri'ni **`07:15,19:15`** yap (TR 10:15 ve 22:15).
+- **Takvimde planlama** (hepsi Türkiye saatiyle):
+  - **Güne tıkla → video seç → saat gir → Ekle:** onaylı bir videoyu (açık platformlar için) istediğin saate koyar. Aynı platformda aynı dakikaya ikinci yayın konamaz; geçmişe ve 400 günden uzağa yayın konamaz.
+  - **Sürükle-bırak:** planlı (henüz gönderilmemiş) yayını başka güne bırak; saati aynı kalır. Geçmiş günler bırakma hedefi değildir. Telefonda sürükleme çalışmazsa gün sayfasındaki **Taşı** kutusu aynı işi yapar.
+  - **Planlama araçları > Otomatik doldur:** onaylı ama takvimde hiç yeri olmayan videoları (örn. sonradan açtığın bir platform için) boş saatlere eskiden yeniye dizer. İptal ettiğin ya da başarısız olanlara dokunmaz; tek seferde en fazla 60 yayın.
+  - **Haftalık şablon:** her gün için ayrı saatler (örn. hafta içi `10:15, 22:15`, hafta sonu `12:00`). Tanımlıysa yeni onaylanan her video şablonun ilk boş saatine girer; yoksa Ayarlar'daki UTC saatleri her gün geçerlidir. Şablonu kapatınca eskisine dönülür.
+  - **Üretim saatleri** (Ayarlar, varsayılan `04:15,16:15` UTC): yalnız takvimdeki "sıradaki üretim" tahmini içindir; `daily.yml`'deki cron'u değiştirirsen burayı da değiştir.
+  - Kuyruk bilgisi GitHub'dan okunur (5 dk önbellek). GitHub'a ulaşılamazsa takvim yine açılır, yalnız kuyruk ve A/B renkleri görünmez.
 - **Saatlik üst sınır:** saatte en fazla 12 yayın emri gönderilir (`PANEL_MAX_DISPATCH_PER_HOUR`).
 - **Bir yayın "başarısız" olursa:** Takvim'de sebebi yazar. **Yeniden dene** elle yapılır; panel kendiliğinden tekrar denemez. Önce platformda video var mı diye bak. Zaten yayınlanmış bir videoyu iki kez yüklememek için yayın workflow'u R2'deki `ledger/` kaydına bakar.
 
@@ -215,11 +222,29 @@ curl -sI https://byte.semihkopcal.com | head -5      # 302 ve cloudflareaccess.c
 Son 14 yedek konteynerin `/data/backups` klasöründe (`panel-data` volume'u) tutulur. Haftada bir sunucudan çıkar: önce
 `docker compose cp panel:/data/backups /srv/www/byte/backups/yedek-$(date +%F)` ile `/srv/www/byte/backups` altına al, sonra o klasörü sunucunun **dışına** (kendi bilgisayarına ya da başka bir depolamaya) taşı; aynı sunucudaki kopya sunucuyla birlikte kaybolur. Panel kaybolsa bile videolar R2'de, yayınlar platformlarda durur; kayıt kaybı yalnız onay geçmişini ve takvimi etkiler.
 
-**Güncelleme:**
+**Güncelleme:** `main`'e giren değişiklikleri sunucuya güvenle almak için:
 
 ```bash
-cd /srv/www/byte/app && git pull --ff-only && cd panel/deploy && docker compose up -d --build
+cd /srv/www/byte/app/panel/deploy && ./update.sh        # ne değişeceğini gösterir, onay sorar
 ```
+
+Script sırayla şunları yapar, biri bozulursa durur: yerel değişiklik / yanlış dal / force-push
+varsa **reddeder**; `panel/` değişmediyse yeniden derlemez (yalnız kodu ilerletir); çalışan
+panelin veritabanı yedeğini alır; çalışan imajı `byte-panel:prev` olarak saklar; derler,
+başlatır ve konteynerin **sağlıklı** olmasını bekler (en çok 90 sn); sağlıklı olmazsa
+**kendiliğinden geri alır** (eski commit + eski imaj). Derleme hata verirse çalışan panele
+hiç dokunmaz. Yapılandırma: `BYTE_PULL=1 ./update.sh` taban imajı da çeker (ayda bir
+güvenlik yamaları için), `-y` onay sormaz. Sırlara (`.env`, `secrets/`) dokunmaz.
+
+Geri alma kodu ve imajı döndürür, **veritabanını döndürmez**. Panel şeması yalnız `CREATE TABLE
+IF NOT EXISTS` ile eklemeli büyüyor; bir sürüm şemayı bozucu biçimde değiştirirse geri
+almadan sonra yedeği (`/data/backups`) elle geri yükle. Elle eski yöntem de çalışır:
+`git pull --ff-only && docker compose up -d --build` (yedek ve geri alma YOK).
+
+**Kendiliğinden güncellenme yok (bilerek):** sunucuya dışarıdan bağlantı yolu olmadığı için
+GitHub oraya "deploy" edemez; ve yayın kararını veren panelin kodu gözetimsiz değişmesin.
+İstersen güvenilir bir zamanlayıcıyla `./update.sh -y` çalıştırabilirsin, ama öneri: PR'ı
+birleştirdikten sonra sen çalıştır.
 
 Dependabot haftalık PR açar (hiçbiri kendiliğinden birleşmez); `audit` workflow'u her pazartesi bilinen güvenlik açıklarına bakar ve açık varsa kırmızı yanar.
 

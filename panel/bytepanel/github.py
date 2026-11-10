@@ -14,6 +14,9 @@ import re
 
 import httpx
 
+from . import plan
+from .config import SLUG
+
 
 class GitHubError(RuntimeError):
     pass
@@ -70,21 +73,60 @@ class GitHub:
         return {"status": x.get("status"), "conclusion": x.get("conclusion"),
                 "created_at": x.get("created_at"), "url": x.get("html_url", "")}
 
-    def queue_left(self) -> dict:
-        """Kuyrukta (p001-...) islenmemis senaryo sayisi. Tahmin: dosya adi = id."""
+    def _content_json(self, name: str):
+        """content/<name> icindeki JSON; yok/bozuksa None (cagiran 'bos' sayar)."""
+        try:
+            raw = self._get(f"/repos/{self.repo}/contents/content/{name}",
+                            params={"ref": self.ref},
+                            headers={"Accept": "application/vnd.github.raw+json"}).text
+            return json.loads(raw or "null")
+        except (GitHubError, ValueError):
+            return None
+
+    def _scripts_and_done(self) -> tuple[set[str], set[str]]:
         listing = self._get(f"/repos/{self.repo}/contents/content/scripts",
                             params={"ref": self.ref}).json()
         ids = {m.group(1) for it in listing
                if (m := QUEUE_FILE.match(str(it.get("name", ""))))}
         done: set[str] = set()
         for name in ("built.json", "published.json"):
-            try:
-                raw = self._get(f"/repos/{self.repo}/contents/content/{name}",
-                                params={"ref": self.ref},
-                                headers={"Accept": "application/vnd.github.raw+json"}).text
-                data = json.loads(raw or "[]")
-            except (GitHubError, ValueError):
-                continue
-            for x in data:
-                done.add(x if isinstance(x, str) else str(x.get("id", "")))
+            data = self._content_json(name)
+            for x in data if isinstance(data, list) else []:
+                done.add(x if isinstance(x, str) else str(x.get("id", "")) if isinstance(x, dict) else "")
+        return ids, done
+
+    def queue_left(self) -> dict:
+        """Kuyrukta (p001-...) islenmemis senaryo sayisi. Tahmin: dosya adi = id."""
+        ids, done = self._scripts_and_done()
         return {"total": len(ids), "left": len(ids - done)}
+
+    def queue_info(self) -> dict:
+        """Siradaki senaryolar, tools/pick_script.py ile AYNI sirayla (content/order.json once)."""
+        ids, done = self._scripts_and_done()
+        order = self._content_json("order.json")
+        order = [x for x in order if isinstance(x, str)] if isinstance(order, list) else []
+        return {"total": len(ids), "queue": plan.compute_queue(ids, done, order)}
+
+    def experiments(self) -> dict:
+        """content/experiments.json -> {arm_info: {script_id: {name,label,n,exp}}, legend: [...]}.
+        Gelen veri dogrulanir: kol adi kisa/guvenli, id'ler SLUG, sayilar sinirli."""
+        data = self._content_json("experiments.json")
+        arm_info: dict[str, dict] = {}
+        legend: list[dict] = []
+        if not isinstance(data, dict):
+            return {"arm_info": arm_info, "legend": legend}
+        for ename, e in list(data.items())[:10]:
+            if not isinstance(e, dict) or not isinstance(e.get("arms"), dict):
+                continue
+            ename = re.sub(r"[^A-Za-z0-9_-]", "", str(ename))[:40]
+            arms = []
+            for n, (aname, ids) in enumerate(list(e["arms"].items())[:4], start=1):
+                aname = re.sub(r"[^A-Za-z0-9_-]", "", str(aname))[:20] or f"arm{n}"
+                label = plan.arm_label(aname)
+                arms.append({"name": aname, "label": label, "n": n})
+                for sid in (ids if isinstance(ids, list) else [])[:300]:
+                    if isinstance(sid, str) and SLUG.match(sid):
+                        arm_info.setdefault(sid, {"name": aname, "label": label, "n": n, "exp": ename})
+            title = re.sub(r"[\x00-\x1f\x7f]", " ", str(e.get("title", ename)))[:120].strip()
+            legend.append({"name": ename, "title": title or ename, "arms": arms})
+        return {"arm_info": arm_info, "legend": legend}

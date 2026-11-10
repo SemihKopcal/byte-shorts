@@ -17,6 +17,7 @@ from functools import lru_cache
 from pathlib import Path
 
 GAP = 0.18           # beat'ler arasi nefes payi (sn)
+END_PAD = 0.45       # son kelimeden sonra video + ses bu kadar sessiz surer (son kelime kesilmesin)
 SR = 22050
 MAX_SECONDS = 59     # Shorts tavani degil, bizim QC esigimiz
 
@@ -159,13 +160,16 @@ def synthesize(spec: dict, out_dir: Path, voice: Path) -> dict:
     concat.write_text("\n".join(lines))
     _run(["ffmpeg", "-y", "-f", "concat", "-safe", "0", "-i", str(concat),
           "-c", "copy", str(out_dir / "voice_raw.wav")])
+    # Video, SON KELIMEDEN END_PAD sonra biter. (Eskiden t - GAP'ti: son beat'ten sonra bosluk 0
+    # oldugu icin video sesten 0.18 sn ONCE bitiyor, son kelimenin sonu kesiliyordu.)
+    duration = round(timeline[-1]["end"] + END_PAD, 3)
     # -14 LUFS: Shorts'un fiili standardi. Bu adimin yoklugu amator isi
-    # amator yapan seylerin basinda geliyor.
+    # amator yapan seylerin basinda geliyor. apad: ses dosyasi videoyla ayni uzunlukta bitsin
+    # (-shortest ile kesilmesin).
     _run(["ffmpeg", "-y", "-i", str(out_dir / "voice_raw.wav"),
-          "-af", "highpass=f=80,loudnorm=I=-14:TP=-1.5:LRA=11",
+          "-af", f"highpass=f=80,loudnorm=I=-14:TP=-1.5:LRA=11,apad=whole_dur={duration}",
           "-ar", "48000", "-ac", "2", str(out_dir / "voice.wav")])
 
-    duration = round(t - GAP, 3)
     tl = {"duration": duration, "beats": timeline}
     (out_dir / "timeline.json").write_text(json.dumps(tl, indent=1))
     return tl

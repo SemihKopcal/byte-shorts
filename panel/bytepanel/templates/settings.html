@@ -2,27 +2,33 @@
 {% block body %}
 <h1>Ayarlar</h1>
 <div class="card">
-<h2 style="margin-top:0">Platformlar</h2>
+<h2 class="mt0">Platformlar</h2>
 <p class="mut small">Yalniz YENI onaylanan videolar icin gecerli. Eski videolari bir platforma eklemek icin video sayfasindan "Planla".</p>
 {% for p in platforms %}
-<div class="toggle" style="padding:4px 0"><span>{{ p }}</span>
+<div class="toggle py4"><span>{{ p }}</span>
 {% if settings['platform_' ~ p] == '1' %}{{ m.post('/settings', 'ACIK: kapat', csrf, cls='pri', fields={'key':'platform_' ~ p,'value':'0'}) }}
 {% else %}{{ m.post('/settings', 'Kapali: ac', csrf, fields={'key':'platform_' ~ p,'value':'1'}) }}{% endif %}</div>
 {% endfor %}
 </div>
 <div class="card">
-<h2 style="margin-top:0">YouTube gizliligi</h2>
+<h2 class="mt0">YouTube gizliligi</h2>
 <form method="post" action="/settings" class="row"><input type="hidden" name="csrf" value="{{ csrf }}"><input type="hidden" name="key" value="youtube_privacy">
 <select name="value">{% for o in ['public','unlisted','private'] %}<option{% if settings.youtube_privacy == o %} selected{% endif %}>{{ o }}</option>{% endfor %}</select><button type="submit">Kaydet</button></form>
 </div>
 <div class="card">
-<h2 style="margin-top:0">Yayin saatleri (UTC)</h2>
-<p class="mut small">Virgulle ayir. Her yeni video siradaki bos saate girer. Turkiye = UTC+3.</p>
+<h2 class="mt0">Yayin saatleri (UTC)</h2>
+<p class="mut small">Virgulle ayir. Her yeni video siradaki bos saate girer. Turkiye = UTC+3. Takvimde <a href="/calendar">haftalik sablon</a> (Turkiye saati, gune gore) tanimlarsan o gecerli olur; bu saatler yalniz sablon yokken kullanilir. Sablon su an: {% if settings.week_tr %}<b>acik</b>{% else %}yok{% endif %}.</p>
 <form method="post" action="/settings" class="row"><input type="hidden" name="csrf" value="{{ csrf }}"><input type="hidden" name="key" value="slots_utc">
 <input name="value" value="{{ settings.slots_utc }}" size="32"><button type="submit">Kaydet</button></form>
 </div>
 <div class="card">
-<h2 style="margin-top:0">Depo dongusu</h2>
+<h2 class="mt0">Uretim saatleri (UTC)</h2>
+<p class="mut small">Gunluk uretim (daily) hattinin GitHub cron saatleri. Yalniz takvimde "siradaki uretim" tahmini icin; degistirmek workflow'u degistirmez. Su an <code>04:15,16:15</code> (Turkiye 07:15 ve 19:15).</p>
+<form method="post" action="/settings" class="row"><input type="hidden" name="csrf" value="{{ csrf }}"><input type="hidden" name="key" value="runs_utc">
+<input name="value" value="{{ settings.runs_utc }}" size="32"><button type="submit">Kaydet</button></form>
+</div>
+<div class="card">
+<h2 class="mt0">Depo dongusu</h2>
 <p class="mut small">R2'de en yeni kadar video dosyasi tutulur; fazlasi (yalniz yayinlanmis ya da reddedilmis olanlar) silinir, kayit arsivde kalir. YouTube/Instagram'daki yayinlara dokunulmaz.</p>
 <form method="post" action="/settings" class="row"><input type="hidden" name="csrf" value="{{ csrf }}"><input type="hidden" name="key" value="retention_count">
 <input name="value" value="{{ settings.retention_count }}" size="6" inputmode="numeric"><button type="submit">Kaydet</button></form>

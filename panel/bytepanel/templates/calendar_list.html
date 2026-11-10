@@ -1,0 +1,28 @@
+{% extends "base.html" %}{% import "_m.html" as m %}
+{% block body %}
+<div class="calbar"><h1>Takvim · liste</h1><div class="calnav"><a class="btn" href="/calendar">Ay gorunumu</a></div></div>
+<p class="mut small">Saatler UTC; yaninda Turkiye saati. "Tasi" kutusuna Turkiye saati yaz (YYYY-AA-GG SS:DD).</p>
+<div class="card tbl">
+{% if upcoming %}<table><tr><th>Video</th><th>Platform</th><th>Zaman</th><th>Islem</th></tr>
+{% for p in upcoming %}<tr>
+<td><a href="/videos/{{ p.script_id }}">{{ p.title }}</a></td><td>{{ p.platform }}</td>
+<td>{{ p.scheduled_at|ts }}<div>{{ m.badge(p.status) }}</div></td>
+<td>{% if p.status == 'planned' %}
+{{ m.post('/pubs/' ~ p.id ~ '/now', 'Simdi', csrf, 'Hemen yayinlansin mi?', fields={'view':'list'}) }}
+{{ m.post('/pubs/' ~ p.id ~ '/cancel', 'Iptal', csrf, 'Bu yayin iptal edilsin mi?', cls='dng', fields={'view':'list'}) }}
+<form class="inline" method="post" action="/pubs/{{ p.id }}/reschedule"><input type="hidden" name="csrf" value="{{ csrf }}"><input type="hidden" name="view" value="list">
+<input name="when" size="16" placeholder="2026-11-09 11:15" value="{{ p.scheduled_at|trin }}"><button type="submit">Tasi</button></form>
+{% else %}<span class="mut small">gonderildi, sonuc bekleniyor</span>{% endif %}</td>
+</tr>{% endfor %}</table>
+{% else %}<span class="mut">Planli yayin yok.</span>{% endif %}
+</div>
+<h2>Gecmis</h2>
+<div class="card tbl">
+{% if recent %}<table><tr><th>Video</th><th>Platform</th><th>Sonuc</th><th></th></tr>
+{% for p in recent %}<tr><td><a href="/videos/{{ p.script_id }}">{{ p.title }}</a></td><td>{{ p.platform }}</td>
+<td>{{ m.badge(p.status) }} <span class="small mut">{{ p.finished_at|ts }}</span>{% if p.error %}<div class="small mut">{{ p.error }}</div>{% endif %}</td>
+<td>{% if p.remote_url %}<a href="{{ p.remote_url }}" rel="noopener noreferrer" target="_blank">ac</a>{% endif %}
+{% if p.status == 'failed' %}{{ m.post('/pubs/' ~ p.id ~ '/retry', 'Yeniden dene', csrf, 'Platformda zaten var mi diye baktin mi? Ayni video iki kez yuklenebilir.', fields={'view':'list'}) }}{% endif %}</td></tr>{% endfor %}</table>
+{% else %}<span class="mut">Kayit yok.</span>{% endif %}
+</div>
+{% endblock %}

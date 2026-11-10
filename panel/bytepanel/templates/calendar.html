@@ -1,28 +1,68 @@
 {% extends "base.html" %}{% import "_m.html" as m %}
+{% macro chip(e, day) -%}
+{%- if e.kind == 'pub' -%}
+<a class="chip pub pf-{{ e.platform }} st-{{ e.status }}{% if e.arm_n %} arm-{{ e.arm_n }}{% endif %}" href="/calendar?d={{ day }}" title="{{ e.title }} · {{ e.platform }} · {{ e.hhmm }} · {{ e.status }}"{% if e.draggable %} draggable="true" data-pub="{{ e.id }}"{% endif %}><span class="t">{{ e.hhmm }}</span><span class="ttl">{{ e.title }}</span>{% if e.arm %}<i class="ab arm-{{ e.arm_n }}">{{ e.arm }}</i>{% endif %}</a>
+{%- elif e.kind == 'made' -%}
+<span class="chip made{% if e.arm_n %} arm-{{ e.arm_n }}{% endif %}" title="uretildi: {{ e.title }} ({{ e.hhmm }}, {{ e.approval }})"><span class="t">{{ e.hhmm }}</span><span class="ttl">uretildi · {{ e.title }}</span></span>
+{%- else -%}
+<span class="chip run{% if e.empty %} empty{% endif %}{% if e.arm_n %} arm-{{ e.arm_n }}{% endif %}" title="tahmini uretim: {{ e.title }} ({{ e.hhmm }})"><span class="t">{{ e.hhmm }}</span><span class="ttl">{{ 'uretim · ' ~ e.title }}</span>{% if e.arm %}<i class="ab arm-{{ e.arm_n }}">{{ e.arm }}</i>{% endif %}</span>
+{%- endif -%}
+{%- endmacro %}
 {% block body %}
+<div class="calbar">
 <h1>Takvim</h1>
-<p class="mut small">Saatler UTC; yaninda Turkiye saati. Zaman girerken UTC kullan (YYYY-AA-GG SS:DD).</p>
-<div class="card tbl">
-{% if upcoming %}<table><tr><th>Video</th><th>Platform</th><th>Zaman</th><th>Islem</th></tr>
-{% for p in upcoming %}<tr>
-<td><a href="/videos/{{ p.script_id }}">{{ p.title }}</a></td><td>{{ p.platform }}</td>
-<td>{{ p.scheduled_at|ts }}<div>{{ m.badge(p.status) }}</div></td>
-<td>{% if p.status == 'planned' %}
-{{ m.post('/pubs/' ~ p.id ~ '/now', 'Simdi', csrf, 'Hemen yayinlansin mi?') }}
-{{ m.post('/pubs/' ~ p.id ~ '/cancel', 'Iptal', csrf, 'Bu yayin iptal edilsin mi?', cls='dng') }}
-<form class="inline" method="post" action="/pubs/{{ p.id }}/reschedule"><input type="hidden" name="csrf" value="{{ csrf }}">
-<input name="when" size="16" placeholder="2026-11-09 08:15" value="{{ p.scheduled_at[:10] }} {{ p.scheduled_at[11:16] }}"><button type="submit">Tasi</button></form>
-{% else %}<span class="mut small">gonderildi, sonuc bekleniyor</span>{% endif %}</td>
-</tr>{% endfor %}</table>
-{% else %}<span class="mut">Planli yayin yok.</span>{% endif %}
+<div class="calnav">
+<a class="btn" href="/calendar?m={{ mm.prev }}" aria-label="Onceki ay">&larr;</a><b>{{ mm.title }}</b><a class="btn" href="/calendar?m={{ mm.next }}" aria-label="Sonraki ay">&rarr;</a>
+<a class="btn" href="/calendar">Bugun</a><a class="btn" href="/calendar?view=list">Liste</a>
 </div>
-<h2>Gecmis</h2>
-<div class="card tbl">
-{% if recent %}<table><tr><th>Video</th><th>Platform</th><th>Sonuc</th><th></th></tr>
-{% for p in recent %}<tr><td><a href="/videos/{{ p.script_id }}">{{ p.title }}</a></td><td>{{ p.platform }}</td>
-<td>{{ m.badge(p.status) }} <span class="small mut">{{ p.finished_at|ts }}</span>{% if p.error %}<div class="small mut">{{ p.error }}</div>{% endif %}</td>
-<td>{% if p.remote_url %}<a href="{{ p.remote_url }}" rel="noopener noreferrer" target="_blank">ac</a>{% endif %}
-{% if p.status == 'failed' %}{{ m.post('/pubs/' ~ p.id ~ '/retry', 'Yeniden dene', csrf, 'Platformda zaten var mi diye baktin mi? Ayni video iki kez yuklenebilir.') }}{% endif %}</td></tr>{% endfor %}</table>
-{% else %}<span class="mut">Kayit yok.</span>{% endif %}
 </div>
+
+<div class="card qstrip{% if qs.warn %} warn{% endif %}">
+{% if qs.known %}
+<b>Kuyruk: {{ qs.left }} senaryo</b> · gunde {{ qs.per_day }} uretim ≈ <b>{{ qs.days }} gun</b>{% if qs.last_run %} · son uretim {{ qs.last_run }} (TR){% endif %}
+<progress class="q" max="{{ extras.total or 1 }}" value="{{ qs.left }}"></progress>
+{% if qs.next_id %}<div class="small mut">Siradaki uretim: {{ qs.next_run }} (TR) · {{ qs.next_id }}</div>{% endif %}
+{% if qs.warn %}<div class="small">Kuyruk yakinda bitiyor: yeni senaryo grubu gerekli.</div>{% endif %}
+{% else %}<span class="mut">Kuyruk bilgisi alinamadi{% if extras.error %} ({{ extras.error }}){% endif %}. Planlar yine gorunur.</span>{% endif %}
+</div>
+
+<p class="legend">
+<span><i class="sw pf-youtube"></i>YouTube</span><span><i class="sw pf-instagram"></i>Instagram</span><span><i class="sw pf-tiktok"></i>TikTok</span>
+<span>kesikli kenar: gonderildi · kalin: yayinda · kirmizi: basarisiz</span>
+<span>soluk kesikli: uretim (gecmis = uretildi, gelecek = tahmin)</span>
+{% for e in extras.legend %}<span>{{ e.title }}: {% for a in e.arms %}<i class="arm arm-{{ a.n }}">{{ a.label }}</i> {{ a.name }} {% endfor %}</span>{% endfor %}
+</p>
+
+<div class="cal">
+{% for wd in mm.weekdays %}<div class="wd">{{ wd }}</div>{% endfor %}
+{% for week in mm.weeks %}{% for c in week %}
+<div class="cell{% if not c.in_month %} out{% endif %}{% if c.today %} today{% endif %}{% if c.past %} past{% endif %}" data-day="{{ c.iso }}"{% if not c.past %} data-drop="1"{% endif %}>
+<a class="dn" href="/calendar?d={{ c.iso }}">{{ c.num }}</a>
+{% for e in c.shown %}{{ chip(e, c.iso) }}{% endfor %}
+{% if c.more %}<a class="more" href="/calendar?d={{ c.iso }}">+{{ c.more }}</a>{% endif %}
+</div>
+{% endfor %}{% endfor %}
+</div>
+<p class="mut small">Gune tikla: o gunun ayrintisi ve video ekleme. Planli (henuz gonderilmemis) yayini baska gune surukle: saati ayni kalir. Telefonda gun sayfasindan "Tasi" kullan.</p>
+
+<form id="move-form" method="post" action="/calendar/move" hidden>
+<input type="hidden" name="csrf" value="{{ csrf }}"><input type="hidden" name="pub" value=""><input type="hidden" name="d" value=""><input type="hidden" name="m" value="{{ mm.this }}">
+</form>
+
+<details class="card">
+<summary>Planlama araclari</summary>
+<h2>Otomatik doldur</h2>
+<p class="mut small">Onayli ama takvimde hic yeri olmayan videolari, acik platformlar icin siradaki bos saatlere (eskiden yeniye) dizer. Iptal ettigin ya da basarisiz olanlara dokunmaz.</p>
+{% if unplanned %}{{ m.post('/calendar/autofill', 'Otomatik doldur (' ~ unplanned ~ ')', csrf, 'Takvimde yeri olmayan ' ~ unplanned ~ ' yayin bos saatlere dizilsin mi?', cls='pri', fields={'m': mm.this}) }}
+{% else %}<span class="mut small">Takvimde yeri olmayan onayli video yok.</span>{% endif %}
+<hr class="sep">
+<h2>Haftalik sablon (Turkiye saati)</h2>
+<p class="mut small">Her gun icin yayin saatleri, virgulle ayir; bos birakilan gun yayinsiz. Yeni onaylanan her video bu saatlerin ilk bos olanina girer.{% if not week_set %} Su an sablon yok: Ayarlar'daki UTC saatleri her gun gecerli; asagida onlarin Turkiye karsiliklari yazili.{% endif %}</p>
+<form method="post" action="/calendar/template">
+<input type="hidden" name="csrf" value="{{ csrf }}"><input type="hidden" name="m" value="{{ mm.this }}">
+<div class="weekform">{% for w in week %}<label>{{ w.name }}<input name="d{{ w.i }}" value="{{ w.value }}" maxlength="60" placeholder="10:15, 22:15" autocomplete="off"></label>{% endfor %}</div>
+<button class="pri" type="submit">Sablonu kaydet</button>
+</form>
+{% if week_set %}{{ m.post('/calendar/template', 'Sablonu kapat', csrf, 'Haftalik sablon kapatilsin mi? Ayarlar\'daki UTC saatleri gecerli olur.', fields={'clear': '1', 'm': mm.this}) }}{% endif %}
+</details>
 {% endblock %}

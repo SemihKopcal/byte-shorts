@@ -21,7 +21,7 @@
 {% else %}
 {{ m.post('/settings', 'Kapali: ac', csrf, 'Otomatik onay acilsin mi? Yeni videolar sen bakmadan yayina gider.', fields={'key':'auto_approve','value':'1','back':'home'}) }}
 {% endif %}</div>
-<hr style="border:0;border-top:1px solid var(--line)">
+<hr class="sep">
 <div class="toggle"><div><b>Yayini duraklat</b><div class="mut small">Aciksa hicbir sey platformlara gonderilmez (acil durdurma).</div></div>
 {% if settings.paused == '1' %}
 {{ m.post('/settings', 'DURAKLATILDI: surdur', csrf, cls='dng', fields={'key':'paused','value':'0','back':'home'}) }}
@@ -34,11 +34,11 @@
 <h2>Onayini bekleyenler</h2>
 <div class="card">
 {% for v in pending %}
-<div class="row" style="justify-content:space-between;padding:6px 0">
+<div class="row between">
 <a href="/videos/{{ v.script_id }}">{{ v.title }}</a>
 <span>{{ m.post('/videos/' ~ v.script_id ~ '/approve', 'Onayla', csrf, cls='pri') }}{{ m.post('/videos/' ~ v.script_id ~ '/reject', 'Reddet', csrf, 'Bu video reddedilsin mi?', cls='dng') }}</span>
 </div>{% endfor %}
-{% if counts.pending > 1 %}<div style="margin-top:8px">{{ m.post('/approve-all', 'Hepsini onayla (' ~ counts.pending ~ ')', csrf, 'Bekleyen tum videolar onaylansin mi?') }}</div>{% endif %}
+{% if counts.pending > 1 %}<div class="mt8">{{ m.post('/approve-all', 'Hepsini onayla (' ~ counts.pending ~ ')', csrf, 'Bekleyen tum videolar onaylansin mi?') }}</div>{% endif %}
 </div>
 {% endif %}
 
