@@ -22,6 +22,8 @@ from PIL import Image, ImageDraw
 from . import draw as D
 from .byte import draw_byte_badge, MINT as B_MINT
 from . import cta as CTA
+from . import fx as FX
+from . import style as STYLE
 from .qc import check
 from .synth import synthesize
 
@@ -33,6 +35,7 @@ from publish.manifest import (build_manifest, captions_markdown,   # noqa: E402
                               load_brand)
 
 VOICE = Path(os.environ.get("PIPER_VOICE", ROOT / "voices/en-us-ryan-high.onnx"))
+SAFE_SECONDS = 56.0      # QC sinirinin (59) altinda pay; tempo bunu asarsa varsayilana doner
 
 
 def _stages(series_mod, S, duration, spec):
@@ -62,6 +65,28 @@ def _recent_themes(n=3):
         return []
 
 
+def style_layer(img, t, i, stages, cams, sty, theme_colors):
+    """Sahne katmanina kamera hareketi + gecis efekti (altyazi/rozet bundan SONRA, olceksiz).
+
+    Kamera sahnenin KENDI penceresinde (t0'dan itibaren) calisir; sahne baslamadan once onceki
+    sahnenin son durumunda kalir (aradaki ani ziplama olmaz). Efekt sahne degisiminde
+    TRANSITION_DELAY'den sonra TRANSITION_SECONDS surer; ilk sahnede efekt yoktur."""
+    if not stages:
+        return img
+    si = 0
+    for k, (t0, _t1, _f) in enumerate(stages):
+        if t0 <= t:
+            si = k
+    t0, t1, _f = stages[si]
+    p = D.clamp01((t - t0) / max(0.1, t1 - t0))
+    scale, dx, dy = FX.camera_state(cams[si]["mode"], p, cams[si]["amp"], img.width, img.height)
+    img = FX.apply_camera(img, scale, dx, dy)
+    u = (t - t0 - FX.TRANSITION_DELAY) / FX.TRANSITION_SECONDS
+    if si >= 1 and 0 <= u < 1:
+        img = FX.transition(img, STYLE.transition_for(sty, si), u, theme_colors, seed=i)
+    return img
+
+
 def render(spec, tl, series_mod, out_path: Path, parallel: bool = False) -> None:
     # Tema EN BASTA secilir: D.INK, D.TONE gibi degerler buradan sonra
     # okunuyor, sonra degistirmek yarisi eski yarisi yeni renkte bir video
@@ -69,7 +94,10 @@ def render(spec, tl, series_mod, out_path: Path, parallel: bool = False) -> None
     from . import themes as T
     theme = D.use_theme(T.pick(spec, _recent_themes()))
     spec["_theme"] = theme
-    print(f"  tema: {theme}")
+    sty = spec.get("_style") if STYLE.active(spec) else None
+    if sty:                                           # videoya ozgu doku (temanin kendisi ya da baska)
+        D.TEXTURE = STYLE.texture_for(sty, D.TEXTURE)
+    print(f"  tema: {theme}" + (f"  stil: fx={'+'.join(sty['fx'])} doku={D.TEXTURE}" if sty else ""))
 
     beats = tl["beats"]
     duration = tl["duration"]
@@ -87,6 +115,8 @@ def render(spec, tl, series_mod, out_path: Path, parallel: bool = False) -> None
         corner = CTA.corner_window(duration, close_t0, cc)
         corner_text = cc.get("text", "")
 
+    cams = STYLE.cameras(STYLE.sid_of(spec), len(stages)) if sty else None
+    theme_colors = T.THEMES.get(theme, {})
     bg = D.build_bg()
     grain = D.build_grain()
     nframes = int(duration * D.FPS)
@@ -112,8 +142,11 @@ def render(spec, tl, series_mod, out_path: Path, parallel: bool = False) -> None
                 fn(d, t, S, spec)
                 push = D.PUSH * D.clamp01((t - t0) / max(0.1, t1 - t0))
 
+        if sty:
+            img = style_layer(img, t, i, stages, cams, sty, theme_colors)
+            d = ImageDraw.Draw(img)
         # push-in SADECE sahne katmanina; altyazi/chrome ustte, olceksiz.
-        if push > 0.0005:
+        elif push > 0.0005:
             k = 1 + push
             cw, ch = int(D.W / k), int(D.H / k)
             img = img.crop(((D.W - cw) // 2, (D.H - ch) // 2,
@@ -163,6 +196,7 @@ def main() -> None:
     _inject_brand(spec, brand)
     if CTA.apply(spec, brand, ROOT):
         print("  CTA: begen/takip cumlesi + kapanis chip'leri eklendi")
+    STYLE.apply(spec, brand)                      # kamera/gecis/doku/tempo: senaryo kimliginden
     out_dir = ROOT / args.out / spec["id"]
     out_dir.mkdir(parents=True, exist_ok=True)
 
@@ -173,6 +207,11 @@ def main() -> None:
             sys.exit(f"Ses modeli yok: {VOICE}\n  tools/fetch_voice.sh calistir")
         print("seslendirme...")
         tl = synthesize(spec, out_dir, VOICE)
+        # Yavas tempo videoyu QC sinirina (59 sn) yaklastirirsa varsayilan tempoya don.
+        if tl["duration"] > SAFE_SECONDS and STYLE.pace(spec) != STYLE.NEUTRAL_PACE:
+            print(f"  sure {tl['duration']:.1f}s > {SAFE_SECONDS:.0f}s: tempo varsayilana donuyor")
+            spec["_style"]["pace"] = dict(STYLE.NEUTRAL_PACE)
+            tl = synthesize(spec, out_dir, VOICE)
     print(f"  sure: {tl['duration']:.2f}s")
 
     series_mod = importlib.import_module(f".series_{spec['series'].lower()}", __package__)

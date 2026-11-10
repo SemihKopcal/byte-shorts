@@ -24,7 +24,7 @@ except Exception as e:                 # noqa: BLE001
     _OK, _WHY = False, str(e)
 
 
-def fake_piper(text, path, voice, i=0):
+def fake_piper(text, path, voice, i=0, shift=0.0):
     """Kelime basina 0.3 sn'lik 440 Hz ton (sessizlik degil: esik testleri anlamli olsun)."""
     n = max(1, len(text.split())) * 3 * 2205
     with wave.open(str(path), "wb") as w:
@@ -74,6 +74,34 @@ class VideoEndsAfterTheLastWord(unittest.TestCase):
         tail = samples[int((end + 0.10) * sr):int((tl["duration"] - 0.02) * sr)]
         self.assertGreater(rms(word), 500, "son kelimenin sonu sessiz: kesilmis")
         self.assertLess(rms(tail), 100, "son kelimeden sonra sessizlik olmali")
+
+    def test_pace_shift_is_passed_to_piper_and_gaps_scale(self):
+        calls = []
+
+        def spy(text, path, voice, i=0, shift=0.0):
+            calls.append(shift)
+            return fake_piper(text, path, voice, i, shift)
+
+        spec = {**self.SPEC, "_style": {"pace": {"length_delta": 0.03, "gap_scale": 1.1}}}
+        with tempfile.TemporaryDirectory() as tmp, mock.patch.object(synth, "_piper", spy):
+            tl_fast = synth.synthesize(spec, Path(tmp), Path("u.onnx"))
+        self.assertEqual(calls, [0.03] * 3)
+        with tempfile.TemporaryDirectory() as tmp, mock.patch.object(synth, "_piper", fake_piper):
+            tl_neutral = synth.synthesize(self.SPEC, Path(tmp), Path("u.onnx"))
+        b1, b2 = tl_fast["beats"][0], tl_fast["beats"][1]
+        n1, n2 = tl_neutral["beats"][0], tl_neutral["beats"][1]
+        self.assertAlmostEqual((b2["start"] - b1["end"]), (n2["start"] - n1["end"]) * 1.1, delta=0.01)
+
+    def test_pace_is_neutral_without_a_style(self):
+        calls = []
+
+        def spy(text, path, voice, i=0, shift=0.0):
+            calls.append(shift)
+            return fake_piper(text, path, voice, i, shift)
+
+        with tempfile.TemporaryDirectory() as tmp, mock.patch.object(synth, "_piper", spy):
+            synth.synthesize(self.SPEC, Path(tmp), Path("u.onnx"))
+        self.assertEqual(calls, [0.0] * 3)
 
     def test_pad_is_a_breath_not_dead_air(self):
         self.assertTrue(0.2 <= synth.END_PAD <= 0.8)

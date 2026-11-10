@@ -47,5 +47,10 @@
    "tiktok": "Follow {handle} for more."
   },
   "pinned_comment": "Every number in this video is sourced in the description. A new one every day: subscribe to BYTE."
- }
+ },
+
+ "style": {
+  "_note": "Her videoya senaryo kimliginden turetilen kamera hareketi (yakinlas/uzaklas/kay), gecis efekti (flas, kayma, titresim, odak, zipla), doku ve anlatim temposu (worker/style.py). Rastgele degil: ayni senaryo hep ayni gorunur. enabled=false -> eski gorunum (hep ayni yavas yakinlasma, gecis yok, sabit tempo).",
+  "enabled": true
+}
 }

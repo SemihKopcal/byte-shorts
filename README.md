@@ -98,6 +98,24 @@ Bitince daily "Kuyruk bos" diye kirmizi durur (Gemini'ye dusmez); yeni parti
 zamaninda yazilmali. Kuyruk sirasi dosya adi sirasidir, bu yuzden `pNNN-`
 numarasi plandaki siradir.
 
+## Video stili: kamera, gecis, doku, tempo (`brand.json` > `style`, `worker/style.py`)
+
+Tema rengi her videoda degisiyordu ama gerisi ayniydi (ayni yavas yakinlasma, ayni gecis, ayni
+tempo). Artik her videonun kendi "el yazisi" var. Hepsi senaryo kimliginden (sha256) turetilir:
+rastgele DEGIL, `publish.yml` videoyu yeniden urettiginde iki render birebir ayni cikar; ayni
+senaryo hep ayni gorunur, farkli senaryolar farkli.
+
+| Ne | Secenekler | Nasil |
+|---|---|---|
+| Kamera (sahne basina) | yakinlas, uzaklas, saga kay, sola kay, yukari kay | art arda iki sahne ayni hareketi yapmaz; kayma kenardan tasmaz |
+| Gecis efekti | flas, yatay kayma, titresim, odak, zipla | videonun iki "imza" efekti var, sahne degisimlerinde sirayla (0,3 sn) |
+| Doku | temanin kendi dokusu ya da baska bir doku | %50 / %50 |
+| Tempo | hikaye biraz yavas, olcum capcanli, aciklama arada | konusma +-%3, beat arasi bosluk 0,9-1,12x |
+
+Tempo uzarsa (56 sn'yi asarsa) `worker/build.py` varsayilan tempoya doner; QC 59 sn'de durur.
+Kapatmak icin `brand.json` > `style` > `"enabled": false` (eski gorunum). Algoritmayi degistirirsen
+`style.VERSION`'i artir: butun videolarin gorunumu degisir, bilerek yapilmali.
+
 ## Begen / takip CTA'si (`brand.json` > `cta`, `worker/cta.py`)
 
 Videolarin sonunda sakin ve kisa bir "begen, takip et" cagrisi var; hepsini hat ekler,
