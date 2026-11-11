@@ -51,7 +51,7 @@ jobs:
 
       # daily.yml ile AYNI anahtarlar: main'de isinmis cache'i okur, indirme beklemez.
       - name: arac cache
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: |
             ~/.local/bin
@@ -71,7 +71,7 @@ jobs:
 
       - name: ses modeli cache
         id: voice
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: voices
           key: piper-en-us-ryan-high-v1
