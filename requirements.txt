@@ -1,6 +1,6 @@
 # Cizim ve ses
 Pillow==13.0.0
-numpy==2.1.3
+numpy==2.5.4
 
 # YouTube yukleme (publish.yml)
 google-api-python-client==2.151.0
