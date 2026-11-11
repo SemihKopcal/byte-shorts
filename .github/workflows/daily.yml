@@ -293,7 +293,7 @@ jobs:
       # Panel modunda yuklenmez: public depoda artifact'i de herhangi bir GitHub hesabi indirebilir.
       - name: artifact
         if: steps.render.outcome == 'success' && vars.PANEL_MODE != 'on'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: video-${{ github.run_number }}
           path: |
