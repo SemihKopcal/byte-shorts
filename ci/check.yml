@@ -36,7 +36,7 @@ jobs:
       - name: secret taramasi
         run: python tools/secret_scan.py
 
-      - run: pip install Pillow==13.0.0 numpy==2.5.4 pyyaml
+      - run: pip install Pillow==13.0.0 numpy==2.4.6 pyyaml
 
       - name: sozdizimi
         run: python -m compileall -q worker editorial publish tools tests

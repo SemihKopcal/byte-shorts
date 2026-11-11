@@ -9,6 +9,10 @@ updates:
     directory: /
     schedule: {interval: weekly}
     open-pull-requests-limit: 5
+    ignore:
+      # numpy 2.5+ Python 3.12 ister; workflow'lar 3.11'de. Python 3.12'ye gecince bu satir silinir.
+      - dependency-name: "numpy"
+        versions: [">=2.5"]
   - package-ecosystem: docker
     directory: /panel
     schedule: {interval: weekly}
