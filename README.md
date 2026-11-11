@@ -144,6 +144,36 @@ temalarin eski degerlerini ve iki yuzun okunurlugunu kilitliyor). (3) Yeni sahne
 `draw_byte` degil `D.byte` kullan: karton temasinda dis cizgi ekler, yoksa lacivertte koyu govde kaybolur.
 Algoritmayi degistirirsen `cartoon.VERSION`'i artir.
 
+## Kendi sesin: klon ses (`brand.json` > `voice_clone`, `worker/voiceover.py`)
+
+Videolar Piper'in robot sesi yerine **senin sesinle** okunur. Model (Chatterbox Turbo) GPU ister, Actions
+CPU'sunda calismaz; bu yuzden sesler **Colab'da onceden, toplu** uretilir, **private R2'de** durur
+(`voice/<senaryo-id>/`), `daily` render'dan once o senaryonunkini indirir ve Piper yerine kullanir.
+
+```
+Colab (senin sesin) --uretir--> R2 voice/<id>/b1.wav ... cta.wav + manifest.json
+daily/publish:  tools/r2_voice.py pull  ->  out/_clone/<id>/  ->  worker.build bulursa Piper CALISMAZ
+```
+
+**Kurulum (bir kerelik):** 1) 10-20 sn kayit (tarif Colab defterinin basinda), 2) `colab/byte_colab_ses_uret.ipynb`'i
+Colab'a yukle, T4 sec, hucreleri sirayla calistir (R2 anahtarlari Colab Secrets'ta: `R2_ENDPOINT`, `R2_BUCKET`,
+`R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`; GitHub Secrets'taki ayni degerler), 3) bitti. Bundan sonra her
+10-20 senaryoda bir defteri tekrar calistirmak yeter (`HOW_MANY`): **kuyruktaki siradaki senaryolarin** sesi uretilir.
+Hangi senaryolarin sesi hazir: `python tools/r2_voice.py list` (R2 degiskenleri ortamda).
+
+**Sozlesme:** senaryo basina `manifest.json` (her cumlenin `say` ozeti) + `<beat-id>.wav`. CTA cumlesi
+(`brand.json` > `cta.voice`) dahil HER cumle gerekir; cumle sonradan degistiyse (senaryo ya da CTA metni) ozet
+tutmaz ve o senaryo icin klon KULLANILMAZ. Bir videoda iki ses olmaz: yarim klon yok, ya hepsi ya Piper.
+`python tools/voice_lines.py <id>` render'in okuyacagi cumleleri gosterir; `--next N` sirada bekleyenleri.
+
+**Anahtar `brand.json` > `voice_clone`:** `enabled=false` -> klon hic kullanilmaz. `require=true` -> klon ses YOKSA
+render DURUR (video cikmaz): kanalin sesi sessizce degismesin istiyorsan ac; `false` iken ses yoksa uyari
+yazilir ve Piper ile devam edilir (kosu sari uyari verir: "Klon ses yok").
+
+**Lokal:** wav'lari `voices/clone/<id>/` altina koy (ya da `BYTE_CLONE_DIR`); `voices/` gitignore'da.
+**Gizlilik:** depo public. Ham kayit ve uretilen sesler depoya, cache'e, artifact'e GIRMEZ (indirme dizini `out/_clone`).
+**Tempo:** `style.py` anlatim temposu klon sese de uygulanir (ffmpeg `atempo`, en fazla %15).
+
 ## Begen / takip CTA'si (`brand.json` > `cta`, `worker/cta.py`)
 
 Videolarin sonunda sakin ve kisa bir "begen, takip et" cagrisi var; hepsini hat ekler,
@@ -264,7 +294,7 @@ tutmuyorsa yayinlanmaz.
 editorial/   Gemini: llm.py (istemci) roles.py (istemler) rules.py (kurallar)
              pipeline.py (akis) signals.py (HN/GitHub/YouTube canli sinyal)
              authored.py (yazilmis senaryolarin kapisi, Gemini yok)
-worker/      cizim: synth, draw, scenes, themes, byte, series_*, qc, build, cartoon (karton stili), assets/ (font)
+worker/      cizim: synth, draw, scenes, themes, byte, series_*, qc, build, cartoon (karton stili), voiceover (klon ses), assets/ (font)
 publish/     youtube.py (yukleme) manifest.py (platform metinleri)
              instagram.py tiktok.py net.py ledger.py (content/social.json)
 tools/       setup_runner.sh, fetch_voice.sh, pick_script.py, release.sh,
@@ -429,6 +459,10 @@ yaparken ikisini de guncelle ya da `cp ci/*.yml .github/workflows/`.
 | Instagram "Invalid OAuth / token" | token suresi doldu ya da yenilenemedi | Meta panelinden yeni uzun omurlu token uret, `INSTAGRAM_TOKEN` guncelle; `GH_PAT` kur ki bir daha olmasin |
 | TikTok "scope_not_authorized" | uygulamada `video.upload` yok | portalda Content Posting API'yi ekle, `tiktok_login.py`'yi tekrar calistir |
 | TikTok "invalid_grant" | refresh token iptal / degismis | `tiktok_login.py`'yi tekrar calistir, secret'i guncelle |
+| Actions uyarisi "Klon ses yok" | bu senaryonun sesi R2'de yok | Colab defterini calistir (`HOW_MANY`'yi artir); ses yokken Piper ile uretildi. Hep klon istiyorsan `voice_clone.require=true` |
+| "klon ses kullanilamiyor: bX: cumle degismis" | senaryo ya da CTA cumlesi sesten sonra degisti | Colab'da o senaryoyu yeniden uret (`SCRIPT_IDS`) |
+| "klon ses zorunlu ... " ile kosu kirmizi | `require=true` ve ses yok/bozuk | Colab ile uret ya da gecici `require=false` |
+| Colab 7. hucre "Secrets eksik" | R2 anahtarlari Colab'a eklenmemis | anahtar simgesi > 4 isimle ekle, "Notebook access" ac |
 | "arama araci kullanilamiyor" / "web search is unavailable" | Google Search grounding **ucretsiz Gemini anahtarinda yok** (resmi fiyat sayfasi: Free = Not available) | Kod bunu kendisi anlar: ilk 429/400'de ayni modele aramasiz sorar, o kosuda aramayi birakir ve hikaye/gundem adaylarini bastan eler; yalniz formullu (`measured`) konular yayina girer. Hikaye/gundem acmak icin AI Studio'da projeye faturalandirma bagla: ucretli katmanda ayda 5.000 arama bedava (Gemini 3+ modelleri icin ortak), sonrasi 1.000 aramaya 14 USD. Bir kosu en fazla birkac arama yapar. Kullandikca token ucreti de yazilir; AI Studio'da butce uyarisi koy |
 
 ## brand.json

@@ -69,9 +69,32 @@ jobs:
       - name: ses modeli indir
         if: steps.voice.outputs.cache-hit != 'true'
         run: bash tools/fetch_voice.sh en-us-ryan-high
+      # ── klon ses ──────────────────────────────────────────────────────
+      # Kendi sesinin klonu: Colab'da onceden uretilip PRIVATE R2'ye konur (tools/r2_voice.py push).
+      # Bu senaryo icin varsa indirilir ve render Piper yerine onu kullanir; yoksa uyari yazilir ve
+      # Piper sesiyle devam edilir. brand.json > voice_clone > require=true ise render durur
+      # (kanalin sesi sessizce degismesin). R2 secret'lari hic yoksa adim sessizce atlanir.
+      # Dizin out/ altinda: ses dosyalari ne cache'e ne commit'e ne artifact'e girer.
+      - name: klon ses indir
+        id: clonevoice
+        continue-on-error: true
+        timeout-minutes: 5
+        env:
+          R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
+          R2_BUCKET: ${{ secrets.R2_BUCKET }}
+          R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          BYTE_CLONE_DIR: out/_clone
+          SCRIPT_INPUT: ${{ inputs.script }}
+        run: |
+          dir="$(python tools/pick_script.py --dir "$SCRIPT_INPUT" | sed -n 's/^dir=//p')"
+          id="${dir##*/}"
+          python tools/r2_voice.py pull "$id" "$BYTE_CLONE_DIR/$id" || echo "::warning title=Klon ses indirilemedi::R2'ye ulasilamadi; Piper sesiyle devam"
+
       - name: yeniden uret + QC
         env:
           SCRIPT_INPUT: ${{ inputs.script }}
+          BYTE_CLONE_DIR: out/_clone
         run: python -m worker.build "content/scripts/$SCRIPT_INPUT"
 
       - name: cikti dizini
