@@ -46,13 +46,15 @@
    "id": "b3",
    "role": "why",
    "say": "It described an imitation game with a machine and an interrogator.",
-   "cap": "The imitation game"
+   "cap": "The imitation game",
+   "kw": "imitation game"
   },
   {
    "id": "b4",
    "role": "data",
    "say": "He predicted that in about fifty years, computers could play it well.",
-   "cap": "About 50 years"
+   "cap": "About 50 years",
+   "kw": "50 years"
   },
   {
    "id": "b5",
@@ -88,19 +90,22 @@
    "id": "b7",
    "role": "turn",
    "say": "That means at least three calls in ten would be wrong.",
-   "cap": "At least 30% wrong"
+   "cap": "At least 30% wrong",
+   "kw": "30% wrong"
   },
   {
    "id": "b8",
    "role": "turn",
    "say": "Turing set a time limit and a threshold, both stated in numbers.",
-   "cap": "Time limit + threshold"
+   "cap": "Time limit + threshold",
+   "kw": "Time limit"
   },
   {
    "id": "b9",
    "role": "resolve",
    "say": "Claims of passing can be checked against those two numbers: five minutes, seventy percent.",
-   "cap": "Check against the paper"
+   "cap": "Check against the paper",
+   "kw": "the paper"
   },
   {
    "id": "b10",

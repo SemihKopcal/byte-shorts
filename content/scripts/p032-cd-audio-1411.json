@@ -36,7 +36,8 @@
    "id": "b2",
    "role": "why",
    "say": "Sound is measured thousands of times a second.",
-   "cap": "Sampling"
+   "cap": "Sampling",
+   "kw": "Sampling"
   },
   {
    "id": "b3",
@@ -57,13 +58,15 @@
    "id": "b4",
    "role": "data",
    "say": "Each sample is sixteen bits.",
-   "cap": "16 bits each"
+   "cap": "16 bits each",
+   "kw": "16 bits"
   },
   {
    "id": "b5",
    "role": "data",
    "say": "Stereo means two channels.",
-   "cap": "2 channels"
+   "cap": "2 channels",
+   "kw": "2 channels"
   },
   {
    "id": "b6",
@@ -98,7 +101,8 @@
    "id": "b7",
    "role": "turn",
    "say": "That is about one point four megabits per second.",
-   "cap": "≈ 1.4 Mbit/s"
+   "cap": "≈ 1.4 Mbit/s",
+   "kw": "1.4 Mbit/s"
   },
   {
    "id": "b8",
@@ -123,7 +127,8 @@
    "id": "b9",
    "role": "resolve",
    "say": "A format is numbers multiplied together.",
-   "cap": "Numbers, multiplied"
+   "cap": "Numbers, multiplied",
+   "kw": "multiplied"
   },
   {
    "id": "b10",

@@ -12,7 +12,7 @@ from pathlib import Path
 from PIL import Image, ImageDraw, ImageFont
 import numpy as np
 
-from .byte import draw_byte_badge, MINT as B_MINT
+from .byte import draw_byte, draw_byte_sticker, draw_byte_badge, MINT as B_MINT
 
 W, H, FPS = 1080, 1920, 30
 FONT_DIR = Path("/usr/share/fonts/opentype/inter")
@@ -32,13 +32,22 @@ LINE = (34, 34, 52)
 TONE = {"base": INK, "good": MINT, "mid": VIOLET, "bad": AMBER}
 TEXTURE = "none"
 THEME = "midnight"
+# Yuzeyler ve cizgiler (CTA hapi, ilerleme cubugu, koyu cubuk ustu yazi...). Koyu temalarda ESKI sabit
+# degerler; acik/karton temalarda temadan geliyor (themes.py'de "panel" vb. alanlar).
+PANEL = (22, 22, 36)           # CTA hapinin dolgusu
+PANEL2 = (16, 16, 28)          # kose etiketinin dolgusu
+ON_ACCENT = (10, 10, 18)       # vurgu renginin ustundeki yazi
+TRACK = (20, 20, 32)           # ilerleme cubugunun izi
+SHADOW = (0, 0, 0)             # karton stilinde sert ofset golge
+OUTLINE = (24, 22, 28)         # karton stilinde sprite dis cizgisi
+STICKER = False                # True -> BYTE kalin dis cizgili cikartma olarak cizilir (karton temalari)
 
 
 def use_theme(name: str) -> str:
     """Paleti degistirir. build.render en basta bir kez cagiriyor."""
-    from .themes import THEMES
+    from .themes import ALL_THEMES as THEMES
     global BG0, BG1, GLOW, INK, MUTE, MINT, AMBER, VIOLET, LINE, TONE
-    global TEXTURE, THEME
+    global TEXTURE, THEME, PANEL, PANEL2, ON_ACCENT, TRACK, SHADOW, OUTLINE, STICKER
     t = THEMES.get(name) or THEMES["midnight"]
     THEME = name if name in THEMES else "midnight"
     BG0, BG1, GLOW = t["bg0"], t["bg1"], t["glow"]
@@ -46,6 +55,10 @@ def use_theme(name: str) -> str:
     MINT, VIOLET, AMBER = t["good"], t["mid"], t["bad"]
     TONE = {"base": INK, "good": MINT, "mid": VIOLET, "bad": AMBER}
     TEXTURE = t["tex"]
+    PANEL, PANEL2 = t.get("panel", (22, 22, 36)), t.get("panel2", (16, 16, 28))
+    ON_ACCENT, TRACK = t.get("on_accent", (10, 10, 18)), t.get("track", (20, 20, 32))
+    SHADOW, OUTLINE = t.get("shadow", (0, 0, 0)), t.get("outline", (24, 22, 28))
+    STICKER = "outline" in t
     return THEME
 
 # Shorts guvenli alanlari: alt ~290px arayuz (baslik, aksiyon sutunu) ile
@@ -149,6 +162,14 @@ def cjk_font(size: int) -> ImageFont.FreeTypeFont:
 
 
 # ───────────────────────── yardimcilar ─────────────────────────
+def byte(d, cx, cy, scale=1.0, pose="idle", cursor=B_MINT, blink=True, cursor_w=1.0):
+    """BYTE'i aktif temaya gore cizer: koyu temalarda eskisi gibi; karton temalarinda dis cizgili cikartma."""
+    if STICKER:
+        draw_byte_sticker(d, cx, cy, scale, pose, cursor, blink, cursor_w, pen=OUTLINE, shadow=SHADOW)
+    else:
+        draw_byte(d, cx, cy, scale, pose, cursor, blink, cursor_w)
+
+
 def clamp01(x):
     return 0.0 if x < 0 else 1.0 if x > 1 else x
 
@@ -235,7 +256,27 @@ def _texture(yy, xx, kind):
     return g * np.clip(1 - yy / (H * 0.9), 0, 1)[:, :]
 
 
+def build_paper_bg():
+    """Karton stilinin kagit zemini: ust-alt degrade + dusuk frekansli leke + ince tane + kenar kararmasi.
+    Sabit tohum: ayni tema ayni kagidi verir (iki render birebir ayni)."""
+    rng = np.random.default_rng(11)
+    mott = rng.normal(0, 1, (H // 16 + 2, W // 16 + 2)).astype(np.float32)
+    mott = np.asarray(Image.fromarray(np.clip(mott * 40 + 128, 0, 255).astype(np.uint8))
+                      .resize((W, H), Image.BICUBIC), np.float32) - 128
+    y = np.linspace(0, 1, H, dtype=np.float32)[:, None]
+    arr = np.zeros((H, W, 3), dtype=np.float32)
+    for i in range(3):
+        arr[:, :, i] = BG0[i] + (BG1[i] - BG0[i]) * y
+    arr += (mott / 128.0)[..., None] * 4.0 + rng.normal(0, 0.9, (H, W, 1)).astype(np.float32)
+    yy, xx = np.mgrid[0:H, 0:W].astype(np.float32)
+    r = ((xx - W / 2) / (W / 2)) ** 2 + ((yy - H / 2) / (H / 2)) ** 2
+    arr *= (1 - 0.05 * r)[..., None]
+    return Image.fromarray(np.clip(arr, 0, 255).astype(np.uint8))
+
+
 def build_bg():
+    if TEXTURE == "paper":
+        return build_paper_bg()
     y = np.linspace(0, 1, H, dtype=np.float32)[:, None]
     base = np.zeros((H, W, 3), dtype=np.float32)
     for i in range(3):
@@ -303,7 +344,7 @@ def draw_caption(d, t, chunks):
 
 def draw_chrome(d, t, dur, badge_font):
     p = clamp01(t / dur)
-    d.rectangle((0, 0, W, 6), fill=(20, 20, 32))
+    d.rectangle((0, 0, W, 6), fill=TRACK)
     d.rectangle((0, 0, W * p, 6), fill=VIOLET)
     draw_byte_badge(d, 72, 150, badge_font, 0.15, B_MINT)
 
@@ -332,10 +373,10 @@ def cta_pill(d, box, kind, label, fnt, a, filled, track=4):
     x0, y0, x1, y1 = box
     cy = (y0 + y1) / 2
     accent = HEART if kind == "like" else VIOLET
-    d.rounded_rectangle(box, radius=(y1 - y0) / 2, fill=fade(accent if filled else (22, 22, 36), a),
+    d.rounded_rectangle(box, radius=(y1 - y0) / 2, fill=fade(accent if filled else PANEL, a),
                         outline=fade(accent, a), width=3)
-    ink = fade((10, 10, 18) if filled else INK, a)
-    icon = fade((10, 10, 18) if filled else accent, a)
+    ink = fade(ON_ACCENT if filled else INK, a)
+    icon = fade(ON_ACCENT if filled else accent, a)
     sz = (y1 - y0) * 0.40
     ix = x0 + (y1 - y0) * 0.55
     if kind == "like":
@@ -353,7 +394,7 @@ def cta_row_width(d, labels, fnt, h, gap, track=4):
     return ws, sum(ws) + gap * (len(ws) - 1)
 
 
-def draw_cta_corner(d, t, window, text):
+def draw_cta_corner(d, t, window, text, origin=(72, 214)):
     """Videonun ortasinda sessiz kucuk etiket: sol ust, BYTE rozetinin altinda (guvenli alan:
     ust ~300px sahnelere kapali, Shorts arayuzu sag ustte). window = (bas, bit) saniye."""
     if not window or not text:
@@ -366,9 +407,9 @@ def draw_cta_corner(d, t, window, text):
     track = 4
     tw = sum(d.textlength(ch, font=fnt) for ch in text) + track * (len(text) - 1)
     h = 54
-    x0, y0 = 72, 214 + (1 - a) * 10
+    x0, y0 = origin[0], origin[1] + (1 - a) * 10
     x1 = x0 + h * 0.55 + 28 + tw + h * 0.5
-    d.rounded_rectangle((x0, y0, x1, y0 + h), radius=h / 2, fill=fade((16, 16, 28), a),
+    d.rounded_rectangle((x0, y0, x1, y0 + h), radius=h / 2, fill=fade(PANEL2, a),
                         outline=fade(MUTE, a * 0.8), width=2)
     heart(d, x0 + h * 0.55, y0 + h / 2 + 1, 22, fade(HEART, a))
     tracked(d, (x0 + h * 0.55 + 22, y0 + h / 2), text, fnt, fade(INK, a), track=track, anchor="lm")

@@ -41,7 +41,8 @@
    "id": "b2",
    "role": "why",
    "say": "In February two thousand eleven, Watson played two human champions on Jeopardy.",
-   "cap": "Jeopardy!, February 2011"
+   "cap": "Jeopardy!, February 2011",
+   "kw": "February 2011"
   },
   {
    "id": "b3",
@@ -77,13 +78,15 @@
    "id": "b5",
    "role": "data",
    "say": "It wagered nine hundred forty seven dollars, a cautious bet.",
-   "cap": "Wager: $947"
+   "cap": "Wager: $947",
+   "kw": "$947"
   },
   {
    "id": "b6",
    "role": "data",
    "say": "Both human players answered Chicago.",
-   "cap": "Humans: Chicago"
+   "cap": "Humans: Chicago",
+   "kw": "Chicago"
   },
   {
    "id": "b7",
@@ -122,7 +125,9 @@
    "id": "b9",
    "role": "resolve",
    "say": "The match was won. The mistake got the headlines.",
-   "cap": "Won the match. Missed the clue."
+   "cap": "Won the match. Missed the clue.",
+   "kw": "Missed the clue",
+   "mark": "x"
   },
   {
    "id": "b10",

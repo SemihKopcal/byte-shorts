@@ -40,7 +40,8 @@
    "id": "b2",
    "role": "why",
    "say": "Each position holds one of four bases.",
-   "cap": "A, C, G or T"
+   "cap": "A, C, G or T",
+   "kw": "A, C, G or T"
   },
   {
    "id": "b3",
@@ -83,7 +84,8 @@
    "id": "b5",
    "role": "data",
    "say": "Divide by eight bits per byte.",
-   "cap": "6 billion ÷ 8 = 750 million bytes"
+   "cap": "6 billion ÷ 8 = 750 million bytes",
+   "kw": "750 million bytes"
   },
   {
    "id": "b6",
@@ -104,7 +106,8 @@
    "id": "b7",
    "role": "turn",
    "say": "That counts one set of chromosomes.",
-   "cap": "One set"
+   "cap": "One set",
+   "kw": "One set"
   },
   {
    "id": "b8",
@@ -129,7 +132,8 @@
    "id": "b9",
    "role": "resolve",
    "say": "Letters in, bits out. Plain arithmetic.",
-   "cap": "Letters in, bits out"
+   "cap": "Letters in, bits out",
+   "kw": "bits out"
   },
   {
    "id": "b10",

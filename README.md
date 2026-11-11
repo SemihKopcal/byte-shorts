@@ -116,6 +116,34 @@ Tempo uzarsa (56 sn'yi asarsa) `worker/build.py` varsayilan tempoya doner; QC 59
 Kapatmak icin `brand.json` > `style` > `"enabled": false` (eski gorunum). Algoritmayi degistirirsen
 `style.VERSION`'i artir: butun videolarin gorunumu degisir, bilerek yapilmali.
 
+## Karton / cizgi film stili (`brand.json` > `cartoon`, `worker/cartoon.py`)
+
+Aciklayici cizgi film kanallarinin teknigi, BYTE'in kendi cizimiyle: kod cizer, stok gorsel ve baska
+kanalin karakteri yok. Dikey Short, yalniz senaryodan okuyan seri (G); A/B serileri eski gorunumde kalir.
+
+| Ne | Nasil |
+|---|---|
+| Iki yuz | acik **kagit** ve koyu **lacivert** (`themes.TOON_THEMES`); sahneler arasinda sirayla, hangisiyle basladigi senaryo kimliginden |
+| BYTE sunucu | sol ustte kalin dis cizgili cikartma (`byte.draw_byte_sticker`); imleci SESIN siddetiyle oynar (dudak senkronunun karsiligi), fosforlu kelime belirirken kolunu uzatir |
+| Fosforlu kelime | ust bantta (sahneler 330 px'ten basliyor) soldan saga boyanir. **Cumle basina**: beat'e `"kw": "metin"` yazilirsa o cumle okunurken (basladiktan 0,3 sn sonra) belirir, cumle bitince kapanir; `""` = bu beat'te otomatik kelime yok. `kw` ayni beat'in `cap` alanindan BIREBIR bir parca, en fazla 18 karakter, harf/rakam/`. , % $ + - x : ? !` olmali (`editorial/rules.py` kapida kontrol eder; Fredoka'da olmayan glif bos kutu cikar). Otomatik yalniz sahnenin ilk beat'inde ve yalniz `title` (kicker) ile etiketli sahnelerde: `counter`/`equation`/`contrast` ana sayiyi zaten dev yaziyor, tekrar etmez. Gemini yazarken 4-7 beat'e koyar (`editorial/roles.py`), kuyruktaki p005-p037'ye elle eklendi |
+| Elle cizilen isaret | beat'e `"mark": "check"` ya da `"x"` (yalniz `kw` ile birlikte; videoda en fazla 2) -> kelimenin yaninda kalemle cizilir |
+| Gecis | sahne degisiminde iris (daire acilir, kalin halka); eski FX gecisleri (flas/kayma/titresim) bu modda kullanilmaz, kamera hareketi kalir |
+| Altyazi | krem hap, kalin cizgi, sert golge; aktif kelime fosforlu. Font: Fredoka One (SIL OFL, `worker/assets/`) |
+
+Hepsi senaryo kimliginden turetilir (sha256), rastgele DEGIL: `publish.yml` videoyu yeniden uretse de iki
+render birebir ayni.
+
+**Acma/kapama** (`brand.json` > `cartoon`): `enabled` (true/false), `share` (0-1: videolarin ne kadari karton
+olsun, geri kalani eski koyu gorunum; kimlikten turetilir), `alternate` (false = sahneler hep kagit).
+Kapatinca bir sonraki render eski gorunumle cikar; gecmis videolar etkilenmez.
+
+**Bilmen gerekenler:** (1) render ~7x gercek zaman (29 sn'lik video ~3,5 dk, 2 cekirdekli runner) -- eski
+gorunumden yavas; `daily` zaman asimi icinde. (2) Tema sahne basina degistigi icin sahneler `D.INK`/`D.TONE`/
+`D.PANEL` gibi tema degerlerini CAGRI ANINDA okumali; sahneye sabit renk yazma (`tests/test_cartoon.py` koyu
+temalarin eski degerlerini ve iki yuzun okunurlugunu kilitliyor). (3) Yeni sahne turunde BYTE cizeceksen
+`draw_byte` degil `D.byte` kullan: karton temasinda dis cizgi ekler, yoksa lacivertte koyu govde kaybolur.
+Algoritmayi degistirirsen `cartoon.VERSION`'i artir.
+
 ## Begen / takip CTA'si (`brand.json` > `cta`, `worker/cta.py`)
 
 Videolarin sonunda sakin ve kisa bir "begen, takip et" cagrisi var; hepsini hat ekler,
@@ -236,7 +264,7 @@ tutmuyorsa yayinlanmaz.
 editorial/   Gemini: llm.py (istemci) roles.py (istemler) rules.py (kurallar)
              pipeline.py (akis) signals.py (HN/GitHub/YouTube canli sinyal)
              authored.py (yazilmis senaryolarin kapisi, Gemini yok)
-worker/      cizim: synth, draw, scenes, themes, byte, series_*, qc, build
+worker/      cizim: synth, draw, scenes, themes, byte, series_*, qc, build, cartoon (karton stili), assets/ (font)
 publish/     youtube.py (yukleme) manifest.py (platform metinleri)
              instagram.py tiktok.py net.py ledger.py (content/social.json)
 tools/       setup_runner.sh, fetch_voice.sh, pick_script.py, release.sh,

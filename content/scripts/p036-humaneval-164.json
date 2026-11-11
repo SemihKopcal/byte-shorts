@@ -36,13 +36,15 @@
    "id": "b2",
    "role": "why",
    "say": "Researchers wrote the problems by hand.",
-   "cap": "Hand-written, not copied"
+   "cap": "Hand-written, not copied",
+   "kw": "Hand-written"
   },
   {
    "id": "b3",
    "role": "why",
    "say": "Each has a docstring and unit tests.",
-   "cap": "≈ 7.7 tests per problem"
+   "cap": "≈ 7.7 tests per problem",
+   "kw": "7.7 tests"
   },
   {
    "id": "b4",
@@ -101,13 +103,15 @@
    "id": "b7",
    "role": "turn",
    "say": "About forty seven of one hundred sixty four.",
-   "cap": "≈ 47 of 164"
+   "cap": "≈ 47 of 164",
+   "kw": "47 of 164"
   },
   {
    "id": "b8",
    "role": "turn",
    "say": "Those numbers are for a single attempt.",
-   "cap": "One sample per problem"
+   "cap": "One sample per problem",
+   "kw": "One sample"
   },
   {
    "id": "b9",

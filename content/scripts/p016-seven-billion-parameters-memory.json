@@ -41,13 +41,15 @@
    "id": "b2",
    "role": "why",
    "say": "A seven billion parameter model stores seven billion numbers.",
-   "cap": "7B parameters = 7B numbers"
+   "cap": "7B parameters = 7B numbers",
+   "kw": "7B numbers"
   },
   {
    "id": "b3",
    "role": "why",
    "say": "How much space each number takes depends on its format.",
-   "cap": "Space per number depends on format"
+   "cap": "Space per number depends on format",
+   "kw": "depends on format"
   },
   {
    "id": "b4",
@@ -113,13 +115,15 @@
    "id": "b6",
    "role": "data",
    "say": "At sixteen bits, that halves to fourteen gigabytes.",
-   "cap": "16-bit: 7B × 2 bytes = 14 GB"
+   "cap": "16-bit: 7B × 2 bytes = 14 GB",
+   "kw": "14 GB"
   },
   {
    "id": "b7",
    "role": "turn",
    "say": "At four bits, it drops to three and a half.",
-   "cap": "4-bit: 7B × 0.5 bytes = 3.5 GB"
+   "cap": "4-bit: 7B × 0.5 bytes = 3.5 GB",
+   "kw": "4-bit"
   },
   {
    "id": "b8",
@@ -154,7 +158,8 @@
    "id": "b9",
    "role": "resolve",
    "say": "This counts only the stored weights, not the working memory.",
-   "cap": "Weights only"
+   "cap": "Weights only",
+   "kw": "Weights only"
   },
   {
    "id": "b10",

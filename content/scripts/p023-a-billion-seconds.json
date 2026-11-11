@@ -41,19 +41,22 @@
    "id": "b2",
    "role": "why",
    "say": "A second is defined by counting cycles of light from a caesium atom.",
-   "cap": "9,192,631,770 cycles of caesium"
+   "cap": "9,192,631,770 cycles of caesium",
+   "kw": "caesium"
   },
   {
    "id": "b3",
    "role": "why",
    "say": "A day holds eighty six thousand four hundred of them.",
-   "cap": "1 day = 24 × 60 × 60 = 86,400 s"
+   "cap": "1 day = 24 × 60 × 60 = 86,400 s",
+   "kw": "86,400 s"
   },
   {
    "id": "b4",
    "role": "data",
    "say": "The astronomers' year is three hundred sixty five and a quarter days.",
-   "cap": "Julian year = 365.25 days"
+   "cap": "Julian year = 365.25 days",
+   "kw": "365.25 days"
   },
   {
    "id": "b5",
@@ -99,7 +102,8 @@
    "id": "b7",
    "role": "turn",
    "say": "A trillion seconds is a thousand times longer.",
-   "cap": "1,000 × longer"
+   "cap": "1,000 × longer",
+   "kw": "longer"
   },
   {
    "id": "b8",
@@ -127,7 +131,8 @@
    "id": "b9",
    "role": "resolve",
    "say": "Each extra three zeros multiplies the time by a thousand.",
-   "cap": "+3 zeros = × 1,000"
+   "cap": "+3 zeros = × 1,000",
+   "kw": "+3 zeros"
   },
   {
    "id": "b10",

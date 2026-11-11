@@ -37,19 +37,22 @@
    "id": "b2",
    "role": "why",
    "say": "A model can turn each word into a list of numbers.",
-   "cap": "word → vector"
+   "cap": "word → vector",
+   "kw": "vector"
   },
   {
    "id": "b3",
    "role": "why",
    "say": "That list works like coordinates, a position on a map.",
-   "cap": "Vector = coordinates"
+   "cap": "Vector = coordinates",
+   "kw": "coordinates"
   },
   {
    "id": "b4",
    "role": "data",
    "say": "A Google paper trained word vectors on one point six billion words, in under a day.",
-   "cap": "1.6 billion words · under a day"
+   "cap": "1.6 billion words · under a day",
+   "kw": "1.6 billion words"
   },
   {
    "id": "b5",
@@ -98,7 +101,9 @@
    "id": "b7",
    "role": "turn",
    "say": "A later paper argued analogies are not an accurate test for bias.",
-   "cap": "2020: analogies ≠ a bias test"
+   "cap": "2020: analogies ≠ a bias test",
+   "kw": "a bias test",
+   "mark": "x"
   },
   {
    "id": "b8",
@@ -110,7 +115,8 @@
    "id": "b9",
    "role": "resolve",
    "say": "The vectors are real. The tidy example is not the whole picture.",
-   "cap": "Real vectors. Partial picture."
+   "cap": "Real vectors. Partial picture.",
+   "kw": "Partial picture"
   },
   {
    "id": "b10",

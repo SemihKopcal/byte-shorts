@@ -283,6 +283,15 @@ TWO TEXTS PER BEAT
 - "cap" is what appears on screen. Digits and symbols: "$3", "47%", "UTF-8".
 - No URL, bracket or emoji in either.
 
+KEYWORD HIGHLIGHT (optional; use it on 4 to 7 beats, never all)
+- "kw": the one term or number the viewer should catch while that line is
+  spoken, copied EXACTLY from that beat's "cap". At most 18 characters; only
+  letters, digits and . , % $ + - x : ? ! Pick the surprising word, not filler.
+  Skip it on a beat whose own scene already shows that number in huge type
+  (counter, equation). "kw": "" switches the automatic highlight off.
+- "mark": "check" or "x" ONLY on a beat that states something is right or
+  wrong, and only together with a "kw". Use it at most twice per video.
+
 STRUCTURE - every beat has a "role", in exactly this order, each used:
   hook    (1 beat)   the surprising, specific, verifiable fact. At most 12
                      words. Not a question. The contradiction is visible at once.
@@ -318,7 +327,7 @@ TITLE: under 60 characters, plain statement, no ALL CAPS, no "shocking".
  "beats": [
   {{"id": "b1", "role": "hook", "scene": "contrast", "say": "...", "cap": "...",
     "data": {{}}}},
-  {{"id": "b2", "role": "why", "say": "...", "cap": "..."}}
+  {{"id": "b2", "role": "why", "say": "...", "cap": "...", "kw": "..."}}
  ]}}"""
 
 REVISE = """Your script was reviewed. Fix EVERY point below and return the

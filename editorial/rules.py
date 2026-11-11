@@ -14,6 +14,13 @@ import re
 from dataclasses import dataclass, field
 
 ROLES = ("hook", "why", "data", "turn", "resolve")
+
+# Karton stili fosforlu kelime (worker/cartoon.py): beat'in "kw" alani cap'in icinden kisa bir parca,
+# "mark" cizilen isaret. Karakter kumesi ve uzunluk cartoon.py ile AYNI olmali (Fredoka'da olmayan glif bos
+# kutu cikar); tests/test_cartoon.py ikisinin ayni kaldigini kilitliyor.
+KW_MAX = 18
+KW_OK = re.compile(r"^[A-Za-z0-9 .,%$€£#&@+=<>/\\:;?!()\[\]{}~^*_|'\"\-–—·×÷…°]+$")
+MARKS = ("check", "x", "none")
 FORMATS = ("measured", "story", "explain", "trend")
 NEEDS_FACTS = {"story": 2, "trend": 2}        # bicim -> en az listelenen olay iddiasi
 MAX_FACTS = 8
@@ -220,6 +227,22 @@ def validate_script(spec: dict, scene_names) -> list[str]:
             if rx.search(say) or rx.search(cap):
                 p.append(f"{who}: yasakli kalip {rx.pattern!r}")
                 break
+        kw, mk = b.get("kw"), b.get("mark")
+        if kw is not None:
+            if not isinstance(kw, str):
+                p.append(f"{who}: kw metin olmali")
+            elif kw:
+                if len(kw) > KW_MAX:
+                    p.append(f"{who}: kw {len(kw)} karakter (en fazla {KW_MAX})")
+                elif not KW_OK.match(kw):
+                    p.append(f"{who}: kw'de desteklenmeyen karakter ({kw!r}); harf, rakam ve . , % $ + - x : ? ! ")
+                elif kw.lower() not in cap.lower():
+                    p.append(f"{who}: kw cap'in icinden AYNEN alinmali ({kw!r} cap'te yok)")
+        if mk is not None:
+            if mk not in MARKS:
+                p.append(f"{who}: mark {mk!r} gecersiz ({'|'.join(MARKS)})")
+            elif mk != "none" and not (isinstance(kw, str) and kw):
+                p.append(f"{who}: mark icin kw gerekli")
         s = b.get("scene")
         if s:
             if s not in scene_names:

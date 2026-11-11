@@ -21,6 +21,7 @@ from PIL import Image, ImageDraw
 
 from . import draw as D
 from .byte import draw_byte_badge, MINT as B_MINT
+from . import cartoon as TOON
 from . import cta as CTA
 from . import fx as FX
 from . import style as STYLE
@@ -87,14 +88,50 @@ def style_layer(img, t, i, stages, cams, sty, theme_colors):
     return img
 
 
+def _classic_frame(t, i, bg, stages, S, spec, sty, cams, theme_colors, chunks, close_t0, duration,
+                   badge_font, corner, corner_text):
+    """Eski (koyu tema) kare: sahne katmani + kamera/gecis + altyazi + chrome + CTA kose etiketi."""
+    img = bg.copy()
+    d = ImageDraw.Draw(img)
+    push = 0.0
+    for t0, t1, fn in stages:
+        if t0 - 0.25 <= t <= t1:
+            fn(d, t, S, spec)
+            push = D.PUSH * D.clamp01((t - t0) / max(0.1, t1 - t0))
+
+    if sty:
+        img = style_layer(img, t, i, stages, cams, sty, theme_colors)
+        d = ImageDraw.Draw(img)
+    # push-in SADECE sahne katmanina; altyazi/chrome ustte, olceksiz.
+    elif push > 0.0005:
+        k = 1 + push
+        cw, ch = int(D.W / k), int(D.H / k)
+        img = img.crop(((D.W - cw) // 2, (D.H - ch) // 2,
+                        (D.W - cw) // 2 + cw, (D.H - ch) // 2 + ch)) \
+                 .resize((D.W, D.H), Image.BILINEAR)
+        d = ImageDraw.Draw(img)
+
+    # kapanista baslik zaten metin; altyazi tekrar olurdu
+    if t < close_t0 - 0.1:
+        D.draw_caption(d, t, chunks)
+    D.draw_chrome(d, t, duration, badge_font)
+    if corner:
+        D.draw_cta_corner(d, t, corner, corner_text)
+    return img
+
+
 def render(spec, tl, series_mod, out_path: Path, parallel: bool = False) -> None:
     # Tema EN BASTA secilir: D.INK, D.TONE gibi degerler buradan sonra
     # okunuyor, sonra degistirmek yarisi eski yarisi yeni renkte bir video
     # verirdi.
     from . import themes as T
-    theme = D.use_theme(T.pick(spec, _recent_themes()))
+    toon_on = TOON.active(spec) and hasattr(series_mod, "_group")      # karton stili: yalniz senaryodan okuyan seri
+    if toon_on:
+        theme = D.use_theme(TOON.stage_themes(spec["_cartoon"], 1)[0])  # sahne basina tema Toon icinde degisir
+    else:
+        theme = D.use_theme(T.pick(spec, _recent_themes()))
     spec["_theme"] = theme
-    sty = spec.get("_style") if STYLE.active(spec) else None
+    sty = spec.get("_style") if STYLE.active(spec) and not toon_on else None
     if sty:                                           # videoya ozgu doku (temanin kendisi ya da baska)
         D.TEXTURE = STYLE.texture_for(sty, D.TEXTURE)
     print(f"  tema: {theme}" + (f"  stil: fx={'+'.join(sty['fx'])} doku={D.TEXTURE}" if sty else ""))
@@ -116,8 +153,15 @@ def render(spec, tl, series_mod, out_path: Path, parallel: bool = False) -> None
         corner_text = cc.get("text", "")
 
     cams = STYLE.cameras(STYLE.sid_of(spec), len(stages)) if sty else None
-    theme_colors = T.THEMES.get(theme, {})
-    bg = D.build_bg()
+    theme_colors = T.colors(theme)
+    toon = None
+    if toon_on:
+        toon = TOON.Toon(spec, stages, S, duration, tl, chunks,
+                         TOON.plan(spec, series_mod._group(spec["beats"])),
+                         corner, corner_text, out_path.parent / "voice.wav", close_t0)
+        print(f"  karton stili: tema={'+'.join(dict.fromkeys(toon.themes))}"
+              f" kelime={sum(1 for p in toon.plan if p['kw'])}/{len(toon.plan)} sahne")
+    bg = D.build_bg() if not toon else None
     grain = D.build_grain()
     nframes = int(duration * D.FPS)
 
@@ -134,33 +178,11 @@ def render(spec, tl, series_mod, out_path: Path, parallel: bool = False) -> None
 
     for i in range(nframes):
         t = i / D.FPS
-        img = bg.copy()
-        d = ImageDraw.Draw(img)
-        push = 0.0
-        for t0, t1, fn in stages:
-            if t0 - 0.25 <= t <= t1:
-                fn(d, t, S, spec)
-                push = D.PUSH * D.clamp01((t - t0) / max(0.1, t1 - t0))
-
-        if sty:
-            img = style_layer(img, t, i, stages, cams, sty, theme_colors)
-            d = ImageDraw.Draw(img)
-        # push-in SADECE sahne katmanina; altyazi/chrome ustte, olceksiz.
-        elif push > 0.0005:
-            k = 1 + push
-            cw, ch = int(D.W / k), int(D.H / k)
-            img = img.crop(((D.W - cw) // 2, (D.H - ch) // 2,
-                            (D.W - cw) // 2 + cw, (D.H - ch) // 2 + ch)) \
-                     .resize((D.W, D.H), Image.BILINEAR)
-            d = ImageDraw.Draw(img)
-
-        # kapanista baslik zaten metin; altyazi tekrar olurdu
-        if t < close_t0 - 0.1:
-            D.draw_caption(d, t, chunks)
-        D.draw_chrome(d, t, duration, badge_font)
-        if corner:
-            D.draw_cta_corner(d, t, corner, corner_text)
-
+        if toon:
+            img = toon.frame(i)
+        else:
+            img = _classic_frame(t, i, bg, stages, S, spec, sty, cams, theme_colors, chunks, close_t0,
+                                 duration, badge_font, corner, corner_text)
         arr = np.asarray(img, dtype=np.int16) + grain[i % len(grain)]
         enc.stdin.write(np.clip(arr, 0, 255).astype(np.uint8).tobytes())
         if i % 200 == 0:
@@ -197,6 +219,8 @@ def main() -> None:
     if CTA.apply(spec, brand, ROOT):
         print("  CTA: begen/takip cumlesi + kapanis chip'leri eklendi")
     STYLE.apply(spec, brand)                      # kamera/gecis/doku/tempo: senaryo kimliginden
+    if TOON.apply(spec, brand):                   # karton/cizgi film stili (brand.json "cartoon")
+        print("  karton stili: acik (kagit/lacivert, BYTE sunucu, fosforlu kelime, iris)")
     out_dir = ROOT / args.out / spec["id"]
     out_dir.mkdir(parents=True, exist_ok=True)
 

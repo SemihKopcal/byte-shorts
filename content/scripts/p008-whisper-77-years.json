@@ -40,7 +40,8 @@
    "id": "b2",
    "role": "why",
    "say": "Whisper is OpenAI's speech recognition model. It turns audio into text.",
-   "cap": "Speech recognition: audio in, text out"
+   "cap": "Speech recognition: audio in, text out",
+   "kw": "audio in, text out"
   },
   {
    "id": "b3",
@@ -60,13 +61,15 @@
    "id": "b4",
    "role": "why",
    "say": "The audio was collected from the web, in many languages.",
-   "cap": "Collected from the web, many languages"
+   "cap": "Collected from the web, many languages",
+   "kw": "many languages"
   },
   {
    "id": "b5",
    "role": "data",
    "say": "About a third of it is not English.",
-   "cap": "About a third is non-English"
+   "cap": "About a third is non-English",
+   "kw": "non-English"
   },
   {
    "id": "b6",
@@ -116,7 +119,8 @@
    "id": "b9",
    "role": "resolve",
    "say": "Speech recognition was learned by listening, at a scale no person could.",
-   "cap": "Learned at a scale no person could"
+   "cap": "Learned at a scale no person could",
+   "kw": "no person could"
   },
   {
    "id": "b10",

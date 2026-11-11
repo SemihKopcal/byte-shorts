@@ -36,7 +36,8 @@
    "id": "b2",
    "role": "why",
    "say": "Each one is stored in seven bits.",
-   "cap": "7 bits per character"
+   "cap": "7 bits per character",
+   "kw": "7 bits"
   },
   {
    "id": "b3",
@@ -67,7 +68,8 @@
    "id": "b4",
    "role": "data",
    "say": "The first thirty three are control codes.",
-   "cap": "33 control codes"
+   "cap": "33 control codes",
+   "kw": "control codes"
   },
   {
    "id": "b5",
@@ -88,7 +90,8 @@
    "id": "b6",
    "role": "data",
    "say": "Digits, letters and punctuation fill those ninety five.",
-   "cap": "Digits · letters · punctuation"
+   "cap": "Digits · letters · punctuation",
+   "kw": "punctuation"
   },
   {
    "id": "b7",
@@ -108,7 +111,8 @@
    "id": "b8",
    "role": "turn",
    "say": "Extended sets used it for more characters.",
-   "cap": "Up to 128 more"
+   "cap": "Up to 128 more",
+   "kw": "128 more"
   },
   {
    "id": "b9",

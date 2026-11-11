@@ -36,7 +36,8 @@
    "id": "b2",
    "role": "why",
    "say": "Many systems count time in seconds since January first, nineteen seventy.",
-   "cap": "Seconds since 1 January 1970"
+   "cap": "Seconds since 1 January 1970",
+   "kw": "1 January 1970"
   },
   {
    "id": "b3",
@@ -61,7 +62,8 @@
    "id": "b4",
    "role": "why",
    "say": "One bit marks the sign. Thirty one bits hold the value.",
-   "cap": "1 sign bit + 31 value bits"
+   "cap": "1 sign bit + 31 value bits",
+   "kw": "31 value bits"
   },
   {
    "id": "b5",
@@ -126,13 +128,15 @@
    "id": "b9",
    "role": "turn",
    "say": "Systems that read it see December, nineteen oh one.",
-   "cap": "Reads as 13 December 1901"
+   "cap": "Reads as 13 December 1901",
+   "kw": "13 December 1901"
   },
   {
    "id": "b10",
    "role": "resolve",
    "say": "Switch to sixty four bits and the deadline moves two hundred ninety two billion years.",
-   "cap": "64-bit time: about 292 billion years"
+   "cap": "64-bit time: about 292 billion years",
+   "kw": "292 billion years"
   },
   {
    "id": "b11",

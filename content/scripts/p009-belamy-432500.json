@@ -40,7 +40,8 @@
    "id": "b2",
    "role": "why",
    "say": "A Paris collective called Obvious trained it on fifteen thousand portraits.",
-   "cap": "Trained on 15,000 historical portraits"
+   "cap": "Trained on 15,000 historical portraits",
+   "kw": "15,000"
   },
   {
    "id": "b3",
@@ -65,7 +66,8 @@
    "id": "b4",
    "role": "why",
    "say": "Christie's put it up for auction in New York.",
-   "cap": "Christie's, New York, 2018"
+   "cap": "Christie's, New York, 2018",
+   "kw": "Christie's"
   },
   {
    "id": "b5",
@@ -106,7 +108,8 @@
    "id": "b6",
    "role": "data",
    "say": "The hammer fell at three hundred fifty thousand dollars.",
-   "cap": "Hammer price: $350,000"
+   "cap": "Hammer price: $350,000",
+   "kw": "Hammer price"
   },
   {
    "id": "b7",
@@ -130,7 +133,8 @@
    "id": "b9",
    "role": "resolve",
    "say": "A machine made the image. A room of bidders set the price.",
-   "cap": "Machine made it. Bidders priced it."
+   "cap": "Machine made it. Bidders priced it.",
+   "kw": "Bidders priced it"
   },
   {
    "id": "b10",

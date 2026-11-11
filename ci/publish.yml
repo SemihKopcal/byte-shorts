@@ -25,13 +25,13 @@ jobs:
     permissions:
       contents: write          # published.json'u geri yazmak icin
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       # apt DEGIL: runner'in Ubuntu aynasi 50 KB/s'ye dusup kosuyu 40 dakikalik
       # zaman asimina soktu. Ayni ikililer GitHub release'inden 15 saniyede
       # geliyor, ustelik cache'lenince hic inmiyor.
       - name: arac cache
         id: tools
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: |
             ~/.local/bin
@@ -42,7 +42,7 @@ jobs:
       - name: ffmpeg + fontlar
         run: bash tools/setup_runner.sh
 
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v7
         with:
           python-version: "3.11"
           cache: pip
@@ -61,7 +61,7 @@ jobs:
 
       - name: ses modeli cache
         id: voice
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: voices
           key: piper-en-us-ryan-high-v1

@@ -36,7 +36,8 @@
    "id": "b2",
    "role": "why",
    "say": "The context window is everything the model can reference while replying.",
-   "cap": "Everything it can reference"
+   "cap": "Everything it can reference",
+   "kw": "reference"
   },
   {
    "id": "b3",
@@ -67,7 +68,8 @@
    "id": "b4",
    "role": "data",
    "say": "OpenAI defines it as the maximum tokens in a single request.",
-   "cap": "Max tokens in one request"
+   "cap": "Max tokens in one request",
+   "kw": "Max tokens"
   },
   {
    "id": "b5",
@@ -126,19 +128,22 @@
    "id": "b7",
    "role": "turn",
    "say": "Chat apps can manage a full window by dropping the oldest turns first.",
-   "cap": "Oldest turns drop first"
+   "cap": "Oldest turns drop first",
+   "kw": "Oldest turns"
   },
   {
    "id": "b8",
    "role": "turn",
    "say": "Forgetting here means old text is no longer in the window.",
-   "cap": "Forgetting = out of the window"
+   "cap": "Forgetting = out of the window",
+   "kw": "out of the window"
   },
   {
    "id": "b9",
    "role": "resolve",
    "say": "Windows are measured in tokens, so how much fits depends on the text.",
-   "cap": "Measured in tokens"
+   "cap": "Measured in tokens",
+   "kw": "tokens"
   },
   {
    "id": "b10",

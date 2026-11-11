@@ -40,13 +40,15 @@
    "id": "b2",
    "role": "why",
    "say": "Making a model bigger does not automatically make it follow instructions.",
-   "cap": "Bigger is not inherently better at following intent"
+   "cap": "Bigger is not inherently better at following intent",
+   "kw": "following intent"
   },
   {
    "id": "b3",
    "role": "why",
    "say": "Parameters are the adjustable numbers inside a model.",
-   "cap": "Parameters: a model's adjustable numbers"
+   "cap": "Parameters: a model's adjustable numbers",
+   "kw": "adjustable numbers"
   },
   {
    "id": "b4",
@@ -71,7 +73,9 @@
    "id": "b5",
    "role": "data",
    "say": "In human evaluations, its outputs were preferred over the big model's.",
-   "cap": "Human evaluators preferred the small model"
+   "cap": "Human evaluators preferred the small model",
+   "kw": "preferred",
+   "mark": "check"
   },
   {
    "id": "b6",
@@ -119,7 +123,8 @@
    "id": "b9",
    "role": "resolve",
    "say": "Training on what people prefer can beat adding parameters.",
-   "cap": "Human feedback can beat raw size"
+   "cap": "Human feedback can beat raw size",
+   "kw": "beat raw size"
   },
   {
    "id": "b10",

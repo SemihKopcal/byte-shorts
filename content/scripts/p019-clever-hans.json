@@ -37,25 +37,29 @@
    "id": "b2",
    "role": "why",
    "say": "His trainer, Wilhelm von Osten, asked questions. Hans answered by tapping a hoof.",
-   "cap": "Questions in. Taps out."
+   "cap": "Questions in. Taps out.",
+   "kw": "Taps out"
   },
   {
    "id": "b3",
    "role": "why",
    "say": "In nineteen oh four, a panel of thirteen found no trick.",
-   "cap": "1904: 13-member panel, no trick"
+   "cap": "1904: 13-member panel, no trick",
+   "kw": "no trick"
   },
   {
    "id": "b4",
    "role": "data",
    "say": "Then a student, Oskar Pfungst, ran controlled tests.",
-   "cap": "Oskar Pfungst, 1907 report"
+   "cap": "Oskar Pfungst, 1907 report",
+   "kw": "Oskar Pfungst"
   },
   {
    "id": "b5",
    "role": "data",
    "say": "With the questioner in view, Hans got fifty of fifty six right.",
-   "cap": "Questioner visible: 50 of 56"
+   "cap": "Questioner visible: 50 of 56",
+   "kw": "50 of 56"
   },
   {
    "id": "b6",
@@ -119,7 +123,8 @@
    "id": "b9",
    "role": "resolve",
    "say": "Researchers use the same label for models that are right for the wrong reason.",
-   "cap": "The Clever Hans effect, in AI"
+   "cap": "The Clever Hans effect, in AI",
+   "kw": "Clever Hans effect"
   },
   {
    "id": "b10",

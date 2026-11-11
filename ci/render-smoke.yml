@@ -45,13 +45,13 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           persist-credentials: false
 
       # daily.yml ile AYNI anahtarlar: main'de isinmis cache'i okur, indirme beklemez.
       - name: arac cache
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: |
             ~/.local/bin
@@ -62,7 +62,7 @@ jobs:
       - name: ffmpeg + fontlar
         run: bash tools/setup_runner.sh
 
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v7
         with:
           python-version: "3.11"
           cache: pip
@@ -71,7 +71,7 @@ jobs:
 
       - name: ses modeli cache
         id: voice
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: voices
           key: piper-en-us-ryan-high-v1
@@ -108,7 +108,7 @@ jobs:
 
       - name: videoyu artifact olarak sakla (yalniz PR)
         if: github.event_name == 'pull_request'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: render-smoke
           path: out/*/*.mp4

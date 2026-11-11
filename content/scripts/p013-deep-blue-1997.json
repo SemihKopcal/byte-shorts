@@ -40,13 +40,16 @@
    "id": "b2",
    "role": "why",
    "say": "IBM designed Deep Blue to play chess.",
-   "cap": "IBM's Deep Blue"
+   "cap": "IBM's Deep Blue",
+   "kw": "Deep Blue"
   },
   {
    "id": "b3",
    "role": "why",
    "say": "In nineteen ninety six, Deep Blue one lost the match four to two.",
-   "cap": "1996: lost 2 – 4"
+   "cap": "1996: lost 2 – 4",
+   "kw": "lost",
+   "mark": "x"
   },
   {
    "id": "b4",
@@ -91,7 +94,8 @@
    "id": "b6",
    "role": "data",
    "say": "In May nineteen ninety seven, the rematch ran six games.",
-   "cap": "May 1997: six games"
+   "cap": "May 1997: six games",
+   "kw": "six games"
   },
   {
    "id": "b7",
@@ -125,13 +129,16 @@
    "id": "b8",
    "role": "turn",
    "say": "The deciding sixth game lasted only nineteen moves.",
-   "cap": "Game 6: 19 moves"
+   "cap": "Game 6: 19 moves",
+   "kw": "19 moves"
   },
   {
    "id": "b9",
    "role": "resolve",
    "say": "Final score: three and a half to two and a half.",
-   "cap": "Final: 3.5 – 2.5"
+   "cap": "Final: 3.5 – 2.5",
+   "kw": "3.5 – 2.5",
+   "mark": "check"
   },
   {
    "id": "b10",
