@@ -1,12 +1,12 @@
 # syntax=docker/dockerfile:1
 # Bagimliliklar ayri katmanda kurulur; son imajda derleyici/pip onbellegi yok.
-FROM python:3.13-slim AS build
+FROM python:3.15-slim AS build
 ENV PIP_NO_CACHE_DIR=1 PIP_DISABLE_PIP_VERSION_CHECK=1
 WORKDIR /w
 COPY requirements.txt .
 RUN python -m venv /opt/venv && /opt/venv/bin/pip install --no-compile -r requirements.txt
 
-FROM python:3.13-slim
+FROM python:3.15-slim
 ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1 PATH=/opt/venv/bin:$PATH
 # Yetkisiz, kabuksuz, ev dizinsiz kullanici. /data: SQLite (adlandirilmis volume).
 RUN useradd --system --uid 10001 --user-group --no-create-home --shell /usr/sbin/nologin panel \
