@@ -62,7 +62,8 @@
    "id": "b4",
    "role": "data",
    "say": "Faithfulness hallucination: the output diverges from the user's input, or from itself.",
-   "cap": "Faithfulness: wrong about the input"
+   "cap": "Faithfulness: wrong about the input",
+   "kw": "the input"
   },
   {
    "id": "b5",
@@ -92,25 +93,29 @@
    "id": "b6",
    "role": "data",
    "say": "In the data: misinformation and biases in the pretraining text.",
-   "cap": "Data: misinformation and bias"
+   "cap": "Data: misinformation and bias",
+   "kw": "misinformation"
   },
   {
    "id": "b7",
    "role": "turn",
    "say": "In training, tuning on knowledge the model does not have is a listed cause.",
-   "cap": "Training: tuning past its knowledge"
+   "cap": "Training: tuning past its knowledge",
+   "kw": "past its knowledge"
   },
   {
    "id": "b8",
    "role": "turn",
    "say": "At generation time, decoding choices and over-confidence add to it.",
-   "cap": "Inference: decoding, over-confidence"
+   "cap": "Inference: decoding, over-confidence",
+   "kw": "over-confidence"
   },
   {
    "id": "b9",
    "role": "resolve",
    "say": "An earlier survey adds that sampling for diversity can raise hallucination rates.",
-   "cap": "Diverse sampling can raise it"
+   "cap": "Diverse sampling can raise it",
+   "kw": "Diverse sampling"
   },
   {
    "id": "b10",

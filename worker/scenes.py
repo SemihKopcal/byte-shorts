@@ -187,7 +187,7 @@ def bars(d, t, t0, t1, data):
                        fill=D.fade(col, la), anchor="lt")
             else:
                 d.text((bx - 20, yy + 58), lab, font=D.F_DISP(44),
-                       fill=D.fade((10, 10, 16), la), anchor="rt")
+                       fill=D.fade(D.ON_ACCENT, la), anchor="rt")
 
 
 def counter(d, t, t0, t1, data):
@@ -317,7 +317,7 @@ def byte_says(d, t, t0, t1, data):
     # 1.25 olcek ~ 500px govde: dikey karede BYTE'in okunur oldugu en kucuk boy.
     # 0.72'de thumbnail boyutunda silik bir leke oluyordu.
     cy = MID - 170 + D.bob(t)
-    draw_byte(d, MIDX, cy, 1.25 * (0.92 + 0.08 * a), data.get("pose", "point_up"),
+    D.byte(d, MIDX, cy, 1.25 * (0.92 + 0.08 * a), data.get("pose", "point_up"),
               _CURSOR.get(data.get("cursor", "mint"), B_MINT),
               D.blink_on(t), 1.0)
     if data.get("line"):
@@ -347,7 +347,7 @@ def close(d, t, t0, t1, data):
     # CTA konusulurken BYTE sagi gosterir (Shorts'un begen/abone dugmeleri sagda)
     pose = "point_r" if cta_t0 is not None and t >= cta_t0 else "idle"
     # BYTE once, handle en altta: ikisi de 1400'un (altyazi bandi) ustunde kalmali
-    draw_byte(d, MIDX, y + 480 + D.bob(t, 4), 0.62, pose, B_MINT, D.blink_on(t))
+    D.byte(d, MIDX, y + 480 + D.bob(t, 4), 0.62, pose, B_MINT, D.blink_on(t))
     if h > 0.01 and data.get("handle"):
         D.tracked(d, (MIDX, y + 690), str(data["handle"]).upper(), D.F_SEMI(36),
                   D.fade(D.MUTE, h), track=8, anchor="mt")

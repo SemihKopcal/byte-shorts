@@ -60,7 +60,7 @@ jobs:
       HAS_IG: ${{ secrets.INSTAGRAM_TOKEN != '' && secrets.INSTAGRAM_USER_ID != '' }}
       HAS_TT: ${{ secrets.TIKTOK_REFRESH_TOKEN != '' && secrets.TIKTOK_CLIENT_KEY != '' && secrets.TIKTOK_CLIENT_SECRET != '' }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       # ── senaryo: HER SEYDEN ONCE ──────────────────────────────────────
       # pick_script yalniz standart kutuphane kullaniyor, kurulum beklemez.
@@ -89,7 +89,7 @@ jobs:
       # geliyor, cache'lenince hic inmiyor.
       - name: arac cache
         id: tools
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: |
             ~/.local/bin
@@ -100,7 +100,7 @@ jobs:
       - name: ffmpeg + fontlar
         run: bash tools/setup_runner.sh
 
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v7
         with:
           python-version: "3.11"
           cache: pip
@@ -110,7 +110,7 @@ jobs:
       # 120 MB model her kosuda indirilmesin
       - name: ses modeli cache
         id: voice
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: voices
           key: piper-en-us-ryan-high-v1
@@ -293,7 +293,7 @@ jobs:
       # Panel modunda yuklenmez: public depoda artifact'i de herhangi bir GitHub hesabi indirebilir.
       - name: artifact
         if: steps.render.outcome == 'success' && vars.PANEL_MODE != 'on'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: video-${{ github.run_number }}
           path: |

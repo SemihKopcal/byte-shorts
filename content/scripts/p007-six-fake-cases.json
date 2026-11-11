@@ -55,7 +55,8 @@
    "id": "b3",
    "role": "why",
    "say": "One lawyer had used Chat G.P.T. to help research it.",
-   "cap": "ChatGPT helped with the research"
+   "cap": "ChatGPT helped with the research",
+   "kw": "ChatGPT"
   },
   {
    "id": "b4",
@@ -75,13 +76,16 @@
    "id": "b5",
    "role": "data",
    "say": "The judge found the lawyers acted in bad faith.",
-   "cap": "Judge: bad faith"
+   "cap": "Judge: bad faith",
+   "kw": "bad faith",
+   "mark": "x"
   },
   {
    "id": "b6",
    "role": "data",
    "say": "They had kept defending the fake opinions after the court questioned them.",
-   "cap": "They kept defending the cases"
+   "cap": "They kept defending the cases",
+   "kw": "defending"
   },
   {
    "id": "b7",
@@ -108,13 +112,16 @@
     "pose": "idle",
     "cursor": "mint",
     "line": "Tool: allowed. Checking: required."
-   }
+   },
+   "kw": "not improper",
+   "mark": "check"
   },
   {
    "id": "b9",
    "role": "turn",
    "say": "Lawyers still have to make sure the filing is accurate.",
-   "cap": "The lawyer still checks"
+   "cap": "The lawyer still checks",
+   "kw": "still checks"
   },
   {
    "id": "b10",

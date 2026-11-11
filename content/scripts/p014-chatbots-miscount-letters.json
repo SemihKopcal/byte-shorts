@@ -36,19 +36,22 @@
    "id": "b2",
    "role": "why",
    "say": "Most models do not read text as letters. They read tokens.",
-   "cap": "Models read tokens"
+   "cap": "Models read tokens",
+   "kw": "read tokens"
   },
   {
    "id": "b3",
    "role": "why",
    "say": "A tokenizer cuts text into pieces before the model sees it.",
-   "cap": "Tokenizer: text → pieces"
+   "cap": "Tokenizer: text → pieces",
+   "kw": "pieces"
   },
   {
    "id": "b4",
    "role": "data",
    "say": "Here is one real tokenizer, Bert base uncased, from the Hugging Face docs.",
-   "cap": "bert-base-uncased"
+   "cap": "bert-base-uncased",
+   "kw": "bert-base-uncased"
   },
   {
    "id": "b5",
@@ -89,7 +92,8 @@
    "id": "b7",
    "role": "turn",
    "say": "Pieces hide spelling, but a twenty twenty four study found a stronger pattern.",
-   "cap": "Study, December 2024"
+   "cap": "Study, December 2024",
+   "kw": "December 2024"
   },
   {
    "id": "b8",
@@ -116,7 +120,9 @@
    "id": "b9",
    "role": "resolve",
    "say": "Most models failed once a letter appeared more than twice.",
-   "cap": "More than two repeats: most models fail"
+   "cap": "More than two repeats: most models fail",
+   "kw": "most models fail",
+   "mark": "x"
   },
   {
    "id": "b10",

@@ -36,13 +36,15 @@
    "id": "b2",
    "role": "why",
    "say": "A model scores every possible next word, then picks one.",
-   "cap": "Score every word. Pick one."
+   "cap": "Score every word. Pick one.",
+   "kw": "Score every word"
   },
   {
    "id": "b3",
    "role": "why",
    "say": "A setting called temperature divides those scores before they become odds.",
-   "cap": "scores ÷ temperature → odds"
+   "cap": "scores ÷ temperature → odds",
+   "kw": "temperature"
   },
   {
    "id": "b4",
@@ -135,13 +137,15 @@
    "id": "b8",
    "role": "turn",
    "say": "Even then, small variations can still occur.",
-   "cap": "Mostly deterministic, not guaranteed"
+   "cap": "Mostly deterministic, not guaranteed",
+   "kw": "not guaranteed"
   },
   {
    "id": "b9",
    "role": "resolve",
    "say": "Temperature adds no knowledge. It only reshapes the odds.",
-   "cap": "Same scores. Different odds."
+   "cap": "Same scores. Different odds.",
+   "kw": "Different odds"
   },
   {
    "id": "b10",

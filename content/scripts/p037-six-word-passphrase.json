@@ -40,13 +40,15 @@
    "id": "b2",
    "role": "why",
    "say": "The EFF list has seven thousand seven hundred seventy six words.",
-   "cap": "7,776 words"
+   "cap": "7,776 words",
+   "kw": "7,776 words"
   },
   {
    "id": "b3",
    "role": "why",
    "say": "Five dice choose each word.",
-   "cap": "5 dice per word"
+   "cap": "5 dice per word",
+   "kw": "5 dice"
   },
   {
    "id": "b4",
@@ -77,7 +79,8 @@
    "id": "b5",
    "role": "data",
    "say": "Each word adds about twelve point nine bits.",
-   "cap": "≈ 12.9 bits per word"
+   "cap": "≈ 12.9 bits per word",
+   "kw": "12.9 bits"
   },
   {
    "id": "b6",
@@ -131,13 +134,16 @@
    "id": "b8",
    "role": "turn",
    "say": "Words must be chosen randomly, not by taste.",
-   "cap": "Random, not clever"
+   "cap": "Random, not clever",
+   "kw": "Random",
+   "mark": "check"
   },
   {
    "id": "b9",
    "role": "resolve",
    "say": "Strength comes from list size and word count.",
-   "cap": "List size × word count"
+   "cap": "List size × word count",
+   "kw": "word count"
   },
   {
    "id": "b10",

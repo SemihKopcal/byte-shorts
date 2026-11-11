@@ -40,7 +40,8 @@
    "id": "b2",
    "role": "why",
    "say": "Models do not read words. They read chunks called tokens.",
-   "cap": "Models read tokens, not words"
+   "cap": "Models read tokens, not words",
+   "kw": "tokens, not words"
   },
   {
    "id": "b3",
@@ -65,13 +66,15 @@
    "id": "b4",
    "role": "data",
    "say": "One token is about four characters of English.",
-   "cap": "1 token ≈ 4 characters"
+   "cap": "1 token ≈ 4 characters",
+   "kw": "4 characters"
   },
   {
    "id": "b5",
    "role": "data",
    "say": "That is about three quarters of a word.",
-   "cap": "1 token ≈ 0.75 words"
+   "cap": "1 token ≈ 0.75 words",
+   "kw": "0.75 words"
   },
   {
    "id": "b6",
@@ -124,7 +127,8 @@
    "id": "b8",
    "role": "turn",
    "say": "Other languages can need more tokens per character.",
-   "cap": "Not every language costs the same"
+   "cap": "Not every language costs the same",
+   "kw": "Not every language"
   },
   {
    "id": "b9",

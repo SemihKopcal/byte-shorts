@@ -109,7 +109,8 @@
    "id": "b5",
    "role": "data",
    "say": "Two times two is four.",
-   "cap": "2 × 2 = 4"
+   "cap": "2 × 2 = 4",
+   "kw": "2 × 2 = 4"
   },
   {
    "id": "b6",
@@ -179,7 +180,8 @@
    "id": "b9",
    "role": "resolve",
    "say": "Double the width and the height, and you get four times the pixels.",
-   "cap": "2 wide × 2 tall = 4 times"
+   "cap": "2 wide × 2 tall = 4 times",
+   "kw": "2 wide × 2 tall"
   },
   {
    "id": "b10",

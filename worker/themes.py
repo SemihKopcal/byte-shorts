@@ -78,6 +78,37 @@ THEMES = {
 
 NAMES = tuple(THEMES)
 
+# ── karton / cizgi film stili (worker/cartoon.py) ────────────────────────────
+# Bu temalar NAMES'e GIRMEZ: editorial'in sanat yonetmeni ve pick() sadece koyu paletten secer; karton
+# stili brand.json "cartoon" blogundan acilir ve temayi kendisi koyar. Iki yuz: acik kagit ve koyu lacivert
+# (referans videoda sahneler ikisi arasinda gidip geliyor).
+#   panel/panel2/on_accent/track : CTA hapi, kose etiketi, vurgu ustu yazi, ilerleme izi
+#   shadow  : sprite'larin sert ofset golgesi      outline : sprite dis cizgisi
+TOON_THEMES = {
+    "paper": {
+        "bg0": (244, 236, 212), "bg1": (237, 227, 199), "glow": (255, 248, 228),
+        "ink": (28, 26, 34), "mute": (112, 106, 100), "line": (204, 192, 160),
+        "good": (28, 148, 84), "mid": (46, 84, 196), "bad": (214, 48, 48),
+        "tex": "paper",
+        "panel": (252, 250, 242), "panel2": (252, 250, 242), "on_accent": (252, 250, 242),
+        "track": (220, 208, 176), "shadow": (208, 195, 160), "outline": (28, 26, 34),
+    },
+    "ink": {
+        "bg0": (24, 31, 52), "bg1": (19, 25, 44), "glow": (90, 110, 170),
+        "ink": (244, 240, 226), "mute": (150, 158, 184), "line": (52, 62, 92),
+        "good": (88, 214, 141), "mid": (126, 172, 255), "bad": (255, 196, 64),
+        "tex": "none",
+        "panel": (36, 46, 74), "panel2": (36, 46, 74), "on_accent": (20, 24, 40),
+        "track": (44, 54, 84), "shadow": (11, 15, 30), "outline": (244, 240, 226),
+    },
+}
+ALL_THEMES = {**THEMES, **TOON_THEMES}
+
+
+def colors(name: str) -> dict:
+    """Tema renkleri (koyu paletler + karton temalari)."""
+    return ALL_THEMES.get(name, {})
+
 # Konu -> tema egilimi. Gemini senaryoda "theme" alani verebiliyor; vermezse
 # etiketlerden tahmin ediyoruz. Rastgele degil, cunku renk anlam tasiyor:
 # para konusu sicak, hiz konusu soguk.

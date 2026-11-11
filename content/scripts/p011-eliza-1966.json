@@ -37,13 +37,15 @@
    "id": "b2",
    "role": "why",
    "say": "Joseph Weizenbaum built it at M.I.T. and named it ELIZA.",
-   "cap": "Joseph Weizenbaum, MIT"
+   "cap": "Joseph Weizenbaum, MIT",
+   "kw": "Weizenbaum"
   },
   {
    "id": "b3",
    "role": "why",
    "say": "Its best known script, DOCTOR, played a therapist who mirrors the patient.",
-   "cap": "DOCTOR: a Rogerian therapist"
+   "cap": "DOCTOR: a Rogerian therapist",
+   "kw": "Rogerian"
   },
   {
    "id": "b4",
@@ -94,7 +96,8 @@
    "id": "b6",
    "role": "data",
    "say": "The first matching rule supplied a reply, and replies took turns.",
-   "cap": "First matching rule wins"
+   "cap": "First matching rule wins",
+   "kw": "First matching"
   },
   {
    "id": "b7",
@@ -112,13 +115,16 @@
    "id": "b8",
    "role": "turn",
    "say": "Weizenbaum was startled how quickly people treated it as human.",
-   "cap": "People treated it as human, fast"
+   "cap": "People treated it as human, fast",
+   "kw": "as human, fast"
   },
   {
    "id": "b9",
    "role": "resolve",
    "say": "He opposed using programs like it to treat real patients.",
-   "cap": "He opposed it as real therapy"
+   "cap": "He opposed it as real therapy",
+   "kw": "real therapy",
+   "mark": "x"
   },
   {
    "id": "b10",

@@ -42,7 +42,8 @@ if [ "$src" != "--init" ]; then
   [ -f "$mp4" ] || { echo "video yok: $mp4" >&2; exit 1; }
   cp "$mp4" "./${id}.mp4"
   # adlar tarihle basliyor: siralayip en yenilerden $keep tanesini tut
-  ls -1 ./*.mp4 | sort | head -n "-${keep}" | xargs -r rm -f
+  # (macOS'ta `head -n -N` yok; awk iki sistemde de ayni calisir)
+  ls -1 ./*.mp4 | sort | awk -v k="$keep" '{a[NR]=$0} END{for(i=1;i<=NR-k;i++) print a[i]}' | xargs -r rm -f
 fi
 
 git add -A

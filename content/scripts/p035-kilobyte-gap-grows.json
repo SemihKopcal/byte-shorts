@@ -40,7 +40,8 @@
    "id": "b2",
    "role": "why",
    "say": "SI says kilo is exactly one thousand.",
-   "cap": "SI: kilo = 1,000"
+   "cap": "SI: kilo = 1,000",
+   "kw": "kilo = 1,000"
   },
   {
    "id": "b3",
@@ -106,7 +107,8 @@
    "id": "b5",
    "role": "data",
    "say": "The gap starts at two point four percent.",
-   "cap": "kilo vs kibi: 2.4%"
+   "cap": "kilo vs kibi: 2.4%",
+   "kw": "kilo vs kibi"
   },
   {
    "id": "b6",
@@ -124,13 +126,15 @@
    "id": "b8",
    "role": "turn",
    "say": "Kibi means exactly one thousand twenty four.",
-   "cap": "Kibi = 1,024 exactly"
+   "cap": "Kibi = 1,024 exactly",
+   "kw": "exactly"
   },
   {
    "id": "b9",
    "role": "resolve",
    "say": "Kilo keeps meaning one thousand.",
-   "cap": "Kilo stays 1,000"
+   "cap": "Kilo stays 1,000",
+   "kw": "stays 1,000"
   },
   {
    "id": "b10",

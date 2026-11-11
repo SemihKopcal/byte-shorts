@@ -16,7 +16,7 @@ Tasarim kararlari ve SEBEPLERI:
    her poz ayni matematikten cikiyor -- 10.000 videoda da ayni.
 4. IRI KAFA (toplam boyun ~%48'i). Thumbnail boyutunda okunmasi icin.
 """
-from PIL import ImageDraw
+from PIL import Image, ImageDraw, ImageFilter
 
 BODY = (26, 30, 40)
 BODY_HI = (46, 52, 68)
@@ -88,6 +88,32 @@ def draw_byte(d: ImageDraw.ImageDraw, cx: float, cy: float, scale: float = 1.0,
     d.rounded_rectangle((*P(-19, -44), *P(19, -10)), radius=9 * s, fill=BODY)
 
     draw_byte_head(d, cx, cy - 130 * s, scale, cursor, blink, cursor_w)
+
+
+def draw_byte_sticker(d: ImageDraw.ImageDraw, cx: float, cy: float, scale: float = 1.0,
+                      pose: str = "idle", cursor=MINT, blink: bool = True, cursor_w: float = 1.0,
+                      pen=(28, 26, 34), shadow=None, shadow_off: int = 5, px: int = 5, k: int = 2) -> None:
+    """Karton stili: BYTE kalin dis cizgili 'cikartma' olarak (k kat asiri ornekleme, yumusak kenar) +
+    sert ofset golge. Ayni cizim, ustune dis cizgi: koyu govde lacivert zeminde de okunur.
+    d'nin bagli oldugu resme dogrudan yapistirir."""
+    img = d._image                                                   # ImageDraw'in resmi
+    s = scale * k
+    wl, hl = int(480 * s), int(470 * s)
+    cl, ch = wl / 2, 240 * s
+    sp = Image.new("RGBA", (wl, hl), (0, 0, 0, 0))
+    draw_byte(ImageDraw.Draw(sp), cl, ch, s, pose, cursor, blink, cursor_w)
+    m = int(px * k + 8 + shadow_off * k)
+    base = Image.new("RGBA", (wl + 2 * m, hl + 2 * m), (0, 0, 0, 0))
+    base.paste(sp, (m, m))
+    g = base.split()[3].filter(ImageFilter.GaussianBlur(px * k / 1.64)).point(lambda v: 255 if v > 12 else 0)
+    out = Image.new("RGBA", base.size, (0, 0, 0, 0))
+    if shadow is not None and shadow_off:
+        out.paste(Image.new("RGBA", base.size, tuple(shadow) + (255,)), (shadow_off * k, shadow_off * k), g)
+    out.paste(Image.new("RGBA", base.size, tuple(pen) + (255,)), (0, 0), g)
+    out.alpha_composite(base)
+    out = out.resize((max(1, out.width // k), max(1, out.height // k)), Image.LANCZOS)
+    img.paste(out.convert("RGB"), (int(round(cx - (cl + m) / k)), int(round(cy - (ch + m) / k))),
+              out.split()[3])
 
 
 def draw_byte_head(d: ImageDraw.ImageDraw, cx: float, cy: float, scale: float = 1.0,

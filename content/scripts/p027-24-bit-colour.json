@@ -69,19 +69,22 @@
    "id": "b3",
    "role": "why",
    "say": "That is eight bits for each color channel.",
-   "cap": "8 bits per channel"
+   "cap": "8 bits per channel",
+   "kw": "8 bits per channel"
   },
   {
    "id": "b4",
    "role": "data",
    "say": "Eight bits can hold two hundred fifty six different values.",
-   "cap": "2^8 = 256 values"
+   "cap": "2^8 = 256 values",
+   "kw": "256 values"
   },
   {
    "id": "b5",
    "role": "data",
    "say": "So each channel runs from zero to two fifty five.",
-   "cap": "Each channel: 0 to 255"
+   "cap": "Each channel: 0 to 255",
+   "kw": "0 to 255"
   },
   {
    "id": "b6",
@@ -151,7 +154,8 @@
    "id": "b9",
    "role": "resolve",
    "say": "Sixteen million colors is arithmetic on bits.",
-   "cap": "Bits in, colors out"
+   "cap": "Bits in, colors out",
+   "kw": "colors out"
   },
   {
    "id": "b10",

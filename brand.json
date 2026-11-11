@@ -52,5 +52,12 @@
  "style": {
   "_note": "Her videoya senaryo kimliginden turetilen kamera hareketi (yakinlas/uzaklas/kay), gecis efekti (flas, kayma, titresim, odak, zipla), doku ve anlatim temposu (worker/style.py). Rastgele degil: ayni senaryo hep ayni gorunur. enabled=false -> eski gorunum (hep ayni yavas yakinlasma, gecis yok, sabit tempo).",
   "enabled": true
-}
+ },
+
+ "cartoon": {
+  "_note": "Karton/cizgi film stili (worker/cartoon.py): kagit + lacivert zemin, kalin cizgili BYTE sunucu, fosforlu anahtar kelime, elle cizilen tik/X, iris gecisi, krem altyazi. Dikey Short, yalniz senaryodan okuyan seri (G). enabled=false -> eski koyu gorunum. share=0..1: videolarin ne kadari karton olsun (kimlikten turetilir, rastgele degil; 1 = hepsi). alternate=false -> sahneler hep kagit. Beat'e istege bagli alanlar: kw (fosforlu kelime, '' = bu sahnede yok), mark (check | x | none).",
+  "enabled": true,
+  "alternate": true,
+  "share": 1.0
+ }
 }

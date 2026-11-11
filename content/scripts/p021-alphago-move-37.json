@@ -40,7 +40,8 @@
    "id": "b2",
    "role": "why",
    "say": "In March two thousand sixteen, AlphaGo played a five game Go match in Seoul.",
-   "cap": "March 2016 · Seoul · 5 games"
+   "cap": "March 2016 · Seoul · 5 games",
+   "kw": "Seoul"
   },
   {
    "id": "b3",
@@ -66,7 +67,8 @@
    "id": "b4",
    "role": "data",
    "say": "In game two, AlphaGo played move thirty seven.",
-   "cap": "Game 2, move 37"
+   "cap": "Game 2, move 37",
+   "kw": "move 37"
   },
   {
    "id": "b5",
@@ -99,25 +101,30 @@
    "id": "b6",
    "role": "data",
    "say": "The move helped AlphaGo win that game.",
-   "cap": "The move helped win game 2"
+   "cap": "The move helped win game 2",
+   "kw": "helped win"
   },
   {
    "id": "b7",
    "role": "turn",
    "say": "AlphaGo won the match four games to one.",
-   "cap": "Match: 4 – 1"
+   "cap": "Match: 4 – 1",
+   "kw": "4 – 1"
   },
   {
    "id": "b8",
    "role": "turn",
    "say": "A rare move is not the same as a bad move.",
-   "cap": "Rare is not bad"
+   "cap": "Rare is not bad",
+   "kw": "not bad"
   },
   {
    "id": "b9",
    "role": "resolve",
    "say": "The odds were one in ten thousand. The game was won.",
-   "cap": "1 in 10,000. Game won."
+   "cap": "1 in 10,000. Game won.",
+   "kw": "Game won",
+   "mark": "check"
   },
   {
    "id": "b10",

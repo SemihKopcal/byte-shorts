@@ -40,7 +40,8 @@
    "id": "b2",
    "role": "why",
    "say": "Nineteen lines by nineteen lines.",
-   "cap": "19 × 19 = 361 points"
+   "cap": "19 × 19 = 361 points",
+   "kw": "361 points"
   },
   {
    "id": "b3",
@@ -71,13 +72,15 @@
    "id": "b4",
    "role": "data",
    "say": "Many arrangements break the rules.",
-   "cap": "Not every coloring is legal"
+   "cap": "Not every coloring is legal",
+   "kw": "legal"
   },
   {
    "id": "b5",
    "role": "data",
    "say": "Legal positions were counted in twenty sixteen.",
-   "cap": "Counted: 2016"
+   "cap": "Counted: 2016",
+   "kw": "2016"
   },
   {
    "id": "b6",
@@ -111,13 +114,15 @@
    "id": "b8",
    "role": "turn",
    "say": "Ninety powers of ten more.",
-   "cap": "≈ 10^90 times more"
+   "cap": "≈ 10^90 times more",
+   "kw": "10^90 times more"
   },
   {
    "id": "b9",
    "role": "resolve",
    "say": "One position per atom would fall short.",
-   "cap": "Atoms run out first"
+   "cap": "Atoms run out first",
+   "kw": "Atoms run out"
   },
   {
    "id": "b10",

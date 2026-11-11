@@ -36,13 +36,15 @@
    "id": "b2",
    "role": "why",
    "say": "Frank Rosenblatt built the perceptron at the Cornell Aeronautical Laboratory.",
-   "cap": "Frank Rosenblatt, Cornell Aeronautical Lab"
+   "cap": "Frank Rosenblatt, Cornell Aeronautical Lab",
+   "kw": "Rosenblatt"
   },
   {
    "id": "b3",
    "role": "why",
    "say": "The U.S. Office of Naval Research funded the project.",
-   "cap": "Funded by the Office of Naval Research"
+   "cap": "Funded by the Office of Naval Research",
+   "kw": "Naval Research"
   },
   {
    "id": "b4",
@@ -98,7 +100,8 @@
    "id": "b6",
    "role": "data",
    "say": "It learned to tell whether a dot was on the left or right.",
-   "cap": "Task: dot on the left or right"
+   "cap": "Task: dot on the left or right",
+   "kw": "left or right"
   },
   {
    "id": "b7",
@@ -135,13 +138,17 @@
    "id": "b8",
    "role": "turn",
    "say": "In nineteen sixty nine, a book showed single layer perceptrons cannot learn X.O.R.",
-   "cap": "1969: Perceptrons. XOR."
+   "cap": "1969: Perceptrons. XOR.",
+   "kw": "XOR",
+   "mark": "x"
   },
   {
    "id": "b9",
    "role": "resolve",
    "say": "The book contributed to a sharp drop in neural network funding.",
-   "cap": "Funding fell"
+   "cap": "Funding fell",
+   "kw": "Funding fell",
+   "mark": "x"
   },
   {
    "id": "b10",

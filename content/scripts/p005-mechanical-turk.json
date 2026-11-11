@@ -36,7 +36,8 @@
    "id": "b2",
    "role": "why",
    "say": "An inventor built it to impress an empress.",
-   "cap": "Built to impress Empress Maria Theresa"
+   "cap": "Built to impress Empress Maria Theresa",
+   "kw": "Maria Theresa"
   },
   {
    "id": "b3",
@@ -73,13 +74,15 @@
    "id": "b4",
    "role": "data",
    "say": "Its European tour began in seventeen eighty three.",
-   "cap": "European tour from 1783"
+   "cap": "European tour from 1783",
+   "kw": "European tour"
   },
   {
    "id": "b5",
    "role": "data",
    "say": "A later owner took it across America from eighteen twenty six.",
-   "cap": "U.S. tour from 1826"
+   "cap": "U.S. tour from 1826",
+   "kw": "U.S. tour"
   },
   {
    "id": "b6",
@@ -104,7 +107,8 @@
    "id": "b7",
    "role": "turn",
    "say": "When the cabinet was opened, the operator slid out of view.",
-   "cap": "The operator slid out of view"
+   "cap": "The operator slid out of view",
+   "kw": "out of view"
   },
   {
    "id": "b8",

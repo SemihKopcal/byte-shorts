@@ -153,6 +153,13 @@ kötü.
 izleniyor; açık arka plan hem göz yoruyor hem metin kontrastını
 düşürüyor. Çeşitlilik **renkten** gelecek, parlaklıktan değil.
 
+> **Güncelleme (11 Kasım 2026):** karton/çizgi film stili eklendi (`worker/cartoon.py`, `brand.json` >
+> `cartoon`). Açık **kâğıt** yüzü yukarıdaki "koyu kalmalı" kararını bilerek deler: referans kanalların
+> görünümü bu ve temmuz 2026 politikası kalıp üretimi hedefliyor. Göz yorgunluğu riskini azaltan şeyler:
+> kâğıt hep lacivertle **dönüşümlü** (sahne sahne), `share` ile videoların bir kısmı koyu kalabilir, metin
+> kontrastı test ediliyor (`tests/test_cartoon.py`). İzleme süresi/ayrılma ölçümleri kötüleşirse ilk ayar:
+> `share` düşür ya da `alternate` ile lacivert payını artır.
+
 ---
 
 ## 3. Güncel konu motoru  ·  ⬜

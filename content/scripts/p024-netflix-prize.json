@@ -46,7 +46,8 @@
    "id": "b3",
    "role": "why",
    "say": "The grand prize needed ten percent better predictions than its own algorithm, Cinematch.",
-   "cap": "Goal: 10% better than Cinematch"
+   "cap": "Goal: 10% better than Cinematch",
+   "kw": "10% better"
   },
   {
    "id": "b4",
@@ -66,13 +67,15 @@
    "id": "b5",
    "role": "data",
    "say": "Those came from about four hundred eighty thousand users, on seventeen thousand movies.",
-   "cap": "480,189 users · 17,770 movies"
+   "cap": "480,189 users · 17,770 movies",
+   "kw": "17,770 movies"
   },
   {
    "id": "b6",
    "role": "data",
    "say": "More than five thousand teams submitted entries.",
-   "cap": "5,169 teams · 44,014 submissions"
+   "cap": "5,169 teams · 44,014 submissions",
+   "kw": "5,169 teams"
   },
   {
    "id": "b7",
@@ -93,13 +96,15 @@
    "id": "b8",
    "role": "turn",
    "say": "Netflix later said the gains did not justify the engineering effort.",
-   "cap": "Gain vs engineering cost"
+   "cap": "Gain vs engineering cost",
+   "kw": "engineering cost"
   },
   {
    "id": "b9",
    "role": "resolve",
    "say": "Most users were streaming by then, not renting discs.",
-   "cap": "Streaming, not discs"
+   "cap": "Streaming, not discs",
+   "kw": "not discs"
   },
   {
    "id": "b10",

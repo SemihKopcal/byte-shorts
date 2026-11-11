@@ -364,6 +364,44 @@ class ScriptValidation(unittest.TestCase):
         s["beats"][2]["scene"] = "hologram"
         self.assertTrue(any("bilinmeyen sahne" in p for p in self.v(s)))
 
+    def test_keyword_highlight_is_optional_and_checked(self):
+        s = good_spec()
+        s["beats"][1]["kw"] = "per second"                       # cap = "billed per second"
+        s["beats"][1]["mark"] = "check"
+        s["beats"][4]["kw"] = ""                                  # bos kw = otomatik vurguyu kapat
+        self.assertEqual(self.v(s), [])
+
+    def test_keyword_must_be_a_piece_of_the_caption(self):
+        s = good_spec()
+        s["beats"][1]["kw"] = "per minute"
+        self.assertTrue(any("cap'in icinden" in p for p in self.v(s)))
+
+    def test_keyword_length_and_glyphs(self):
+        s = good_spec()
+        s["beats"][3]["cap"] = "price of 60 seconds"
+        s["beats"][3]["kw"] = "price of 60 seconds"             # 19 karakter
+        self.assertTrue(any("en fazla" in p for p in self.v(s)))
+        s = good_spec()
+        s["beats"][1]["cap"] = "billed \u2248 second"
+        s["beats"][1]["kw"] = "\u2248 second"                    # Fredoka'da yok
+        self.assertTrue(any("desteklenmeyen" in p for p in self.v(s)))
+
+    def test_mark_needs_a_keyword_and_a_known_name(self):
+        s = good_spec()
+        s["beats"][1]["mark"] = "check"
+        self.assertTrue(any("mark icin kw gerekli" in p for p in self.v(s)))
+        s = good_spec()
+        s["beats"][1]["kw"] = "per second"
+        s["beats"][1]["mark"] = "star"
+        self.assertTrue(any("gecersiz" in p for p in self.v(s)))
+
+    def test_keyword_rules_match_the_renderer(self):
+        """rules.py ile worker/cartoon.py ayni sinirlari kullanmali (yoksa yazar gecer, render sessizce atar)."""
+        from worker import cartoon
+        self.assertEqual(rules.KW_MAX, cartoon.KW_MAX_CHARS)
+        self.assertEqual(rules.KW_OK.pattern, cartoon._SAFE.pattern)
+        self.assertEqual(set(rules.MARKS) - {"none"}, {"check", "x"})
+
     def test_bad_pose_would_crash_render(self):
         s = good_spec()
         s["beats"][7]["data"]["pose"] = "dance"
