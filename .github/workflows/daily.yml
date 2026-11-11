@@ -60,7 +60,7 @@ jobs:
       HAS_IG: ${{ secrets.INSTAGRAM_TOKEN != '' && secrets.INSTAGRAM_USER_ID != '' }}
       HAS_TT: ${{ secrets.TIKTOK_REFRESH_TOKEN != '' && secrets.TIKTOK_CLIENT_KEY != '' && secrets.TIKTOK_CLIENT_SECRET != '' }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       # ── senaryo: HER SEYDEN ONCE ──────────────────────────────────────
       # pick_script yalniz standart kutuphane kullaniyor, kurulum beklemez.
