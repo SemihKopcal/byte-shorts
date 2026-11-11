@@ -13,4 +13,4 @@ boto3==1.43.126
 # Not: piper-tts ve ffmpeg pip'ten gelmiyor.
 #   ffmpeg  -> apt-get install ffmpeg
 #   piper   -> pip install piper-tts  (veya release binary)
-piper-tts==1.2.0
+piper-tts==1.8.0
