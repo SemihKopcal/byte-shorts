@@ -1,6 +1,6 @@
 # panel-publish workflow'u icin asgari paketler (render araclari gerekmiyor).
 # Surumler requirements.txt ile ayni tutulur; tests/test_workflows.py bunu denetler.
-google-api-python-client==2.151.0
+google-api-python-client==2.201.0
 google-auth==2.36.0
 google-auth-oauthlib==1.2.1
 boto3==1.43.126
