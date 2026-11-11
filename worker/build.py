@@ -25,6 +25,7 @@ from . import cartoon as TOON
 from . import cta as CTA
 from . import fx as FX
 from . import style as STYLE
+from . import voiceover as CLONE
 from .qc import check
 from .synth import synthesize
 
@@ -227,16 +228,25 @@ def main() -> None:
     if args.skip_synth and (out_dir / "timeline.json").exists():
         tl = json.loads((out_dir / "timeline.json").read_text())
     else:
-        if not VOICE.exists():
+        # Klon ses (kendi sesin) varsa Piper hic calismaz; yoksa/bozuksa Piper (brand.json > voice_clone > require
+        # true ise durur: kanalin sesi sessizce degismesin).
+        clone, note = CLONE.find(spec, brand, ROOT)
+        need = CLONE.settings(brand)["require"]
+        if clone is None and need:
+            sys.exit(f"klon ses zorunlu (brand.json > voice_clone > require) ama {note or 'klon ses yok'}: "
+                     f"{CLONE.root(ROOT) / spec['id']}")
+        if note and clone is None:
+            print(f"  {note}")
+        if clone is None and not VOICE.exists():
             sys.exit(f"Ses modeli yok: {VOICE}\n  tools/fetch_voice.sh calistir")
-        print("seslendirme...")
-        tl = synthesize(spec, out_dir, VOICE)
+        print("seslendirme" + (" (klon ses)..." if clone else "..."))
+        tl = synthesize(spec, out_dir, VOICE, clone, need)
         # Yavas tempo videoyu QC sinirina (59 sn) yaklastirirsa varsayilan tempoya don.
         if tl["duration"] > SAFE_SECONDS and STYLE.pace(spec) != STYLE.NEUTRAL_PACE:
             print(f"  sure {tl['duration']:.1f}s > {SAFE_SECONDS:.0f}s: tempo varsayilana donuyor")
             spec["_style"]["pace"] = dict(STYLE.NEUTRAL_PACE)
-            tl = synthesize(spec, out_dir, VOICE)
-    print(f"  sure: {tl['duration']:.2f}s")
+            tl = synthesize(spec, out_dir, VOICE, clone, need)
+    print(f"  sure: {tl['duration']:.2f}s  ses: {tl.get('voice', 'piper')}")
 
     series_mod = importlib.import_module(f".series_{spec['series'].lower()}", __package__)
     video = out_dir / f"{spec['id']}.mp4"

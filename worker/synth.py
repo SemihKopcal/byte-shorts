@@ -16,6 +16,8 @@ import wave
 from functools import lru_cache
 from pathlib import Path
 
+from . import voiceover as CLONE
+
 GAP = 0.18           # beat'ler arasi nefes payi (sn)
 END_PAD = 0.45       # son kelimeden sonra video + ses bu kadar sessiz surer (son kelime kesilmesin)
 SR = 22050
@@ -110,8 +112,13 @@ def _piper(text: str, path: Path, voice: Path, i: int = 0, shift: float = 0.0) -
         return w.getnframes() / w.getframerate()
 
 
-def synthesize(spec: dict, out_dir: Path, voice: Path) -> dict:
-    """Beat'leri seslendirir, tek ses dosyasi + zaman cizelgesi uretir."""
+def synthesize(spec: dict, out_dir: Path, voice: Path, clone: Path | None = None,
+               clone_required: bool = False) -> dict:
+    """Beat'leri seslendirir, tek ses dosyasi + zaman cizelgesi uretir.
+
+    clone: onceden uretilmis klon ses dizini (worker/voiceover.py). Verilirse Piper CALISMAZ;
+    dosyalar kesilip ayni bicime getirilir. Bir dosya bozuksa Piper'a donulur (clone_required ise durur):
+    bir videoda yarisi klon yarisi Piper olmaz."""
     seg = out_dir / "seg"
     seg.mkdir(parents=True, exist_ok=True)
 
@@ -119,6 +126,18 @@ def synthesize(spec: dict, out_dir: Path, voice: Path) -> dict:
     pace = (spec.get("_style") or {}).get("pace") or {}
     shift = float(pace.get("length_delta", 0.0))
     gscale = float(pace.get("gap_scale", 1.0))
+
+    durs = None
+    if clone is not None:
+        try:
+            tempo = CLONE.tempo_for(shift, LENGTH_SCALE)
+            durs = [CLONE.prepare(Path(clone) / f"{b['id']}.wav", seg / f"{i:02d}.wav", SR, tempo)
+                    for i, b in enumerate(beats)]
+        except ValueError as e:
+            if clone_required:
+                raise SystemExit(f"klon ses zorunlu ama kullanilamadi: {e}")
+            print(f"  klon ses kullanilamadi ({e}); Piper'a donuluyor")
+            durs = None
     gaps = [round(_gap_after(b, beats[i + 1] if i + 1 < len(beats) else None) * gscale, 3)
             for i, b in enumerate(beats)]
 
@@ -126,7 +145,10 @@ def synthesize(spec: dict, out_dir: Path, voice: Path) -> dict:
     timeline, parts = [], []
     for i, beat in enumerate(beats):
         p = seg / f"{i:02d}.wav"
-        dur = _piper(beat["say"], p, voice, i, shift) if shift else _piper(beat["say"], p, voice, i)
+        if durs is not None:
+            dur = durs[i]
+        else:
+            dur = _piper(beat["say"], p, voice, i, shift) if shift else _piper(beat["say"], p, voice, i)
         parts.append(p)
 
         words = beat.get("cap", beat["say"]).split()
@@ -173,6 +195,6 @@ def synthesize(spec: dict, out_dir: Path, voice: Path) -> dict:
           "-af", f"highpass=f=80,loudnorm=I=-14:TP=-1.5:LRA=11,apad=whole_dur={duration}",
           "-ar", "48000", "-ac", "2", str(out_dir / "voice.wav")])
 
-    tl = {"duration": duration, "beats": timeline}
+    tl = {"duration": duration, "voice": "clone" if durs is not None else "piper", "beats": timeline}
     (out_dir / "timeline.json").write_text(json.dumps(tl, indent=1))
     return tl

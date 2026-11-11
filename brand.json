@@ -59,5 +59,11 @@
   "enabled": true,
   "alternate": true,
   "share": 1.0
+ },
+
+ "voice_clone": {
+  "_note": "Kendi sesinin klonu (worker/voiceover.py). Sesler Colab'da onceden uretilip private R2'ye konur; render senaryo icin bulursa Piper yerine onu kullanir, bulamazsa Piper. enabled=false -> klon hic kullanilmaz. require=true -> klon ses YOKSA render durur (kanalin sesi sessizce degismesin; ses hazir degilse o gun video cikmaz).",
+  "enabled": true,
+  "require": false
  }
 }
