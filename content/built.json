@@ -10,5 +10,6 @@
  "p008-whisper-77-years",
  "p010-unix-2038",
  "p032-cd-audio-1411",
- "p033-go-more-than-atoms"
+ "p033-go-more-than-atoms",
+ "p012-one-token-four-characters"
 ]
