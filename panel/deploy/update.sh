@@ -61,7 +61,7 @@ git merge-base --is-ancestor "$OLD" "$NEW" \
 
 # ── 2. ne degisiyor ───────────────────────────────────────────────────────────
 say "Degisecek commit'ler ($(git rev-parse --short "$OLD") -> $(git rev-parse --short "$NEW")):"
-git log --oneline "$OLD..$NEW" | head -30
+git --no-pager log --oneline -n 30 "$OLD..$NEW"
 if git diff --quiet "$OLD" "$NEW" -- panel; then
   git merge --ff-only --quiet "$NEW"
   say "panel/ degismedi: yeniden derleme gerekmiyor. Kod ilerletildi, panel oldugu gibi calisiyor."
