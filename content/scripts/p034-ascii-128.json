@@ -20,7 +20,7 @@
   {
    "id": "b1",
    "role": "hook",
-   "say": "ASCII has exactly one hundred twenty eight characters.",
+   "say": "Seven bits once held every English letter, digit and punctuation mark.",
    "cap": "128 characters",
    "scene": "title",
    "data": {

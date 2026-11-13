@@ -84,6 +84,12 @@ class Settings(unittest.TestCase):
             self.assertFalse(C.settings({"cta": {"skip_experiment_scripts": v}})["skip_experiment_scripts"], v)
         self.assertTrue(C.settings({"cta": {"skip_experiment_scripts": True}})["skip_experiment_scripts"])
 
+    def test_spoken_defaults_on_and_only_literal_false_silences(self):
+        self.assertTrue(C.settings({"cta": {}})["spoken"])
+        for v in (0, "false", "no", None, [], {}):
+            self.assertTrue(C.settings({"cta": {"spoken": v}})["spoken"], v)
+        self.assertFalse(C.settings({"cta": {"spoken": False}})["spoken"])
+
     def test_voice_is_normalised_and_capped(self):
         cfg = C.settings({"cta": {"voice": "  Like   it\n now  "}})
         self.assertEqual(cfg["voice"], "Like it now")
@@ -114,6 +120,7 @@ class Settings(unittest.TestCase):
         brand = json.loads((ROOT / "brand.json").read_text())
         cfg = C.settings(brand)
         self.assertTrue(cfg["enabled"])
+        self.assertFalse(cfg["spoken"], "13 Kasim karari: sonda konusulan CTA yok (olu zaman + dongu)")
         self.assertFalse(cfg["skip_experiment_scripts"], "deney videolari da CTA'li (iki kola ayni)")
         self.assertLessEqual(len(cfg["voice"].split()), 10, "sesli cumle kisa kalmali")
         self.assertIn("Byte", cfg["voice"], "Piper icin 'Byte' yazilmali (BYTE harf harf okunur)")
@@ -208,6 +215,40 @@ class Decision(unittest.TestCase):
         self.assertEqual(s["beats"][-2]["data"]["lines"], ["Length sets the bill."], "eski veri korunmali")
         self.assertTrue(C.active(s))
         self.assertEqual(s["_cta"]["corner"]["text"], "LIKE · FOLLOW")
+
+    def test_silent_mode_adds_card_and_corner_but_no_spoken_beat(self):
+        b = copy.deepcopy(BRAND)
+        b["cta"]["spoken"] = False
+        with root_with(None) as t:
+            s = spec_g()
+            n = len(s["beats"])
+            self.assertTrue(C.apply(s, b, Path(t)))
+        self.assertEqual(len(s["beats"]), n, "sessiz kipte yeni beat yok")
+        self.assertNotEqual(s["beats"][-1]["id"], C.BEAT_ID)
+        self.assertEqual(s["beats"][-1]["data"]["cta"], {"like": "LIKE", "follow": "FOLLOW BYTE"})
+        self.assertEqual(s["beats"][-1]["data"]["lines"], ["Length sets the bill."], "eski veri korunmali")
+        self.assertTrue(C.active(s))
+        self.assertFalse(s["_cta"]["spoken"])
+        self.assertEqual(s["_cta"]["corner"]["text"], "LIKE · FOLLOW")
+
+    def test_silent_mode_is_idempotent_and_does_not_need_a_voice_line(self):
+        b = copy.deepcopy(BRAND)
+        b["cta"]["spoken"] = False
+        b["cta"]["voice"] = ""
+        with root_with(None) as t:
+            s = spec_g()
+            self.assertTrue(C.apply(s, b, Path(t)))
+            once = copy.deepcopy(s)
+            self.assertFalse(C.apply(s, b, Path(t)), "ikinci kez dokunmamali (beat yok, _cta isareti var)")
+        self.assertEqual(s, once)
+
+    def test_spoken_mode_with_an_empty_voice_still_means_no_cta(self):
+        b = copy.deepcopy(BRAND)
+        b["cta"]["voice"] = ""
+        with root_with(None) as t:
+            s = spec_g()
+            self.assertFalse(C.apply(s, b, Path(t)))
+            self.assertEqual(s, spec_g())
 
     def test_apply_is_idempotent(self):
         with root_with(None) as t:
@@ -412,6 +453,28 @@ class Drawing(unittest.TestCase):
         im, d = _canvas()
         S.close(d, t, 0.0, 6.0, data)
         return im
+
+    def test_silent_cta_chips_come_from_the_close_scene_not_from_a_beat(self):
+        """cta.spoken=false: 'cta' beat'i yok; chip'ler kapanis sahnesi baslayinca (SILENT_CTA_DELAY) cikar."""
+        b = copy.deepcopy(BRAND)
+        b["cta"]["spoken"] = False
+        silent, plain = spec_g(), spec_g()
+        with root_with(None) as t:
+            C.apply(silent, b, Path(t))
+        S_, t_ = {}, 0.0
+        for bt in plain["beats"]:
+            S_[bt["id"]] = (t_, t_ + 2.0)
+            t_ += 2.2
+
+        def frame(spec, t):
+            fn = stages(spec, S_, t_ + 0.45)[-1][2]
+            im, d = _canvas()
+            fn(d, t, S_, spec)
+            return im
+
+        t0 = stages(plain, S_, t_ + 0.45)[-1][0]
+        self.assertIsNone(_changed(frame(silent, t0 + 0.1), frame(plain, t0 + 0.1)), "chip'ler gec cikmali")
+        self.assertIsNotNone(_changed(frame(silent, t0 + 2.5), frame(plain, t0 + 2.5)), "chip'ler cikmali")
 
     def test_chips_appear_only_with_cta_and_after_it_starts(self):
         before = self.close_frame(1.0, self.CARD)
