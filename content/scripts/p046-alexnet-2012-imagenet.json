@@ -1,0 +1,271 @@
+{
+ "id": "p046-alexnet-2012-imagenet",
+ "series": "G",
+ "lang": "en",
+ "format": "story",
+ "theme": "slate",
+ "title": "A neural network won ImageNet 2012 by about ten points",
+ "summary": "In the 2012 ImageNet contest, a deep convolutional network from the University of Toronto reached a 15.3% top-5 error rate, compared with 26.2% for the second-best entry. The contest report called the team the undisputed winner.",
+ "tags": [
+  "alexnet",
+  "imagenet",
+  "deep learning",
+  "ai history"
+ ],
+ "sources": [
+  "https://arxiv.org/pdf/1409.0575",
+  "https://helios2.mi.parisdescartes.fr/~lomn/Cours/RNVO/AlexNet12.pdf"
+ ],
+ "beats": [
+  {
+   "id": "b1",
+   "role": "hook",
+   "say": "One neural network won an image contest by roughly ten points.",
+   "cap": "A neural network won by ~10 points",
+   "scene": "contrast",
+   "data": {
+    "left": {
+     "label": "Runner-up error",
+     "value": "26.2%",
+     "tone": "bad"
+    },
+    "right": {
+     "label": "Toronto network",
+     "value": "15.3%",
+     "tone": "good"
+    },
+    "verdict": "ImageNet 2012"
+   }
+  },
+  {
+   "id": "b2",
+   "role": "why",
+   "say": "The ImageNet contest asked programs to name objects in photos.",
+   "cap": "Name the object in each photo",
+   "kw": "Name the object"
+  },
+  {
+   "id": "b3",
+   "role": "why",
+   "say": "It used one thousand categories and about one point two million training images.",
+   "cap": "1,000 categories · 1.2M images",
+   "kw": "1,000 categories",
+   "scene": "counter",
+   "data": {
+    "from": 0,
+    "to": 1.2,
+    "dp": 1,
+    "suffix": "M images",
+    "note": "1,000 categories"
+   }
+  },
+  {
+   "id": "b4",
+   "role": "data",
+   "say": "A guess counted as right if the answer was among five labels.",
+   "cap": "Right answer in the top 5",
+   "kw": "top 5",
+   "scene": "flow",
+   "data": {
+    "nodes": [
+     {
+      "label": "Photo"
+     },
+     {
+      "label": "Five guesses"
+     },
+     {
+      "label": "Right answer inside",
+      "tone": "good"
+     }
+    ]
+   }
+  },
+  {
+   "id": "b5",
+   "role": "data",
+   "say": "The winning network came from the University of Toronto.",
+   "cap": "University of Toronto",
+   "kw": "Toronto"
+  },
+  {
+   "id": "b6",
+   "role": "data",
+   "say": "It had sixty million parameters and trained on two graphics cards.",
+   "cap": "60M parameters · 2 GPUs",
+   "kw": "60M parameters",
+   "scene": "layers",
+   "data": {
+    "layers": [
+     {
+      "label": "Training time",
+      "sub": "5-6 days"
+     },
+     {
+      "label": "Graphics cards",
+      "sub": "two GTX 580"
+     },
+     {
+      "label": "Parameters",
+      "sub": "60 million"
+     }
+    ]
+   }
+  },
+  {
+   "id": "b7",
+   "role": "turn",
+   "say": "It scored fifteen point three percent error, and the runner up twenty six point two.",
+   "cap": "15.3% vs 26.2%",
+   "kw": "15.3%",
+   "scene": "bars",
+   "data": {
+    "rows": [
+     {
+      "name": "Runner-up",
+      "v": 26.2,
+      "label": "26.2%",
+      "tone": "bad"
+     },
+     {
+      "name": "Toronto network",
+      "v": 15.3,
+      "label": "15.3%",
+      "tone": "good"
+     }
+    ]
+   }
+  },
+  {
+   "id": "b8",
+   "role": "turn",
+   "say": "The contest report called that team the undisputed winner.",
+   "cap": "Undisputed winner",
+   "kw": "Undisputed",
+   "mark": "check"
+  },
+  {
+   "id": "b9",
+   "role": "resolve",
+   "say": "It was a large, deep convolutional neural network trained on pixel values.",
+   "cap": "A large, deep convolutional network"
+  },
+  {
+   "id": "b10",
+   "role": "resolve",
+   "say": "Same contest, same test, a gap of roughly ten points.",
+   "cap": "Same test. ~10 points apart.",
+   "scene": "close",
+   "data": {
+    "lines": [
+     "Same contest.",
+     "Roughly ten points apart."
+    ],
+    "accent": "good"
+   }
+  }
+ ],
+ "claims": [
+  {
+   "shown": "26.2%",
+   "expr": null,
+   "value": null,
+   "source": 1,
+   "note": "AlexNet paper abstract: '26.2% achieved by the second-best entry'; ILSVRC report Table 5 lists ISI at 26.2%"
+  },
+  {
+   "shown": "15.3%",
+   "expr": null,
+   "value": null,
+   "source": 1,
+   "note": "AlexNet paper abstract: a variant entered in ILSVRC-2012 achieved a winning top-5 test error rate of 15.3% (the ILSVRC report's Table 5 lists SuperVision at 16.4%)"
+  },
+  {
+   "shown": "1,000",
+   "expr": null,
+   "value": null,
+   "source": 0,
+   "note": "ILSVRC report, Section 3.1.4: 1000 object classes"
+  },
+  {
+   "shown": "1.2 million",
+   "expr": null,
+   "value": null,
+   "source": 0,
+   "note": "ILSVRC report: approximately 1.2 million training images"
+  },
+  {
+   "shown": "60 million",
+   "expr": null,
+   "value": null,
+   "source": 1,
+   "note": "AlexNet paper: the network has 60 million parameters"
+  },
+  {
+   "shown": "580",
+   "expr": null,
+   "value": null,
+   "source": 1,
+   "note": "AlexNet paper: trained on two NVIDIA GTX 580 3GB GPUs; training took 5-6 days"
+  }
+ ],
+ "facts": [
+  {
+   "claim": "The 2012 ImageNet classification task used 1000 object classes and about 1.2 million training images",
+   "source": 0,
+   "note": "ILSVRC report (arXiv 1409.0575), Section 3.1.4: '1000 object classes and approximately 1.2 million training images'"
+  },
+  {
+   "claim": "A prediction counts as correct if the right label is among five guesses (top-5 error)",
+   "source": 0,
+   "note": "ILSVRC report, Section 4.1: an algorithm may return five labels and is considered correct if the ground-truth label appears among them"
+  },
+  {
+   "claim": "The AlexNet paper reports a winning top-5 test error of 15.3% in ILSVRC-2012 against 26.2% for the second-best entry; the work was done at the University of Toronto",
+   "source": 1,
+   "note": "AlexNet paper abstract: 'winning top-5 test error rate of 15.3%, compared to 26.2% achieved by the second-best entry'; prologue: 'while we were at the University of Toronto'"
+  },
+  {
+   "claim": "The official ILSVRC report lists SuperVision at 16.4% and ISI at 26.2%, and calls SuperVision the undisputed winner of 2012",
+   "source": 0,
+   "note": "ILSVRC report: Table 5 lists SuperVision (University of Toronto) at 16.4% and ISI at 26.2%; text: 'The undisputed winner of both the classification and localization tasks in 2012 was the SuperVision team'. The gap is about ten points on either figure (9.8 or 10.9)"
+  },
+  {
+   "claim": "The network had 60 million parameters and trained for 5-6 days on two NVIDIA GTX 580 GPUs",
+   "source": 1,
+   "note": "AlexNet paper: 60 million parameters; two GTX 580 3GB GPUs; 5-6 days of training"
+  }
+ ],
+ "copy_parts": {
+  "youtube": {
+   "hook": "In the 2012 ImageNet contest, a deep convolutional network from the University of Toronto reached a 15.3% top-5 error rate. The second-best entry scored 26.2%."
+  },
+  "instagram": {
+   "caption": "In 2012, one neural network reached 15.3% error on ImageNet while the runner-up scored 26.2%."
+  },
+  "tiktok": {
+   "caption": "One neural network won ImageNet 2012 by roughly ten points."
+  },
+  "hashtags": {
+   "youtube": [
+    "#tech",
+    "#ai",
+    "#deeplearning",
+    "#imagenet"
+   ],
+   "instagram": [
+    "#tech",
+    "#ai",
+    "#deeplearning"
+   ],
+   "tiktok": [
+    "#tech",
+    "#ai"
+   ]
+  }
+ },
+ "authored": {
+  "by": "claude",
+  "date": "2026-11-13"
+ }
+}

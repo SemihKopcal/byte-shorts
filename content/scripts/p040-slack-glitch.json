@@ -1,0 +1,228 @@
+{
+ "id": "p040-slack-glitch",
+ "series": "G",
+ "lang": "en",
+ "format": "story",
+ "theme": "deep",
+ "title": "Slack came from a video game that shut down",
+ "summary": "Tiny Speck's browser game Glitch opened to the public in September 2011 and shut down in December 2012. The team's internal messaging tool became the basis of Slack, which had over 10 million daily active users by 2019.",
+ "tags": [
+  "slack",
+  "glitch",
+  "startup story",
+  "pivot"
+ ],
+ "sources": [
+  "https://techcrunch.com/2019/05/30/the-slack-origin-story",
+  "https://en.wikipedia.org/wiki/Glitch_(video_game)"
+ ],
+ "beats": [
+  {
+   "id": "b1",
+   "role": "hook",
+   "say": "A video game shut down, and its chat tool became Slack.",
+   "cap": "A game closed. Slack began.",
+   "scene": "contrast",
+   "data": {
+    "left": {
+     "label": "Glitch, the game",
+     "value": "Closed",
+     "tone": "bad"
+    },
+    "right": {
+     "label": "Its chat tool",
+     "value": "Slack",
+     "tone": "good"
+    },
+    "verdict": "Dec 2012"
+   }
+  },
+  {
+   "id": "b2",
+   "role": "why",
+   "say": "Glitch was a browser game made by a small company, Tiny Speck.",
+   "cap": "Glitch: a browser game",
+   "kw": "browser game"
+  },
+  {
+   "id": "b3",
+   "role": "why",
+   "say": "It opened to the public in September twenty eleven.",
+   "cap": "Public launch: Sep 2011",
+   "kw": "Sep 2011"
+  },
+  {
+   "id": "b4",
+   "role": "data",
+   "say": "The company had raised over fifteen million dollars before beta testing.",
+   "cap": "$15M+ raised before beta",
+   "kw": "$15M+",
+   "scene": "counter",
+   "data": {
+    "from": 0,
+    "to": 15,
+    "prefix": "$",
+    "suffix": "M+",
+    "note": "raised before beta testing"
+   }
+  },
+  {
+   "id": "b5",
+   "role": "data",
+   "say": "Its engineers had also built a real time messaging tool for the team.",
+   "cap": "A chat tool for the team",
+   "kw": "chat tool",
+   "scene": "flow",
+   "data": {
+    "nodes": [
+     {
+      "label": "Glitch game team"
+     },
+     {
+      "label": "Internal messaging tool",
+      "tone": "good"
+     }
+    ]
+   }
+  },
+  {
+   "id": "b6",
+   "role": "data",
+   "say": "The game shut down in December twenty twelve.",
+   "cap": "Glitch closes: Dec 2012",
+   "kw": "Dec 2012",
+   "scene": "timeline",
+   "data": {
+    "steps": [
+     {
+      "at": "Sep 2011",
+      "label": "Glitch opens"
+     },
+     {
+      "at": "Dec 2012",
+      "label": "Glitch shuts down",
+      "tone": "bad"
+     },
+     {
+      "at": "After",
+      "label": "Chat tool becomes Slack",
+      "tone": "good"
+     }
+    ]
+   }
+  },
+  {
+   "id": "b7",
+   "role": "turn",
+   "say": "As the game closed, the team saw the tool's value outside the company.",
+   "cap": "Useful beyond the game",
+   "kw": "beyond"
+  },
+  {
+   "id": "b8",
+   "role": "turn",
+   "say": "That tool became the basis for Slack.",
+   "cap": "The tool became Slack",
+   "kw": "became Slack",
+   "mark": "check"
+  },
+  {
+   "id": "b9",
+   "role": "resolve",
+   "say": "By twenty nineteen, Slack had over ten million daily active users.",
+   "cap": "10M+ daily users, 2019",
+   "kw": "10M+",
+   "scene": "counter",
+   "data": {
+    "from": 0,
+    "to": 10,
+    "suffix": "M+",
+    "note": "daily active users, 2019"
+   }
+  },
+  {
+   "id": "b10",
+   "role": "resolve",
+   "say": "A closed game left behind a tool people kept using.",
+   "cap": "Game closed. Tool stayed.",
+   "scene": "close",
+   "data": {
+    "lines": [
+     "The game closed.",
+     "The chat tool stayed."
+    ],
+    "accent": "good"
+   }
+  }
+ ],
+ "claims": [
+  {
+   "shown": "$15M",
+   "expr": null,
+   "value": null,
+   "source": 0,
+   "note": "TechCrunch: Tiny Speck raised more than $15 million in venture capital before beta testing"
+  },
+  {
+   "shown": "10M",
+   "expr": null,
+   "value": null,
+   "source": 0,
+   "note": "TechCrunch (May 2019): more than 10 million daily active users"
+  }
+ ],
+ "facts": [
+  {
+   "claim": "Tiny Speck, led by Stewart Butterfield, made the browser game Glitch, released to the public in September 2011",
+   "source": 1,
+   "note": "Wikipedia (Glitch): developer Tiny Speck, official launch September 27, 2011; TechCrunch: browser-based game, released to the public in September 2011"
+  },
+  {
+   "claim": "Glitch shut down in December 2012 (the shutdown was confirmed in November 2012)",
+   "source": 1,
+   "note": "Wikipedia (Glitch): officially shut down on December 9, 2012; TechCrunch: shutdown confirmed in November 2012"
+  },
+  {
+   "claim": "The internal messaging tool built for the team became the basis of Slack",
+   "source": 0,
+   "note": "TechCrunch: engineers built a real-time messaging tool for internal communication; when Glitch was shutting down the team saw its value outside the company and it became the basis for Slack; Wikipedia agrees"
+  },
+  {
+   "claim": "Slack had more than 10 million daily active users by 2019",
+   "source": 0,
+   "note": "TechCrunch, May 30, 2019: more than 10 million daily active users across more than 600,000 organizations"
+  }
+ ],
+ "copy_parts": {
+  "youtube": {
+   "hook": "Tiny Speck's browser game Glitch opened to the public in September 2011 and shut down in December 2012. The team's internal messaging tool became the basis of Slack, which had over 10 million daily active users by 2019."
+  },
+  "instagram": {
+   "caption": "Slack began as the internal chat tool of a video game that shut down."
+  },
+  "tiktok": {
+   "caption": "A video game shut down, and its chat tool became Slack."
+  },
+  "hashtags": {
+   "youtube": [
+    "#tech",
+    "#slack",
+    "#startup",
+    "#pivot"
+   ],
+   "instagram": [
+    "#tech",
+    "#slack",
+    "#startup"
+   ],
+   "tiktok": [
+    "#tech",
+    "#slack"
+   ]
+  }
+ },
+ "authored": {
+  "by": "claude",
+  "date": "2026-11-13"
+ }
+}

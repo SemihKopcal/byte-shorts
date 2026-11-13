@@ -1,0 +1,226 @@
+{
+ "id": "p039-instagram-burbn",
+ "series": "G",
+ "lang": "en",
+ "format": "story",
+ "theme": "ember",
+ "title": "Instagram began as a check-in app called Burbn",
+ "summary": "Instagram started as Burbn, a check-in and plans app that users mostly used to share photos. It launched as a photo app on October 6, 2010 with about 25,000 users on day one; Facebook bought it for $1 billion in April 2012 when it had 13 employees.",
+ "tags": [
+  "instagram",
+  "burbn",
+  "startup story",
+  "pivot"
+ ],
+ "sources": [
+  "https://techcrunch.com/2012/04/09/instagram-story-facebook-acquisition/",
+  "https://www.businessinsider.in/tech/news/instagram-only-had-13-employees-when-it-was-bought-by-facebook-for-1-billion-a-decade-later-hereaposs-where-theyaposve-all-ended-up-/slidelist/75259771.cms"
+ ],
+ "beats": [
+  {
+   "id": "b1",
+   "role": "hook",
+   "say": "Instagram began as a check in app called Burbn.",
+   "cap": "Instagram was Burbn first",
+   "scene": "contrast",
+   "data": {
+    "left": {
+     "label": "Early 2010",
+     "value": "Burbn",
+     "tone": "mid"
+    },
+    "right": {
+     "label": "Oct 2010",
+     "value": "Instagram",
+     "tone": "good"
+    },
+    "verdict": "Check-ins to photos"
+   }
+  },
+  {
+   "id": "b2",
+   "role": "why",
+   "say": "Burbn let people check in and post plans, but users mostly shared photos.",
+   "cap": "Users mostly shared photos",
+   "kw": "photos"
+  },
+  {
+   "id": "b3",
+   "role": "why",
+   "say": "So the founders scrapped it and rebuilt the app around photo sharing.",
+   "cap": "Scrapped. Rebuilt around photos.",
+   "kw": "Rebuilt"
+  },
+  {
+   "id": "b4",
+   "role": "data",
+   "say": "Instagram launched in October two thousand ten.",
+   "cap": "Launch: Oct 6, 2010",
+   "kw": "Oct 6, 2010",
+   "scene": "timeline",
+   "data": {
+    "steps": [
+     {
+      "at": "Early 2010",
+      "label": "Burbn tested"
+     },
+     {
+      "at": "Oct 2010",
+      "label": "Instagram launches",
+      "tone": "mid"
+     },
+     {
+      "at": "Apr 2012",
+      "label": "Facebook deal",
+      "tone": "good"
+     }
+    ]
+   }
+  },
+  {
+   "id": "b5",
+   "role": "data",
+   "say": "It drew about twenty five thousand users on its first day.",
+   "cap": "About 25,000 users on day one",
+   "kw": "25,000 users",
+   "scene": "counter",
+   "data": {
+    "from": 0,
+    "to": 25000,
+    "suffix": " users",
+    "note": "on the first day, about"
+   }
+  },
+  {
+   "id": "b6",
+   "role": "data",
+   "say": "In April two thousand twelve, Facebook bought Instagram for one billion dollars.",
+   "cap": "Facebook: $1 billion, Apr 2012",
+   "kw": "$1 billion",
+   "scene": "counter",
+   "data": {
+    "from": 0,
+    "to": 1,
+    "prefix": "$",
+    "suffix": " billion",
+    "note": "Facebook, April 2012"
+   }
+  },
+  {
+   "id": "b7",
+   "role": "turn",
+   "say": "At that point, the team had thirteen employees.",
+   "cap": "13 employees",
+   "kw": "13 employees",
+   "scene": "dots",
+   "data": {
+    "total": 13,
+    "hit": 13,
+    "cols": 13,
+    "label": "13 employees",
+    "sub": "when Facebook bought it",
+    "tone": "mid",
+    "scatter": false
+   }
+  },
+  {
+   "id": "b8",
+   "role": "turn",
+   "say": "Burbn began as a spare time project in twenty ten.",
+   "cap": "Burbn: a spare-time project",
+   "kw": "spare-time"
+  },
+  {
+   "id": "b9",
+   "role": "resolve",
+   "say": "What people actually did in the app became the product.",
+   "cap": "Photos became the product",
+   "kw": "Photos",
+   "mark": "check"
+  },
+  {
+   "id": "b10",
+   "role": "resolve",
+   "say": "A check in app turned into a photo app.",
+   "cap": "Check-ins out. Photos in.",
+   "scene": "close",
+   "data": {
+    "lines": [
+     "Check-ins out.",
+     "Photos in."
+    ],
+    "accent": "good"
+   }
+  }
+ ],
+ "claims": [
+  {
+   "shown": "25,000",
+   "expr": null,
+   "value": null,
+   "source": 0,
+   "note": "TechCrunch: Instagram launched on October 6, 2010 and drew about 25,000 users on its first day"
+  },
+  {
+   "shown": "13 employees",
+   "expr": null,
+   "value": null,
+   "source": 1,
+   "note": "Business Insider: Instagram had 13 employees, including both founders, when Facebook bought it (TechCrunch says 'about a dozen')"
+  }
+ ],
+ "facts": [
+  {
+   "claim": "Burbn was a basic location-based check-in and plans app tested in early 2010; users mostly shared photos, so the founders rebuilt it around photo sharing",
+   "source": 0,
+   "note": "TechCrunch: Systrom tested Burbn in early 2010, a basic location-based app for checking in and posting plans; users mostly shared photos instead, so the founders scrapped it and rebuilt around photo-sharing"
+  },
+  {
+   "claim": "Instagram launched on October 6, 2010 and drew about 25,000 users on its first day",
+   "source": 0,
+   "note": "TechCrunch: launched October 6, 2010, about 25,000 users on its first day"
+  },
+  {
+   "claim": "Facebook bought Instagram for $1 billion in April 2012, when it had 13 employees",
+   "source": 1,
+   "note": "Business Insider: 13 employees including founders Kevin Systrom and Mike Krieger; acquisition in April 2012; $1 billion paid by Facebook"
+  },
+  {
+   "claim": "Burbn was a location- and photo-sharing app that one founder worked on in his spare time in 2010",
+   "source": 1,
+   "note": "Business Insider: in 2010 Systrom worked on Burbn, a 'location- and photo-sharing app', in his spare time; he later brought in Krieger as cofounder and focused on photography"
+  }
+ ],
+ "copy_parts": {
+  "youtube": {
+   "hook": "Instagram started as Burbn, a check-in and plans app that users mostly used to share photos. It launched as a photo app on October 6, 2010 with about 25,000 users on day one, and Facebook bought it for $1 billion in April 2012."
+  },
+  "instagram": {
+   "caption": "Instagram began as a check-in app called Burbn. Users mostly shared photos, so the founders rebuilt it. Facebook bought it for $1 billion when it had 13 employees."
+  },
+  "tiktok": {
+   "caption": "Instagram began as a check-in app called Burbn."
+  },
+  "hashtags": {
+   "youtube": [
+    "#tech",
+    "#instagram",
+    "#startup",
+    "#pivot"
+   ],
+   "instagram": [
+    "#tech",
+    "#instagram",
+    "#startup"
+   ],
+   "tiktok": [
+    "#tech",
+    "#instagram"
+   ]
+  }
+ },
+ "authored": {
+  "by": "claude",
+  "date": "2026-11-13"
+ }
+}

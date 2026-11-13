@@ -1,0 +1,258 @@
+{
+ "id": "p041-youtube-dating-site",
+ "series": "G",
+ "lang": "en",
+ "format": "story",
+ "theme": "midnight",
+ "title": "YouTube started as a video dating site",
+ "summary": "YouTube began in 2005 as a video dating site with the tagline 'Tune in, hook up'. Google agreed to buy it in October 2006 for $1.65 billion, when it reported more than 100 million video views a day.",
+ "tags": [
+  "youtube",
+  "startup story",
+  "google",
+  "tech history"
+ ],
+ "sources": [
+  "https://www.mediavillage.com/article/historys-moment-in-media-youtubes-origin-story-from-dating-site-to-video-giant/amp/",
+  "https://www.sec.gov/Archives/edgar/data/1288776/000119312506206884/dex991.htm"
+ ],
+ "beats": [
+  {
+   "id": "b1",
+   "role": "hook",
+   "say": "YouTube started as a video dating site.",
+   "cap": "YouTube began as a dating site",
+   "scene": "contrast",
+   "data": {
+    "left": {
+     "label": "At first",
+     "value": "Dating videos",
+     "tone": "mid"
+    },
+    "right": {
+     "label": "Soon after",
+     "value": "Any video",
+     "tone": "good"
+    },
+    "verdict": "2005"
+   }
+  },
+  {
+   "id": "b2",
+   "role": "why",
+   "say": "Its tagline was tune in, hook up.",
+   "cap": "Tagline: Tune in, hook up",
+   "kw": "Tune in, hook up"
+  },
+  {
+   "id": "b3",
+   "role": "why",
+   "say": "The domain name was registered on Valentine's Day, two thousand five.",
+   "cap": "Domain registered: Feb 14, 2005",
+   "kw": "Feb 14, 2005"
+  },
+  {
+   "id": "b4",
+   "role": "data",
+   "say": "The first video was posted in April two thousand five.",
+   "cap": "First video: Apr 2005",
+   "kw": "Apr 2005",
+   "scene": "timeline",
+   "data": {
+    "steps": [
+     {
+      "at": "Feb 2005",
+      "label": "Domain registered"
+     },
+     {
+      "at": "Apr 2005",
+      "label": "First video posted"
+     },
+     {
+      "at": "Oct 2006",
+      "label": "Google deal",
+      "tone": "good"
+     }
+    ]
+   }
+  },
+  {
+   "id": "b5",
+   "role": "data",
+   "say": "Users quickly began posting videos on any subject.",
+   "cap": "Videos on any subject",
+   "kw": "any subject"
+  },
+  {
+   "id": "b6",
+   "role": "data",
+   "say": "By December two thousand five, it reported eight million views a day.",
+   "cap": "Dec 2005: 8M views a day",
+   "kw": "8M views",
+   "scene": "bars",
+   "data": {
+    "rows": [
+     {
+      "name": "Dec 2005",
+      "v": 8,
+      "label": "8M a day"
+     },
+     {
+      "name": "Oct 2006",
+      "v": 100,
+      "label": "100M+ a day",
+      "tone": "good"
+     }
+    ]
+   }
+  },
+  {
+   "id": "b7",
+   "role": "turn",
+   "say": "By October two thousand six, it had more than one hundred million views a day.",
+   "cap": "100M+ views a day",
+   "kw": "100M+",
+   "scene": "counter",
+   "data": {
+    "from": 0,
+    "to": 100,
+    "suffix": "M+",
+    "note": "views a day, Oct 2006"
+   }
+  },
+  {
+   "id": "b8",
+   "role": "turn",
+   "say": "That month, Google agreed to acquire it for one billion, six hundred fifty million dollars.",
+   "cap": "Google: $1.65 billion, Oct 2006",
+   "kw": "$1.65 billion",
+   "mark": "check",
+   "scene": "counter",
+   "data": {
+    "from": 0,
+    "to": 1.65,
+    "dp": 2,
+    "prefix": "$",
+    "suffix": " billion",
+    "note": "Google, Oct 2006"
+   }
+  },
+  {
+   "id": "b9",
+   "role": "resolve",
+   "say": "That was about twenty months after the company was founded.",
+   "cap": "About 20 months after founding",
+   "kw": "20 months"
+  },
+  {
+   "id": "b10",
+   "role": "resolve",
+   "say": "A dating site idea became a video platform that Google bought.",
+   "cap": "Dating idea. Video platform.",
+   "scene": "close",
+   "data": {
+    "lines": [
+     "A dating site.",
+     "A $1.65B deal."
+    ],
+    "accent": "good"
+   }
+  }
+ ],
+ "claims": [
+  {
+   "shown": "8 million",
+   "expr": null,
+   "value": null,
+   "source": 0,
+   "note": "MediaVillage (History's Moment in Media): YouTube came out of beta in December 2005, reporting 8 million views a day"
+  },
+  {
+   "shown": "100 million",
+   "expr": null,
+   "value": null,
+   "source": 1,
+   "note": "Google press release, October 9, 2006: YouTube had 'more than 100 million video views every day'"
+  },
+  {
+   "shown": "$1.65 billion",
+   "expr": null,
+   "value": null,
+   "source": 1,
+   "note": "Google press release: Google agreed to acquire YouTube for $1.65 billion in a stock-for-stock transaction"
+  },
+  {
+   "shown": "14",
+   "expr": null,
+   "value": null,
+   "source": 0,
+   "note": "MediaVillage: Chad Hurley registered the YouTube logo, trademark and domain name on Valentine's Day 2005 (February 14)"
+  },
+  {
+   "shown": "20 months",
+   "expr": null,
+   "value": null,
+   "source": 0,
+   "note": "MediaVillage: Google acquired YouTube in October 2006, about 20 months after the company was founded"
+  }
+ ],
+ "facts": [
+  {
+   "claim": "YouTube began as a dating site where users uploaded videos about themselves; its tagline was 'Tune in, hook up'",
+   "source": 0,
+   "note": "MediaVillage: began as a dating site, users would upload videos about themselves and what they wanted in a partner; tagline 'Tune in, hook up'"
+  },
+  {
+   "claim": "The YouTube logo, trademark and domain name were registered on Valentine's Day 2005; the first video was posted in April 2005",
+   "source": 0,
+   "note": "MediaVillage: registered on Valentine's Day 2005 by Chad Hurley; 'Me at the Zoo' was posted in April 2005 (the page's 18-second length is not used)"
+  },
+  {
+   "claim": "After the pivot, users quickly posted videos on any subject; in December 2005 YouTube reported 8 million views a day",
+   "source": 0,
+   "note": "MediaVillage: users quickly began posting videos on any subject; it came out of beta in December 2005 reporting 8 million views a day"
+  },
+  {
+   "claim": "On October 9, 2006 Google agreed to buy YouTube for $1.65 billion in stock",
+   "source": 1,
+   "note": "Google press release dated October 9, 2006: '$1.65 billion in a stock-for-stock transaction'"
+  },
+  {
+   "claim": "At the time of the deal YouTube had more than 100 million video views a day and about 65,000 new videos uploaded daily",
+   "source": 1,
+   "note": "Google press release: 'more than 100 million video views every day' and '65,000 new videos uploaded daily'; founded February 2005"
+  }
+ ],
+ "copy_parts": {
+  "youtube": {
+   "hook": "YouTube began in 2005 as a video dating site with the tagline 'Tune in, hook up'. By October 2006 it reported more than 100 million views a day, and Google agreed to buy it for $1.65 billion."
+  },
+  "instagram": {
+   "caption": "YouTube started as a video dating site. About 20 months after it was founded, Google agreed to buy it for $1.65 billion."
+  },
+  "tiktok": {
+   "caption": "YouTube started as a video dating site."
+  },
+  "hashtags": {
+   "youtube": [
+    "#tech",
+    "#youtube",
+    "#startup",
+    "#techhistory"
+   ],
+   "instagram": [
+    "#tech",
+    "#youtube",
+    "#startup"
+   ],
+   "tiktok": [
+    "#tech",
+    "#youtube"
+   ]
+  }
+ },
+ "authored": {
+  "by": "claude",
+  "date": "2026-11-13"
+ }
+}

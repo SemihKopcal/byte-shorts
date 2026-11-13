@@ -108,6 +108,26 @@ baslayan / olguyla baslayan), tema ailesi (koyu sicak / koyu soguk), kapanis kar
 | deney | `p036-humaneval-164` | measured | GPT three solved none of one hundred sixty four problems. |
 | deney | `p037-six-word-passphrase` | measured | Six random words give about seventy seven bits. |
 
+### Girisim ve teknoloji hikayeleri (13 Kasim, ~40-49 sn)
+
+Her satirin kaynaklari yazilirken acilip okundu; senaryo dosyasinda her iddia icin `note` alani
+sayfanin ne dedigini yazar. Kural: yalniz iyi belgelenmis, genis yer bulmus olaylar; uydurma
+konusma ya da alinti yok; kimsenin niyeti/duygusu kaynaksiz anlatilmaz; dava, skandal, saglik,
+aile yok; gercek yuz ya da fotograf yok (BYTE ve ikonlar).
+
+| Gun | Dosya | Bicim | Acilis cumlesi |
+|---|---|---|---|
+| hikaye | `p041-youtube-dating-site` | story | YouTube started as a video dating site. |
+| hikaye | `p044-whatsapp-nineteen-billion` | story | WhatsApp had fifty five employees when Facebook paid nineteen billion dollars. |
+| hikaye | `p040-slack-glitch` | story | A video game shut down, and its chat tool became Slack. |
+| hikaye | `p038-nvidia-dennys-booth` | story | Three engineers started Nvidia at a Denny's booth. |
+| hikaye | `p042-twitter-odeo` | story | Twitter began as a side project at a podcast company. |
+| hikaye | `p039-instagram-burbn` | story | Instagram began as a check in app called Burbn. |
+| hikaye | `p043-dropbox-demo-video` | story | One three minute video grew a waiting list fifteen times overnight. |
+| hikaye | `p047-hugging-face-teen-chatbot` | story | Hugging Face began as a chatbot app for teenagers. |
+| hikaye | `p045-deepmind-atari` | story | A startup's AI learned Atari games by trial and error. |
+| hikaye | `p046-alexnet-2012-imagenet` | story | One neural network won an image contest by roughly ten points. |
+
 ## Siradaki (gun 11-100)
 
 S = hikaye, M = olcum, E = aciklama. Gun numarasi kuyruktaki sirayi gosterir; gunde
