@@ -1,0 +1,265 @@
+{
+ "id": "p044-whatsapp-nineteen-billion",
+ "series": "G",
+ "lang": "en",
+ "format": "story",
+ "theme": "ice",
+ "title": "WhatsApp had 55 employees when Facebook paid $19 billion",
+ "summary": "On February 19, 2014 Facebook announced a $19 billion deal for WhatsApp: $4 billion in cash, $12 billion in stock and $3 billion in stock units for employees. WhatsApp had over 450 million monthly users and, per Forbes, 55 employees.",
+ "tags": [
+  "whatsapp",
+  "facebook",
+  "startup story",
+  "acquisition"
+ ],
+ "sources": [
+  "https://www.npr.org/sections/thetwo-way/2014/02/19/279763675/facebook-will-buy-whatsapp-message-service-for-19-billion",
+  "https://siliconangle.com/2014/02/19/breaking-news-facebook-buys-whatsapp-for-19-billion/"
+ ],
+ "beats": [
+  {
+   "id": "b1",
+   "role": "hook",
+   "say": "WhatsApp had fifty five employees when Facebook paid nineteen billion dollars.",
+   "cap": "55 employees. $19 billion.",
+   "scene": "contrast",
+   "data": {
+    "left": {
+     "label": "WhatsApp employees",
+     "value": "55",
+     "tone": "base"
+    },
+    "right": {
+     "label": "Price",
+     "value": "$19B",
+     "tone": "good"
+    },
+    "verdict": "Feb 2014"
+   }
+  },
+  {
+   "id": "b2",
+   "role": "why",
+   "say": "Facebook announced the deal on February nineteenth, twenty fourteen.",
+   "cap": "Announced: Feb 19, 2014",
+   "kw": "Feb 19, 2014"
+  },
+  {
+   "id": "b3",
+   "role": "why",
+   "say": "Four billion dollars was cash and twelve billion was Facebook stock.",
+   "cap": "$4B cash · $12B stock",
+   "kw": "$12B stock",
+   "scene": "bars",
+   "data": {
+    "rows": [
+     {
+      "name": "Cash",
+      "v": 4,
+      "label": "$4B"
+     },
+     {
+      "name": "Facebook stock",
+      "v": 12,
+      "label": "$12B",
+      "tone": "mid"
+     },
+     {
+      "name": "Employee stock units",
+      "v": 3,
+      "label": "$3B",
+      "tone": "good"
+     }
+    ]
+   }
+  },
+  {
+   "id": "b4",
+   "role": "data",
+   "say": "Another three billion was stock units granted to WhatsApp employees.",
+   "cap": "Plus $3B in stock units for staff",
+   "kw": "$3B"
+  },
+  {
+   "id": "b5",
+   "role": "data",
+   "say": "More than four hundred fifty million people used it every month.",
+   "cap": "450M+ monthly users",
+   "scene": "counter",
+   "data": {
+    "from": 0,
+    "to": 450,
+    "suffix": "M+",
+    "note": "monthly users"
+   }
+  },
+  {
+   "id": "b6",
+   "role": "data",
+   "say": "About seventy percent of them were active on a given day.",
+   "cap": "About 70% active daily",
+   "kw": "70%",
+   "scene": "ring",
+   "data": {
+    "value": 70,
+    "label": "active on a given day",
+    "tone": "mid"
+   }
+  },
+  {
+   "id": "b7",
+   "role": "turn",
+   "say": "It was free to download, then cost ninety nine cents a year.",
+   "cap": "$0.99 a year after year one",
+   "kw": "$0.99",
+   "scene": "counter",
+   "data": {
+    "from": 0,
+    "to": 0.99,
+    "dp": 2,
+    "prefix": "$",
+    "suffix": " a year",
+    "note": "after the first year"
+   }
+  },
+  {
+   "id": "b8",
+   "role": "turn",
+   "say": "More than a million new people registered every day.",
+   "cap": "1M+ new users a day",
+   "kw": "1M+",
+   "scene": "counter",
+   "data": {
+    "from": 0,
+    "to": 1,
+    "suffix": "M+",
+    "note": "new registered users a day"
+   }
+  },
+  {
+   "id": "b9",
+   "role": "resolve",
+   "say": "A team of fifty five served hundreds of millions of people.",
+   "cap": "55 people. 450M+ users.",
+   "kw": "55 people",
+   "mark": "check"
+  },
+  {
+   "id": "b10",
+   "role": "resolve",
+   "say": "The price tag was nineteen billion dollars.",
+   "cap": "$19B deal",
+   "scene": "close",
+   "data": {
+    "lines": [
+     "55 employees.",
+     "$19B deal."
+    ],
+    "accent": "good"
+   }
+  }
+ ],
+ "claims": [
+  {
+   "shown": "55 employees",
+   "expr": null,
+   "value": null,
+   "source": 0,
+   "note": "NPR: WhatsApp had 55 employees, according to Forbes"
+  },
+  {
+   "shown": "$19 billion",
+   "expr": null,
+   "value": null,
+   "source": 1,
+   "note": "SiliconANGLE (citing the SEC filing of Feb 19, 2014): the deal was $19 billion including retention bonuses"
+  },
+  {
+   "shown": "$12 billion",
+   "expr": null,
+   "value": null,
+   "source": 1,
+   "note": "SiliconANGLE: 183,865,778 Facebook shares valued at $12 billion"
+  },
+  {
+   "shown": "450 million",
+   "expr": null,
+   "value": null,
+   "source": 0,
+   "note": "NPR: over 450 million people use the service each month"
+  },
+  {
+   "shown": "70%",
+   "expr": null,
+   "value": null,
+   "source": 0,
+   "note": "NPR: about 70 percent are active on a given day"
+  },
+  {
+   "shown": "$0.99",
+   "expr": null,
+   "value": null,
+   "source": 0,
+   "note": "NPR: after one year of usage users pay a subscription, currently 99 cents for a year"
+  }
+ ],
+ "facts": [
+  {
+   "claim": "Facebook announced the WhatsApp deal on February 19, 2014 for $19 billion",
+   "source": 1,
+   "note": "SiliconANGLE: SEC filing dated February 19, 2014; the Merger Agreement was entered into that day; price $19 billion"
+  },
+  {
+   "claim": "The price was $4 billion in cash, $12 billion in Facebook stock and $3 billion in restricted stock units for WhatsApp employees",
+   "source": 1,
+   "note": "SiliconANGLE: $4 billion cash, stock valued at $12 billion, employee RSUs valued at $3 billion"
+  },
+  {
+   "claim": "WhatsApp had over 450 million monthly users, about 70 percent of them active on a given day, and 55 employees per Forbes",
+   "source": 0,
+   "note": "NPR: over 450 million monthly users, about 70 percent active on a given day, 55 employees according to Forbes"
+  },
+  {
+   "claim": "WhatsApp added more than 1 million new registered users per day",
+   "source": 1,
+   "note": "SiliconANGLE: more than 1 million new registered users are added per day"
+  },
+  {
+   "claim": "The app was free to download and cost 99 cents a year after the first year",
+   "source": 0,
+   "note": "NPR: free to download, after one year of usage users must pay a subscription, currently 99 cents for a year"
+  }
+ ],
+ "copy_parts": {
+  "youtube": {
+   "hook": "On February 19, 2014 Facebook announced a $19 billion deal for WhatsApp: $4 billion in cash, $12 billion in stock and $3 billion in stock units for employees. WhatsApp had over 450 million monthly users and, according to Forbes, 55 employees."
+  },
+  "instagram": {
+   "caption": "WhatsApp had 55 employees and over 450 million monthly users when Facebook agreed to pay $19 billion."
+  },
+  "tiktok": {
+   "caption": "WhatsApp had 55 employees when Facebook paid $19 billion."
+  },
+  "hashtags": {
+   "youtube": [
+    "#tech",
+    "#whatsapp",
+    "#startup",
+    "#facebook"
+   ],
+   "instagram": [
+    "#tech",
+    "#whatsapp",
+    "#startup"
+   ],
+   "tiktok": [
+    "#tech",
+    "#whatsapp"
+   ]
+  }
+ },
+ "authored": {
+  "by": "claude",
+  "date": "2026-11-13"
+ }
+}

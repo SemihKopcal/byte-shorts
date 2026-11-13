@@ -1,0 +1,226 @@
+{
+ "id": "p045-deepmind-atari",
+ "series": "G",
+ "lang": "en",
+ "format": "story",
+ "theme": "deep",
+ "title": "DeepMind started by teaching an AI Atari games",
+ "summary": "DeepMind was founded in 2010 by three founders and first taught an AI to play Atari games by trial and error. Google confirmed it would acquire the company on January 26, 2014, and in March 2016 DeepMind's AlphaGo beat a Go professional 4 to 1.",
+ "tags": [
+  "deepmind",
+  "atari",
+  "alphago",
+  "startup story"
+ ],
+ "sources": [
+  "https://en.wikipedia.org/wiki/Google_DeepMind",
+  "https://www.csmonitor.com/Technology/2014/0127/Google-acquires-artificial-intelligence-firm-DeepMind"
+ ],
+ "beats": [
+  {
+   "id": "b1",
+   "role": "hook",
+   "say": "A startup's AI learned Atari games by trial and error.",
+   "cap": "An AI learned Atari by trial and error",
+   "scene": "title",
+   "data": {
+    "kicker": "DeepMind",
+    "lines": [
+     "Learned Atari",
+     "by trial and error"
+    ],
+    "accent": "good"
+   }
+  },
+  {
+   "id": "b2",
+   "role": "why",
+   "say": "DeepMind was founded in two thousand ten by three founders.",
+   "cap": "Founded 2010 by 3 founders",
+   "kw": "3 founders"
+  },
+  {
+   "id": "b3",
+   "role": "why",
+   "say": "Its goal was a general purpose AI, useful for almost anything.",
+   "cap": "Goal: general-purpose AI",
+   "kw": "general-purpose",
+   "scene": "contrast",
+   "data": {
+    "left": {
+     "label": "The goal",
+     "value": "General AI",
+     "tone": "mid"
+    },
+    "right": {
+     "label": "Useful for",
+     "value": "Almost anything",
+     "tone": "good"
+    },
+    "verdict": "Founded 2010"
+   }
+  },
+  {
+   "id": "b4",
+   "role": "data",
+   "say": "Early on, its AI played Atari games like Breakout, Pong and Space Invaders.",
+   "cap": "Breakout · Pong · Space Invaders",
+   "kw": "Pong",
+   "scene": "tokens",
+   "data": {
+    "tokens": [
+     "Breakout",
+     "Pong",
+     "Space Invaders"
+    ],
+    "note": "Atari games it learned",
+    "tone": "good"
+   }
+  },
+  {
+   "id": "b5",
+   "role": "data",
+   "say": "It was given no programmed knowledge of how to play.",
+   "cap": "No programmed know-how",
+   "kw": "No programmed"
+  },
+  {
+   "id": "b6",
+   "role": "data",
+   "say": "On January twenty sixth, twenty fourteen, Google confirmed it was acquiring DeepMind.",
+   "cap": "Jan 26, 2014: Google confirms",
+   "kw": "Jan 26, 2014",
+   "scene": "timeline",
+   "data": {
+    "steps": [
+     {
+      "at": "2010",
+      "label": "DeepMind founded"
+     },
+     {
+      "at": "Jan 2014",
+      "label": "Google buys DeepMind",
+      "tone": "mid"
+     },
+     {
+      "at": "Mar 2016",
+      "label": "AlphaGo wins 4 - 1",
+      "tone": "good"
+     }
+    ]
+   }
+  },
+  {
+   "id": "b7",
+   "role": "turn",
+   "say": "Reports put the price between four hundred and six hundred fifty million dollars.",
+   "cap": "Reported: $400M to $650M",
+   "kw": "$400M to $650M"
+  },
+  {
+   "id": "b8",
+   "role": "turn",
+   "say": "In March twenty sixteen, DeepMind's AlphaGo beat a professional Go player, four games to one.",
+   "cap": "Mar 2016: AlphaGo wins 4 - 1",
+   "kw": "4 - 1",
+   "mark": "check"
+  },
+  {
+   "id": "b9",
+   "role": "resolve",
+   "say": "That match came about two years after the Google deal.",
+   "cap": "About 2 years after Google"
+  },
+  {
+   "id": "b10",
+   "role": "resolve",
+   "say": "The same company went from Atari games to a Go match.",
+   "cap": "Atari first. Go later.",
+   "scene": "close",
+   "data": {
+    "lines": [
+     "Atari games first.",
+     "Go professionals later."
+    ],
+    "accent": "good"
+   }
+  }
+ ],
+ "claims": [
+  {
+   "shown": "26",
+   "expr": null,
+   "value": null,
+   "source": 1,
+   "note": "Christian Science Monitor: Google confirmed the acquisition on Sunday, January 26, 2014; Wikipedia: 26 January 2014"
+  },
+  {
+   "shown": "$400 million",
+   "expr": null,
+   "value": null,
+   "source": 1,
+   "note": "Christian Science Monitor: Re/Code first reported the deal at $400 million"
+  },
+  {
+   "shown": "$650 million",
+   "expr": null,
+   "value": null,
+   "source": 0,
+   "note": "Wikipedia: the reported price ranged from $400 million to $650 million"
+  }
+ ],
+ "facts": [
+  {
+   "claim": "DeepMind was founded in November 2010 by Demis Hassabis, Shane Legg and Mustafa Suleyman, aiming at general-purpose AI",
+   "source": 0,
+   "note": "Wikipedia: founded November 2010 by Hassabis, Legg and Suleyman; goal a general-purpose AI 'useful and effective for almost anything'"
+  },
+  {
+   "claim": "DeepMind first taught an AI to play Atari games such as Breakout, Pong and Space Invaders, with no programmed knowledge, by trial and error",
+   "source": 0,
+   "note": "Wikipedia: first taught AI to play 1970s and 1980s Atari games, including Breakout, Pong and Space Invaders; no programmed knowledge of how to play; learned through trial and error"
+  },
+  {
+   "claim": "Google confirmed the DeepMind acquisition on January 26, 2014; the price was reported at $400 million to $650 million",
+   "source": 1,
+   "note": "Christian Science Monitor: confirmed Sunday January 26, 2014, Re/Code reported $400 million; Wikipedia: reported price ranged from $400 million to $650 million"
+  },
+  {
+   "claim": "In March 2016 AlphaGo beat Lee Sedol, a 9-dan professional, four games to one in a five-game match",
+   "source": 0,
+   "note": "Wikipedia: March 2016, AlphaGo beat Lee Sedol 4-1 in a five-game match"
+  }
+ ],
+ "copy_parts": {
+  "youtube": {
+   "hook": "DeepMind was founded in 2010 and first taught an AI to play Atari games by trial and error. Google confirmed it would acquire the company on January 26, 2014, at a reported price of $400 million to $650 million."
+  },
+  "instagram": {
+   "caption": "DeepMind started by teaching an AI Atari games with no programmed knowledge. Two years after Google bought it, AlphaGo beat a Go professional 4 to 1."
+  },
+  "tiktok": {
+   "caption": "DeepMind's AI learned Atari games by trial and error."
+  },
+  "hashtags": {
+   "youtube": [
+    "#tech",
+    "#ai",
+    "#deepmind",
+    "#alphago"
+   ],
+   "instagram": [
+    "#tech",
+    "#ai",
+    "#deepmind"
+   ],
+   "tiktok": [
+    "#tech",
+    "#ai"
+   ]
+  }
+ },
+ "authored": {
+  "by": "claude",
+  "date": "2026-11-13"
+ }
+}

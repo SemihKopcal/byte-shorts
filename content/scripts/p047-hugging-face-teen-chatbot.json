@@ -1,0 +1,238 @@
+{
+ "id": "p047-hugging-face-teen-chatbot",
+ "series": "G",
+ "lang": "en",
+ "format": "story",
+ "theme": "plum",
+ "title": "Hugging Face began as a chatbot app for teenagers",
+ "summary": "Hugging Face was founded in 2016 in New York by three French founders who first aimed to build a chatbot for teenagers. After Google released BERT in 2019 it shifted toward open source models; in August 2023 it said it was valued at $4.5 billion.",
+ "tags": [
+  "hugging face",
+  "startup story",
+  "open source",
+  "pivot"
+ ],
+ "sources": [
+  "https://en.wikipedia.org/wiki/HuggingFace",
+  "https://sifted.eu/articles/hugging-face-interview-julien-chaumond"
+ ],
+ "beats": [
+  {
+   "id": "b1",
+   "role": "hook",
+   "say": "Hugging Face began as a chatbot app for teenagers.",
+   "cap": "A chatbot app for teenagers",
+   "scene": "title",
+   "data": {
+    "kicker": "2016",
+    "lines": [
+     "A chatbot app",
+     "for teenagers"
+    ],
+    "accent": "mid"
+   }
+  },
+  {
+   "id": "b2",
+   "role": "why",
+   "say": "Three French founders launched it in New York in twenty sixteen.",
+   "cap": "2016 · New York",
+   "kw": "New York",
+   "scene": "steps",
+   "data": {
+    "steps": [
+     {
+      "label": "Three French founders"
+     },
+     {
+      "label": "New York, 2016"
+     },
+     {
+      "label": "A chatbot app",
+      "sub": "for teenagers",
+      "tone": "good"
+     }
+    ]
+   }
+  },
+  {
+   "id": "b3",
+   "role": "why",
+   "say": "They pitched it as a virtual friend for teenagers.",
+   "cap": "A virtual friend for teens",
+   "kw": "virtual friend"
+  },
+  {
+   "id": "b4",
+   "role": "data",
+   "say": "The name comes from an emoji, a smiling face with open hands.",
+   "cap": "Named after an emoji",
+   "kw": "emoji",
+   "scene": "title",
+   "data": {
+    "kicker": "The name",
+    "lines": [
+     "Named after",
+     "a smiling emoji"
+    ],
+    "accent": "good"
+   }
+  },
+  {
+   "id": "b5",
+   "role": "data",
+   "say": "In twenty nineteen, Google researchers released BERT, an open source language model.",
+   "cap": "2019: Google releases BERT",
+   "kw": "BERT",
+   "scene": "timeline",
+   "data": {
+    "steps": [
+     {
+      "at": "2016",
+      "label": "Teen chatbot app"
+     },
+     {
+      "at": "2019",
+      "label": "Google releases BERT",
+      "tone": "mid"
+     }
+    ]
+   }
+  },
+  {
+   "id": "b6",
+   "role": "data",
+   "say": "Hugging Face engineers built an easier to use version and released it.",
+   "cap": "An easier-to-use version",
+   "kw": "easier-to-use",
+   "scene": "flow",
+   "data": {
+    "nodes": [
+     {
+      "label": "BERT, from Google"
+     },
+     {
+      "label": "Easier version",
+      "sub": "by Hugging Face"
+     },
+     {
+      "label": "Released on its platform",
+      "tone": "good"
+     }
+    ]
+   }
+  },
+  {
+   "id": "b7",
+   "role": "turn",
+   "say": "A cofounder said it had a huge impact on traction in their community.",
+   "cap": "Huge impact on traction",
+   "kw": "huge impact"
+  },
+  {
+   "id": "b8",
+   "role": "turn",
+   "say": "The company became a machine learning platform.",
+   "cap": "Chatbot app to ML platform",
+   "kw": "ML platform"
+  },
+  {
+   "id": "b9",
+   "role": "resolve",
+   "say": "In August twenty twenty three, it said it was valued at four point five billion dollars.",
+   "cap": "Aug 2023: $4.5B valuation",
+   "kw": "$4.5B",
+   "scene": "counter",
+   "data": {
+    "from": 0,
+    "to": 4.5,
+    "dp": 1,
+    "prefix": "$",
+    "suffix": "B",
+    "note": "valuation, Aug 2023"
+   }
+  },
+  {
+   "id": "b10",
+   "role": "resolve",
+   "say": "A teen chatbot company became a machine learning hub.",
+   "cap": "Teen chatbot. ML hub.",
+   "scene": "close",
+   "data": {
+    "lines": [
+     "A teen chatbot app.",
+     "A $4.5B valuation."
+    ],
+    "accent": "good"
+   }
+  }
+ ],
+ "claims": [
+  {
+   "shown": "$4.5 billion",
+   "expr": null,
+   "value": null,
+   "source": 0,
+   "note": "Wikipedia: in August 2023 Hugging Face said it was valued at $4.5 billion in a $235 million funding round"
+  }
+ ],
+ "facts": [
+  {
+   "claim": "Hugging Face was founded in 2016 in New York by Clément Delangue, Julien Chaumond and Thomas Wolf, as a chatbot app for teenagers",
+   "source": 0,
+   "note": "Wikipedia: founded 2016 in New York City by three French entrepreneurs; originally a company that developed a chatbot app targeted at teenagers"
+  },
+  {
+   "claim": "The founders pitched it as a virtual friend for teenagers",
+   "source": 1,
+   "note": "Sifted interview: three French founders launched in New York in 2016, aiming at an AI chatbot for teenagers, pitched as 'creating a virtual friend for teenagers'"
+  },
+  {
+   "claim": "The name refers to an emoji of a smiling face with open hands",
+   "source": 1,
+   "note": "Sifted: the name refers to the company's logo, an emoji-style smiling face with open hands; Wikipedia: the name comes from the emoji"
+  },
+  {
+   "claim": "In 2019, shortly after Google researchers released BERT, Hugging Face released an easier-to-use version on a new platform and saw a big effect on community traction",
+   "source": 1,
+   "note": "Sifted: pivot in 2019 shortly after BERT was released; engineers created an easier-to-use version released on a new Hugging Face platform; Chaumond: 'a huge impact on the traction this created in our community'"
+  },
+  {
+   "claim": "In August 2023 Hugging Face said it was valued at $4.5 billion in a $235 million funding round",
+   "source": 0,
+   "note": "Wikipedia: August 2023, $4.5 billion valuation, $235 million round with Salesforce, Google and Nvidia among backers"
+  }
+ ],
+ "copy_parts": {
+  "youtube": {
+   "hook": "Hugging Face was founded in 2016 in New York by three French founders who first aimed to build a chatbot for teenagers. After Google released BERT in 2019, it shifted toward open source models; in August 2023 it said it was valued at $4.5 billion."
+  },
+  "instagram": {
+   "caption": "Hugging Face began as a chatbot app for teenagers. In August 2023 it said it was valued at $4.5 billion."
+  },
+  "tiktok": {
+   "caption": "Hugging Face began as a chatbot app for teenagers."
+  },
+  "hashtags": {
+   "youtube": [
+    "#tech",
+    "#ai",
+    "#huggingface",
+    "#startup"
+   ],
+   "instagram": [
+    "#tech",
+    "#ai",
+    "#huggingface"
+   ],
+   "tiktok": [
+    "#tech",
+    "#ai"
+   ]
+  }
+ },
+ "authored": {
+  "by": "claude",
+  "date": "2026-11-13"
+ }
+}

@@ -1,0 +1,286 @@
+{
+ "id": "p042-twitter-odeo",
+ "series": "G",
+ "lang": "en",
+ "format": "story",
+ "theme": "slate",
+ "title": "Twitter began as a side project at a podcast company",
+ "summary": "Odeo built a podcasting platform until Apple added podcasts to iTunes in fall 2005. A text-based side project, Twttr, launched publicly on July 15, 2006. Two months later it had fewer than 5,000 registered users.",
+ "tags": [
+  "twitter",
+  "odeo",
+  "startup story",
+  "pivot"
+ ],
+ "sources": [
+  "https://www.history.com/this-day-in-history/july-15/twitter-launches",
+  "https://www.nbcnews.com/id/wbna42577600"
+ ],
+ "beats": [
+  {
+   "id": "b1",
+   "role": "hook",
+   "say": "Twitter began as a side project at a podcast company.",
+   "cap": "Twitter began at a podcast company",
+   "scene": "title",
+   "data": {
+    "kicker": "2006",
+    "lines": [
+     "Twitter began",
+     "at a podcast",
+     "company"
+    ],
+    "accent": "mid"
+   }
+  },
+  {
+   "id": "b2",
+   "role": "why",
+   "say": "That company, Odeo, had built a podcasting platform by July two thousand five.",
+   "cap": "Odeo: podcasting, 2005",
+   "kw": "podcasting"
+  },
+  {
+   "id": "b3",
+   "role": "why",
+   "say": "In fall two thousand five, Apple announced iTunes with built in podcasting.",
+   "cap": "Fall 2005: iTunes adds podcasts",
+   "kw": "iTunes",
+   "scene": "contrast",
+   "data": {
+    "left": {
+     "label": "July 2005",
+     "value": "Podcasting",
+     "tone": "base"
+    },
+    "right": {
+     "label": "Fall 2005",
+     "value": "iTunes adds it",
+     "tone": "bad"
+    },
+    "verdict": "Odeo's focus lost relevance"
+   }
+  },
+  {
+   "id": "b4",
+   "role": "data",
+   "say": "Odeo's podcasting focus lost its relevance, and it had fourteen full time employees.",
+   "cap": "14 full-time employees",
+   "kw": "14 full-time",
+   "scene": "counter",
+   "data": {
+    "from": 0,
+    "to": 14,
+    "suffix": " employees",
+    "note": "full-time, at that point"
+   }
+  },
+  {
+   "id": "b5",
+   "role": "data",
+   "say": "In February two thousand six, three people presented a text based idea called Twttr.",
+   "cap": "Feb 2006: the Twttr idea",
+   "kw": "Twttr",
+   "scene": "title",
+   "data": {
+    "kicker": "Feb 2006",
+    "lines": [
+     "Twttr",
+     "a text based idea"
+    ],
+    "accent": "good"
+   }
+  },
+  {
+   "id": "b6",
+   "role": "data",
+   "say": "Twttr launched to the public on July fifteenth, two thousand six.",
+   "cap": "Public launch: Jul 15, 2006",
+   "kw": "Jul 15, 2006",
+   "scene": "timeline",
+   "data": {
+    "steps": [
+     {
+      "at": "Fall 2005",
+      "label": "iTunes adds podcasts",
+      "tone": "bad"
+     },
+     {
+      "at": "Feb 2006",
+      "label": "Twttr idea"
+     },
+     {
+      "at": "Jul 2006",
+      "label": "Public launch",
+      "tone": "good"
+     }
+    ]
+   }
+  },
+  {
+   "id": "b7",
+   "role": "turn",
+   "say": "Messages were capped at one hundred forty characters, based on text message limits.",
+   "cap": "140 characters",
+   "kw": "140",
+   "scene": "counter",
+   "data": {
+    "from": 0,
+    "to": 140,
+    "suffix": " characters",
+    "note": "sized for text messages"
+   }
+  },
+  {
+   "id": "b8",
+   "role": "turn",
+   "say": "By September two thousand six, it had fewer than five thousand registered users.",
+   "cap": "Sep 2006: under 5,000 users",
+   "kw": "under 5,000",
+   "scene": "contrast",
+   "data": {
+    "left": {
+     "label": "Public launch",
+     "value": "Jul 2006",
+     "tone": "base"
+    },
+    "right": {
+     "label": "Registered users",
+     "value": "Under 5,000",
+     "tone": "bad"
+    },
+    "verdict": "Sep 2006"
+   }
+  },
+  {
+   "id": "b9",
+   "role": "resolve",
+   "say": "In November two thousand thirteen, Twitter went public, valued at just over thirty one billion dollars.",
+   "cap": "Nov 2013 IPO: $31B+",
+   "kw": "$31B+",
+   "scene": "counter",
+   "data": {
+    "from": 0,
+    "to": 31,
+    "prefix": "$",
+    "suffix": "B+",
+    "note": "valuation at the Nov 2013 IPO"
+   }
+  },
+  {
+   "id": "b10",
+   "role": "resolve",
+   "say": "A podcast company's side project became a public company.",
+   "cap": "Side project. Public company.",
+   "scene": "close",
+   "data": {
+    "lines": [
+     "A side project.",
+     "A $31B valuation."
+    ],
+    "accent": "good"
+   }
+  }
+ ],
+ "claims": [
+  {
+   "shown": "14",
+   "expr": null,
+   "value": null,
+   "source": 1,
+   "note": "NBC News: Odeo had 14 full-time employees at that point"
+  },
+  {
+   "shown": "15",
+   "expr": null,
+   "value": null,
+   "source": 0,
+   "note": "HISTORY: Odeo released Twttr to the public on July 15, 2006"
+  },
+  {
+   "shown": "140",
+   "expr": null,
+   "value": null,
+   "source": 0,
+   "note": "HISTORY: the 140-character limit was based on the maximum length of text messages at the time"
+  },
+  {
+   "shown": "5,000",
+   "expr": null,
+   "value": null,
+   "source": 1,
+   "note": "NBC News: in September 2006 a letter to Odeo's investors said Twitter had less than 5,000 registered users"
+  },
+  {
+   "shown": "$31 billion",
+   "expr": null,
+   "value": null,
+   "source": 0,
+   "note": "HISTORY: when the company went public in November 2013 it was valued at just over $31 billion"
+  }
+ ],
+ "facts": [
+  {
+   "claim": "Odeo's podcasting platform lost relevance when Apple announced iTunes with built-in podcasting in fall 2005",
+   "source": 1,
+   "note": "NBC News: podcasting platform ready by July 2005; in fall 2005 Apple announced iTunes with built-in podcasting; Odeo's focus lost relevance; HISTORY says the same"
+  },
+  {
+   "claim": "In February 2006 three people presented a text-based broadcasting idea called Twttr; a prototype existed by March 2006",
+   "source": 1,
+   "note": "NBC News: February 2006 Glass, Dorsey and Webber presented a text-based system for broadcasting messages to friends called Twttr; working prototype by March 2006"
+  },
+  {
+   "claim": "Twttr was released to the public on July 15, 2006",
+   "source": 0,
+   "note": "HISTORY: on July 15, 2006 Odeo released Twttr to the public as a short messaging service for groups"
+  },
+  {
+   "claim": "The 140-character limit was based on text message length",
+   "source": 0,
+   "note": "HISTORY: 140 characters, set after launch, based on the maximum length of text messages at the time"
+  },
+  {
+   "claim": "A September 2006 letter said Twitter had fewer than 5,000 registered users",
+   "source": 1,
+   "note": "NBC News: Evan Williams wrote to Odeo's investors in September 2006 that Twitter had less than 5,000 registered users"
+  },
+  {
+   "claim": "Twitter went public in November 2013 valued at just over $31 billion",
+   "source": 0,
+   "note": "HISTORY: public in November 2013, valued at just over $31 billion"
+  }
+ ],
+ "copy_parts": {
+  "youtube": {
+   "hook": "Twitter began as a side project at the podcast company Odeo, after Apple added podcasts to iTunes in 2005. It launched on July 15, 2006, and two months later had fewer than 5,000 registered users."
+  },
+  "instagram": {
+   "caption": "Twitter began as a side project at a podcast company. Two months after launch it had fewer than 5,000 registered users."
+  },
+  "tiktok": {
+   "caption": "Twitter began as a side project at a podcast company."
+  },
+  "hashtags": {
+   "youtube": [
+    "#tech",
+    "#twitter",
+    "#startup",
+    "#techhistory"
+   ],
+   "instagram": [
+    "#tech",
+    "#twitter",
+    "#startup"
+   ],
+   "tiktok": [
+    "#tech",
+    "#twitter"
+   ]
+  }
+ },
+ "authored": {
+  "by": "claude",
+  "date": "2026-11-13"
+ }
+}

@@ -1,0 +1,224 @@
+{
+ "id": "p038-nvidia-dennys-booth",
+ "series": "G",
+ "lang": "en",
+ "format": "story",
+ "theme": "plum",
+ "title": "Nvidia was founded at a Denny's booth",
+ "summary": "Nvidia's three co-founders decided to start the company at a Denny's in San Jose in 1993. Its NV1 chip failed in 1995 and nearly bankrupted it; the RIVA 128 in 1997 was a commercial success.",
+ "tags": [
+  "nvidia",
+  "startup story",
+  "gpu",
+  "tech history"
+ ],
+ "sources": [
+  "https://www.nbcmiami.com/news/business/money-report/jensen-huang-started-his-2-trillion-company-nvidia-at-a-dennys-breakfast-booth/3302554",
+  "https://computinghistory.org.uk/det/32763/Nvidia%20is%20founded"
+ ],
+ "beats": [
+  {
+   "id": "b1",
+   "role": "hook",
+   "say": "Three engineers started Nvidia at a Denny's booth.",
+   "cap": "Nvidia began at a Denny's",
+   "scene": "title",
+   "data": {
+    "kicker": "San Jose · 1993",
+    "lines": [
+     "Nvidia began",
+     "at a Denny's"
+    ],
+    "accent": "good"
+   }
+  },
+  {
+   "id": "b2",
+   "role": "why",
+   "say": "In nineteen ninety three, they decided to build a company around three D graphics.",
+   "cap": "1993 · 3D graphics",
+   "kw": "3D graphics"
+  },
+  {
+   "id": "b3",
+   "role": "why",
+   "say": "One founder had worked at that same Denny's as a busboy.",
+   "cap": "Busboy there at 15",
+   "kw": "Busboy",
+   "scene": "contrast",
+   "data": {
+    "left": {
+     "label": "At age 15",
+     "value": "Busboy",
+     "tone": "base"
+    },
+    "right": {
+     "label": "Later",
+     "value": "Co-founder",
+     "tone": "good"
+    },
+    "verdict": "Same Denny's"
+   }
+  },
+  {
+   "id": "b4",
+   "role": "data",
+   "say": "By nineteen ninety five, the company had developed a chip called the N V one.",
+   "cap": "1995 · NV1 chip",
+   "kw": "NV1 chip",
+   "scene": "timeline",
+   "data": {
+    "steps": [
+     {
+      "at": "1993",
+      "label": "Denny's meeting"
+     },
+     {
+      "at": "1995",
+      "label": "NV1 chip",
+      "tone": "mid"
+     },
+     {
+      "at": "1997",
+      "label": "RIVA 128",
+      "tone": "good"
+     }
+    ]
+   }
+  },
+  {
+   "id": "b5",
+   "role": "data",
+   "say": "It failed technically and nearly pushed the company into bankruptcy.",
+   "cap": "NV1: nearly bankrupt",
+   "kw": "nearly bankrupt",
+   "mark": "x"
+  },
+  {
+   "id": "b6",
+   "role": "data",
+   "say": "A contract buyout with Sega brought financial relief and resources.",
+   "cap": "Sega contract buyout",
+   "kw": "Sega"
+  },
+  {
+   "id": "b7",
+   "role": "turn",
+   "say": "The next chip, R I V A one twenty eight, came out in nineteen ninety seven.",
+   "cap": "RIVA 128 · 1997",
+   "kw": "RIVA 128",
+   "mark": "check",
+   "scene": "contrast",
+   "data": {
+    "left": {
+     "label": "NV1 · 1995",
+     "value": "Failed",
+     "tone": "bad"
+    },
+    "right": {
+     "label": "RIVA 128 · 1997",
+     "value": "A hit",
+     "tone": "good"
+    },
+    "verdict": "Same company"
+   }
+  },
+  {
+   "id": "b8",
+   "role": "turn",
+   "say": "It became a commercial success.",
+   "cap": "A commercial success",
+   "kw": "commercial success"
+  },
+  {
+   "id": "b9",
+   "role": "resolve",
+   "say": "One chip nearly ended the company. The next was a hit.",
+   "cap": "Nearly bankrupt, then a hit"
+  },
+  {
+   "id": "b10",
+   "role": "resolve",
+   "say": "The company began with a conversation in a diner booth.",
+   "cap": "A conversation in a diner booth",
+   "scene": "close",
+   "data": {
+    "lines": [
+     "A diner booth.",
+     "A chip company."
+    ],
+    "accent": "good"
+   }
+  }
+ ],
+ "claims": [
+  {
+   "shown": "15",
+   "expr": null,
+   "value": null,
+   "source": 0,
+   "note": "NBC Miami (CNBC): Huang had worked as a busboy at the same restaurant at age 15"
+  },
+  {
+   "shown": "128",
+   "expr": null,
+   "value": null,
+   "source": 0,
+   "note": "NBC Miami (CNBC): the RIVA 128, released in 1997, became a commercial success"
+  }
+ ],
+ "facts": [
+  {
+   "claim": "Nvidia's three co-founders decided to start the company at a Denny's in San Jose in 1993",
+   "source": 0,
+   "note": "NBC Miami (CNBC): the three friends met at the Denny's in 1993 and decided to start the company there; Denny's in San Jose, California; planned around 3D graphics"
+  },
+  {
+   "claim": "One co-founder had worked as a busboy at the same Denny's at age 15",
+   "source": 0,
+   "note": "NBC Miami (CNBC): Huang had worked as a busboy at the same restaurant at age 15"
+  },
+  {
+   "claim": "The NV1 chip (1995) failed technically and nearly pushed Nvidia into bankruptcy; a Sega contract buyout brought relief; the RIVA 128 (1997) was a commercial success",
+   "source": 0,
+   "note": "NBC Miami (CNBC): by 1995 the NV1 failed technically and nearly pushed Nvidia into bankruptcy; a contract buyout with Sega gave financial relief and resources for its successor; the RIVA 128, released in 1997, was a commercial success"
+  },
+  {
+   "claim": "Nvidia was founded on April 5, 1993 by three people: Jen-Hsun Huang, Chris A. Malachowsky and Curtis Priem",
+   "source": 1,
+   "note": "Computing History: '5th April 1993', founders Jen-Hsun Huang, Chris A. Malachowsky and Curtis Priem"
+  }
+ ],
+ "copy_parts": {
+  "youtube": {
+   "hook": "Nvidia's three co-founders decided to start the company at a Denny's in San Jose in 1993. Its NV1 chip failed in 1995 and nearly pushed the company into bankruptcy; the RIVA 128 in 1997 was a commercial success."
+  },
+  "instagram": {
+   "caption": "Nvidia began with a conversation in a Denny's booth. Its first big chip, the NV1, failed in 1995. The RIVA 128 in 1997 was a hit."
+  },
+  "tiktok": {
+   "caption": "Three engineers started Nvidia at a Denny's booth."
+  },
+  "hashtags": {
+   "youtube": [
+    "#tech",
+    "#nvidia",
+    "#startup",
+    "#techhistory"
+   ],
+   "instagram": [
+    "#tech",
+    "#nvidia",
+    "#startup"
+   ],
+   "tiktok": [
+    "#tech",
+    "#nvidia"
+   ]
+  }
+ },
+ "authored": {
+  "by": "claude",
+  "date": "2026-11-13"
+ }
+}
