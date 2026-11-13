@@ -43,6 +43,7 @@ SAMPLES = {
     "scale": {"items": [{"label": "chess", "exp": 44, "text": "10^44"}, {"label": "go", "exp": 170, "text": "10^170"}]},
     "cycle": {"nodes": [{"label": "Demonstrate"}, {"label": "Rank"}, {"label": "Optimize"}], "center": "RLHF"},
     "bits": {"bits": "01111111111111111111111111111111", "flip_to": "10000000000000000000000000000000", "label": "2038", "flip_label": "1901"},
+    "guess": {"q": "How many chips did the demo use?", "options": ["One", "Two", "Four"], "answer": 1, "note": "Two, and one was a spare."},
 }
 JUNK = (None, "", 0, -5, "x" * 300, [], [None], [1, 2, 3], {"a": 1}, True, [{"label": None}])
 
@@ -55,7 +56,7 @@ def _canvas():
 @unittest.skipUnless(_OK, f"render bagimliliklari yok: {_WHY}")
 class NewScenes(unittest.TestCase):
     def test_catalog_has_all_scenes_and_matches_fixture(self):
-        self.assertEqual(len(NAMES), 24)
+        self.assertEqual(len(NAMES), 25)
         self.assertEqual(set(NAMES), set(SCENES))
         self.assertEqual(set(SAMPLES), set(NAMES_MORE))
         for n in NAMES_MORE:
@@ -151,6 +152,48 @@ class ShapeRules(unittest.TestCase):
         self.assertTrue(rules._shape("dots", {"hit": 9, "total": 5}, "b1"))
         self.assertTrue(rules._shape("scale", {"items": [{"label": "x", "value": 0}]}, "b1"))
         self.assertTrue(rules._shape("probs", {"rows": [{"word": "a", "p": "high"}]}, "b1"))
+
+    def test_guess_rules(self):
+        ok = {"q": "Which one?", "options": ["a", {"text": "b"}], "answer": 1}
+        self.assertEqual(rules._shape("guess", ok, "b1"), [])
+        bad = (
+            {**ok, "q": ""}, {**ok, "q": "x" * 91}, {**ok, "options": ["a"]}, {**ok, "options": list("abcde")},
+            {**ok, "options": ["a", ""]}, {**ok, "options": ["a", "x" * 41]}, {**ok, "answer": 2},
+            {**ok, "answer": -1}, {**ok, "answer": "1"}, {**ok, "answer": True}, {**ok, "answer": 0.0},
+            {**ok, "note": 5}, {**ok, "note": "x" * 91}, {"q": "Which one?", "options": ["a", "b"]})
+        for data in bad:
+            with self.subTest(data=data):
+                self.assertTrue(rules._shape("guess", data, "b1"))
+
+
+@unittest.skipUnless(_OK, f"render bagimliliklari yok: {_WHY}")
+class GuessScene(unittest.TestCase):
+    DATA = {"q": "How many chips did the demo use?", "options": ["One", "Two", "Four"], "answer": 1, "note": "Two."}
+
+    def img(self, t, data=None, t1=8.0):
+        img, d = _canvas()
+        CATALOG["guess"](d, t, 0.0, t1, data or self.DATA)
+        return img.tobytes()
+
+    def test_answer_is_hidden_then_revealed(self):
+        before, after = self.img(2.0), self.img(7.0)
+        self.assertNotEqual(before, after)
+        wrong = dict(self.DATA, answer=0)
+        self.assertNotEqual(self.img(7.0, wrong), after)           # farkli sik vurgulanir
+
+    def test_before_reveal_all_answers_look_identical(self):
+        for t in (1.0, 2.0, 4.0):
+            self.assertEqual(self.img(t, dict(self.DATA, answer=0)), self.img(t, dict(self.DATA, answer=2)))
+
+    def test_short_scene_still_reveals(self):
+        self.assertNotEqual(self.img(0.5, t1=1.0), self.img(1.0, t1=1.0))
+        self.assertNotEqual(self.img(0.7, t1=1.0), self.img(5.0, t1=1.0))
+
+    def test_invalid_answer_never_reveals(self):
+        for a in (-1, 3, None, "x", True):
+            with self.subTest(answer=a):
+                bad = dict(self.DATA, answer=a)
+                self.assertEqual(self.img(4.0, bad), self.img(7.5, bad))     # hicbir sik yesile donmez, sure cubugu da yok
 
 
 if __name__ == "__main__":

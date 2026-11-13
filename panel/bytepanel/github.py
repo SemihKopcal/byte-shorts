@@ -49,11 +49,15 @@ class GitHub:
             raise GitHubError(f"HTTP {r.status_code} {path}")
         return r
 
-    def dispatch(self, inputs: dict) -> None:
+    def dispatch(self, inputs: dict, workflow: str | None = None) -> None:
+        """workflow verilmezse yayin workflow'u (panel-publish); senaryo islemleri icin panel-scripts."""
+        wf = workflow or self.workflow
+        if not re.fullmatch(r"[A-Za-z0-9._-]+\.ya?ml", wf):
+            raise GitHubError("workflow adi gecersiz")
         body = {"ref": self.ref, "inputs": {k: str(v) for k, v in inputs.items()}}
         try:
             with self._client() as c:
-                r = c.post(f"/repos/{self.repo}/actions/workflows/{self.workflow}/dispatches",
+                r = c.post(f"/repos/{self.repo}/actions/workflows/{wf}/dispatches",
                            json=body)
         except httpx.HTTPError as e:
             raise GitHubError(f"ulasilamadi: {type(e).__name__}") from None
@@ -106,6 +110,23 @@ class GitHub:
         order = self._content_json("order.json")
         order = [x for x in order if isinstance(x, str)] if isinstance(order, list) else []
         return {"total": len(ids), "queue": plan.compute_queue(ids, done, order)}
+
+    def script_titles(self, ids: list[str]) -> dict[str, dict]:
+        """content/scripts/<id>.json -> {id: {title, format, words, beats}}. Okunamayan id atlanir
+        (cagiran baslik yerine id'yi gosterir). Gelen veri dogrulanir; yalniz kisa metin/sayi tasinir."""
+        out: dict[str, dict] = {}
+        for sid in ids[:20]:
+            if not QUEUE_FILE.match(f"{sid}.json"):
+                continue
+            d = self._content_json(f"scripts/{sid}.json")
+            if not isinstance(d, dict):
+                continue
+            beats = d.get("beats") if isinstance(d.get("beats"), list) else []
+            words = sum(len(str(b.get("say", "")).split()) for b in beats if isinstance(b, dict))
+            out[sid] = {"title": re.sub(r"[\x00-\x1f\x7f]", " ", str(d.get("title", "")))[:120].strip(),
+                        "format": re.sub(r"[^a-z]", "", str(d.get("format", "")))[:12],
+                        "words": words, "beats": len(beats)}
+        return out
 
     def experiments(self) -> dict:
         """content/experiments.json -> {arm_info: {script_id: {name,label,n,exp}}, legend: [...]}.

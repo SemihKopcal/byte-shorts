@@ -56,6 +56,21 @@ CREATE INDEX IF NOT EXISTS pub_due ON publications(status, scheduled_at);
 
 CREATE TABLE IF NOT EXISTS settings(key TEXT PRIMARY KEY, value TEXT NOT NULL);
 
+CREATE TABLE IF NOT EXISTS script_requests(
+  request_id  TEXT PRIMARY KEY,
+  action      TEXT NOT NULL CHECK(action IN ('ingest','move_first','remove')),
+  script_id   TEXT NOT NULL DEFAULT '',
+  title       TEXT NOT NULL DEFAULT '',
+  status      TEXT NOT NULL DEFAULT 'sent' CHECK(status IN ('sent','ok','rejected','error')),
+  message     TEXT NOT NULL DEFAULT '',
+  problems    TEXT NOT NULL DEFAULT '[]',
+  form        TEXT NOT NULL DEFAULT '',
+  actor       TEXT NOT NULL DEFAULT '',
+  created_at  TEXT NOT NULL,
+  finished_at TEXT
+);
+CREATE INDEX IF NOT EXISTS sr_status ON script_requests(status, created_at);
+
 CREATE TABLE IF NOT EXISTS audit(
   id     INTEGER PRIMARY KEY AUTOINCREMENT,
   at     TEXT NOT NULL,

@@ -16,6 +16,8 @@ Tasarim kararlari ve SEBEPLERI:
    her poz ayni matematikten cikiyor -- 10.000 videoda da ayni.
 4. IRI KAFA (toplam boyun ~%48'i). Thumbnail boyutunda okunmasi icin.
 """
+import math
+
 from PIL import Image, ImageDraw, ImageFilter
 
 BODY = (26, 30, 40)
@@ -26,7 +28,8 @@ AMBER = (255, 176, 32)
 RED = (248, 92, 92)
 VIOLET = (139, 139, 255)
 
-POSES = ("idle", "point_r", "point_l", "point_up", "shrug", "alert")
+POSES = ("idle", "point_r", "point_l", "point_up", "shrug", "alert", "cheer", "think", "wave")
+GLYPHS = ("", "!", "?", "star")        # ekrandaki imlecin yerine gecen simgeler (yuz DEGIL: yazi karakteri)
 
 
 def _limb(d, p0, p1, w, fill, rim=None):
@@ -54,13 +57,29 @@ _HANDS = {
     "point_up": ((-104, 74), (166, -178)),
     "shrug":    ((-152, -58), (152, -58)),
     "alert":    ((-136, -32), (136, -32)),
+    "cheer":    ((-150, -128), (150, -128)),     # iki kol havada
+    "think":    ((-104, 74), (86, -28)),         # el cenenin altinda
+    "wave":     ((-104, 74), (156, -112)),       # sag el sallaniyor (anim ile)
 }
+
+
+def _hands(pose: str, anim: float):
+    """Poz -> (sol el, sag el). anim (sn) verilirse 'wave' ve 'cheer' kollari oynar; digerleri sabit."""
+    lh, rh = _HANDS[pose]
+    if pose == "wave":
+        w = math.sin(anim * math.tau * 2.4)
+        rh = (rh[0] + 24 * w, rh[1] - 10 * abs(w))
+    elif pose == "cheer":
+        w = math.sin(anim * math.tau * 2.0)
+        lh, rh = (lh[0], lh[1] + 18 * w), (rh[0], rh[1] - 18 * w)
+    return lh, rh
 
 
 def draw_byte(d: ImageDraw.ImageDraw, cx: float, cy: float, scale: float = 1.0,
               pose: str = "idle", cursor=MINT, blink: bool = True,
-              cursor_w: float = 1.0) -> None:
-    """cy = govdenin DIKEY MERKEZI. Toplam yukseklik ~ 400*scale."""
+              cursor_w: float = 1.0, glyph: str = "", anim: float = 0.0) -> None:
+    """cy = govdenin DIKEY MERKEZI. Toplam yukseklik ~ 400*scale.
+    glyph: imlec yerine ekranda bir simge ('!', '?', 'star'); anim: saniye, 'wave'/'cheer' kollarini oynatir."""
     s = scale
 
     def P(x, y):
@@ -73,7 +92,7 @@ def draw_byte(d: ImageDraw.ImageDraw, cx: float, cy: float, scale: float = 1.0,
         _limb(d, P((x0 + x1) / 2, 100), P((x0 + x1) / 2, 158), 32 * s, BODY, rim)
 
     # ── kollar (govdenin ALTINA cizilir ki omuz temiz dursun) ──
-    lh, rh = _HANDS[pose]
+    lh, rh = _hands(pose, anim)
     for (hx, hy), sx in ((lh, -66), (rh, 66)):
         _limb(d, P(sx, 6), P(hx, hy), 28 * s, BODY, rim)
         p = P(hx, hy)
@@ -87,12 +106,13 @@ def draw_byte(d: ImageDraw.ImageDraw, cx: float, cy: float, scale: float = 1.0,
     # ── boyun ──
     d.rounded_rectangle((*P(-19, -44), *P(19, -10)), radius=9 * s, fill=BODY)
 
-    draw_byte_head(d, cx, cy - 130 * s, scale, cursor, blink, cursor_w)
+    draw_byte_head(d, cx, cy - 130 * s, scale, cursor, blink, cursor_w, glyph)
 
 
 def draw_byte_sticker(d: ImageDraw.ImageDraw, cx: float, cy: float, scale: float = 1.0,
                       pose: str = "idle", cursor=MINT, blink: bool = True, cursor_w: float = 1.0,
-                      pen=(28, 26, 34), shadow=None, shadow_off: int = 5, px: int = 5, k: int = 2) -> None:
+                      pen=(28, 26, 34), shadow=None, shadow_off: int = 5, px: int = 5, k: int = 2,
+                      glyph: str = "", anim: float = 0.0) -> None:
     """Karton stili: BYTE kalin dis cizgili 'cikartma' olarak (k kat asiri ornekleme, yumusak kenar) +
     sert ofset golge. Ayni cizim, ustune dis cizgi: koyu govde lacivert zeminde de okunur.
     d'nin bagli oldugu resme dogrudan yapistirir."""
@@ -101,7 +121,7 @@ def draw_byte_sticker(d: ImageDraw.ImageDraw, cx: float, cy: float, scale: float
     wl, hl = int(480 * s), int(470 * s)
     cl, ch = wl / 2, 240 * s
     sp = Image.new("RGBA", (wl, hl), (0, 0, 0, 0))
-    draw_byte(ImageDraw.Draw(sp), cl, ch, s, pose, cursor, blink, cursor_w)
+    draw_byte(ImageDraw.Draw(sp), cl, ch, s, pose, cursor, blink, cursor_w, glyph, anim)
     m = int(px * k + 8 + shadow_off * k)
     base = Image.new("RGBA", (wl + 2 * m, hl + 2 * m), (0, 0, 0, 0))
     base.paste(sp, (m, m))
@@ -116,10 +136,26 @@ def draw_byte_sticker(d: ImageDraw.ImageDraw, cx: float, cy: float, scale: float
               out.split()[3])
 
 
+def _glyph(d, P, s, glyph, cursor) -> None:
+    """Ekrandaki simge: imlecin yerine gecer. Yuz cizmiyoruz; bunlar yazi karakteri ('!', '?') ve bir kivilcim."""
+    if glyph == "!":
+        d.rounded_rectangle((*P(-11, -46), *P(11, 8)), radius=9 * s, fill=cursor)
+        d.ellipse((*P(-12, 22), *P(12, 46)), fill=cursor)
+    elif glyph == "?":
+        w = int(max(3, 15 * s))
+        d.arc((*P(-27, -50), *P(27, 4)), start=180, end=90, fill=cursor, width=w)
+        d.line([P(0, 4), P(0, 12)], fill=cursor, width=w)
+        d.ellipse((*P(-11, 26), *P(11, 48)), fill=cursor)
+    elif glyph == "star":
+        pts = [(0, -50), (11, -11), (50, 0), (11, 11), (0, 50), (-11, 11), (-50, 0), (-11, -11)]
+        d.polygon([P(x, y) for x, y in pts], fill=cursor)
+
+
 def draw_byte_head(d: ImageDraw.ImageDraw, cx: float, cy: float, scale: float = 1.0,
-                   cursor=MINT, blink: bool = True, cursor_w: float = 1.0) -> None:
+                   cursor=MINT, blink: bool = True, cursor_w: float = 1.0, glyph: str = "") -> None:
     """Sadece CRT kafa. cy = kafanin DIKEY MERKEZI. Yukseklik ~184*scale.
-    Avatar/ikon icin bunu kullan: 32 pikselde govde okunmuyor, kafa okunuyor."""
+    Avatar/ikon icin bunu kullan: 32 pikselde govde okunmuyor, kafa okunuyor.
+    glyph verilirse imlec yerine o simge (hep gorunur, yanip sonmez)."""
     s = scale
 
     def P(x, y):
@@ -129,7 +165,9 @@ def draw_byte_head(d: ImageDraw.ImageDraw, cx: float, cy: float, scale: float = 
     d.rounded_rectangle((*P(-116, -92), *P(116, 92)), radius=48 * s,
                         outline=BODY_HI, width=int(max(2, 5 * s)))
     d.rounded_rectangle((*P(-94, -72), *P(94, 72)), radius=32 * s, fill=SCREEN)
-    if blink:
+    if glyph in ("!", "?", "star"):
+        _glyph(d, P, s, glyph, cursor)
+    elif blink:
         w = 15 * cursor_w
         d.rounded_rectangle((*P(-w, -28), *P(w, 28)), radius=6 * s, fill=cursor)
 

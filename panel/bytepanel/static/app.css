@@ -15,8 +15,8 @@ th{color:var(--mut);font-weight:600;font-size:.85rem}
 .tbl{overflow-x:auto}
 .badge{display:inline-block;padding:1px 9px;border-radius:99px;font-size:.8rem;border:1px solid var(--line);color:var(--mut)}
 .badge.ok,.badge.published,.badge.approved{color:var(--ok);background:var(--okbg);border-color:transparent}
-.badge.warn,.badge.pending,.badge.planned,.badge.dispatched{color:var(--warn);background:var(--warnbg);border-color:transparent}
-.badge.fail,.badge.failed,.badge.rejected{color:var(--fail);background:var(--failbg);border-color:transparent}
+.badge.warn,.badge.pending,.badge.planned,.badge.dispatched,.badge.sent{color:var(--warn);background:var(--warnbg);border-color:transparent}
+.badge.fail,.badge.failed,.badge.rejected,.badge.error{color:var(--fail);background:var(--failbg);border-color:transparent}
 .banner{border-radius:12px;padding:12px 16px;margin-bottom:12px;font-weight:600}
 .banner.ok{background:var(--okbg);color:var(--ok)}.banner.warn{background:var(--warnbg);color:var(--warn)}.banner.fail{background:var(--failbg);color:var(--fail)}.banner.unknown{background:var(--card);border:1px solid var(--line);color:var(--mut)}
 .flash{background:var(--warnbg);color:var(--warn);border-radius:10px;padding:10px 14px;margin-bottom:12px}
@@ -87,3 +87,45 @@ details.card summary{cursor:pointer;font-weight:600}
   .chip.pub.pf-youtube{background:var(--yt)}.chip.pub.pf-instagram{background:var(--ig)}.chip.pub.pf-tiktok{background:var(--tt)}
   .chip.made,.chip.run{border:1px dashed var(--mut)}
 }
+
+/* hikayeler: kuyruk + kolay form */
+.qtbl td.n{font-variant-numeric:tabular-nums;color:var(--mut);width:2.2em}
+.qtbl td.act{white-space:nowrap}
+.fmt{display:inline-block;font-size:.72rem;padding:0 7px;border-radius:99px;border:1px solid var(--line);color:var(--mut)}
+.probs{margin:6px 0 0;padding-left:1.2em;font-size:.85rem}
+.probs li{margin:2px 0}
+.formgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px;margin:8px 0}
+.formgrid label,.fld{display:flex;flex-direction:column;gap:3px;font-size:.85rem;color:var(--mut)}
+.formgrid input,.formgrid select,.fld input,.fld select,.fld textarea,textarea.wide{width:100%;font:inherit;padding:7px 10px;border-radius:9px;border:1px solid var(--line);background:var(--card);color:var(--ink)}
+textarea.wide{resize:vertical;min-height:4.2em}
+.beatrow{display:grid;grid-template-columns:2.2em minmax(0,3fr) minmax(0,2fr) minmax(0,1fr) 6.5em;gap:8px;align-items:start;padding:8px 0;border-bottom:1px solid var(--line)}
+.beatrow:last-child{border-bottom:0}
+.beatrow .no{color:var(--mut);font-variant-numeric:tabular-nums;padding-top:7px}
+.beatrow input,.beatrow select{width:100%}
+.beathead{display:grid;grid-template-columns:2.2em minmax(0,3fr) minmax(0,2fr) minmax(0,1fr) 6.5em;gap:8px;font-size:.8rem;color:var(--mut);font-weight:600}
+.factrow{display:grid;grid-template-columns:minmax(0,4fr) 6.5em minmax(0,3fr);gap:8px;padding:6px 0}
+.factrow input{width:100%}
+.est{position:sticky;bottom:0;background:var(--card);border-top:1px solid var(--line);padding:8px 0;margin-top:8px;z-index:2}
+.est.over b{color:var(--fail)}
+.stack input{width:100%;margin:3px 0}
+@media (max-width:640px){
+  .beathead{display:none}
+  .beatrow{grid-template-columns:1fr 1fr;gap:6px}
+  .beatrow .no{grid-column:1/-1;padding-top:0;font-weight:600}
+  .beatrow .say,.beatrow .cap{grid-column:1/-1}
+  .factrow{grid-template-columns:1fr 6.5em}
+  .factrow .note{grid-column:1/-1}
+}
+
+/* takvim: sade gorunumler */
+.tabs{display:flex;flex-wrap:wrap;gap:4px;margin:0 0 10px;border-bottom:1px solid var(--line)}
+.tabs a{padding:8px 14px;color:var(--mut);text-decoration:none;border-bottom:3px solid transparent;margin-bottom:-1px}
+.tabs a.on{color:var(--acc);border-bottom-color:var(--acc);font-weight:600}
+.lead{font-size:1.1rem;margin:0 0 6px}
+.bad{color:var(--fail)}
+.card.attn{border-color:var(--warn);background:var(--warnbg)}
+.card.attn>div{padding:4px 0}
+.card.warn{border-color:var(--warn);background:var(--warnbg)}
+.weekday.today{border-color:var(--acc);box-shadow:0 0 0 1px var(--acc)}
+.weekday.past{opacity:.75}
+.weekday .evrow{padding:5px 0}

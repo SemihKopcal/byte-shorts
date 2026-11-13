@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+{% block body %}
+<div class="calbar"><h1>Yeni hikaye</h1><div class="calnav"><a class="btn" href="/scripts">Geri</a></div></div>
+
+{% if problems %}<div class="banner fail">Gonderilmedi, su sorunlari duzelt:
+<ul class="probs">{% for p in problems %}<li>{{ p }}</li>{% endfor %}</ul></div>{% endif %}
+
+<form id="script-form" method="post" action="/scripts/new">
+<input type="hidden" name="csrf" value="{{ csrf }}">
+
+<div class="card">
+<h2 class="mt0">Genel</h2>
+<div class="formgrid">
+<label>Baslik (en fazla {{ lim.LIMIT.title }} karakter)<input name="title" value="{{ form.title }}" autocomplete="off"></label>
+<label>Bicim<select name="format">{% for f in formats %}<option value="{{ f }}"{% if form.format == f %} selected{% endif %}>{{ f }}</option>{% endfor %}</select></label>
+<label>Renk temasi<select name="theme"><option value="">otomatik</option>{% for t in themes %}<option value="{{ t }}"{% if form.theme == t %} selected{% endif %}>{{ t }}</option>{% endfor %}</select></label>
+</div>
+<label class="fld">Aciklama: videonun altina yazilir, 1-2 cumle (en az 30 karakter)<textarea class="wide" name="description">{{ form.description }}</textarea></label>
+<label class="fld">Etiketler (virgulle ayir, en fazla {{ lim.TAGS_MAX }}; # koyma)<input name="tags" value="{{ form.tags }}" autocomplete="off"></label>
+</div>
+
+<div class="card">
+<h2 class="mt0">Cumleler ({{ lim.BEATS_MIN }}-{{ lim.BEATS_MAX }} tane)</h2>
+<p class="mut small">Her satir videoda bir an: BYTE <b>okunacak cumleyi</b> soyler, ekranda <b>ekran yazisi</b> gorunur. Ilk cumle kanca: en fazla {{ lim.MAX_HOOK_WORDS }} kelime, soru degil, sasirtici bir olgu. Sonra "neden onemli", "rakamlar", "donus noktasi" ve kapanis gelir; bosluklari kendin doldur, yapiyi (sahneler, grafikler) sistem kurar.</p>
+<ul class="small mut">
+<li>Okunacak cumlede <b>rakam yok</b>: "three dollars" yaz; rakam yalniz ekran yazisinda ("$3").</li>
+<li>Cumle basina en fazla {{ lim.MAX_BEAT_WORDS }} kelime; ekran yazisi en fazla {{ lim.LIMIT.cap }} karakter.</li>
+<li>Vurgulu kelime: ekran yazisinin icinden <b>aynen</b> kopyala (en fazla {{ lim.KW_MAX }} karakter); isaret: tik (check) ya da carpi (x) vurgulu kelimeyi isaretler.</li>
+<li>Toplam sure en fazla {{ lim.MAX_SECONDS }} saniye: asagidaki sayac canli gosterir.</li>
+</ul>
+<div class="beathead"><span>#</span><span>Okunacak cumle (rakamsiz)</span><span>Ekran yazisi</span><span>Vurgulu kelime</span><span>Isaret</span></div>
+{% for b in form.beats %}{% set i = loop.index %}
+<div class="beatrow">
+<span class="no">{{ i }}</span>
+<input class="say" name="say_{{ i }}" value="{{ b.say }}" autocomplete="off" placeholder="{% if i == 1 %}kanca: sasirtici bir olgu{% endif %}" aria-label="Cumle {{ i }}: okunacak cumle">
+<input class="cap" name="cap_{{ i }}" value="{{ b.cap }}" autocomplete="off" aria-label="Cumle {{ i }}: ekran yazisi">
+<input name="kw_{{ i }}" value="{{ b.kw }}" autocomplete="off" aria-label="Cumle {{ i }}: vurgulu kelime">
+<select name="mark_{{ i }}" aria-label="Cumle {{ i }}: isaret">{% for k in marks %}<option value="{{ k }}"{% if b.mark == k %} selected{% endif %}>{{ {'': '-', 'check': 'tik', 'x': 'carpi'}[k] }}</option>{% endfor %}</select>
+</div>
+{% endfor %}
+</div>
+
+<div class="card">
+<h2 class="mt0">Kaynaklar ({{ lim.SOURCES_MIN }}-{{ lim.SOURCES_MAX }})</h2>
+<p class="mut small">Haberin dayandigi sayfalar, "https://" ile. Her kaynak asagida en az bir olayda kullanilmali.</p>
+<div class="stack">
+{% for u in form.sources %}<input name="src_{{ loop.index }}" value="{{ u }}" autocomplete="off" placeholder="https://..." aria-label="Kaynak {{ loop.index }}">{% endfor %}
+</div>
+</div>
+
+<div class="card">
+<h2 class="mt0">Dogrulanan olaylar ({{ lim.FACTS_MIN }}-{{ lim.FACTS_MAX }})</h2>
+<p class="mut small">Videoda soyledigin her onemli iddia: olayin kendisi (<b>sayilari rakamla yaz</b>), hangi kaynakta oldugu (1, 2, ...) ve o sayfa ne diyor. Sistem bunlari cumlelerdeki sayilarla karsilastirir.</p>
+{% for f in form.facts %}{% set i = loop.index %}
+<div class="factrow">
+<input name="fact_text_{{ i }}" value="{{ f.text }}" autocomplete="off" placeholder="olay {{ i }}: ornek 'The company raised $3 billion in 2026'" aria-label="Olay {{ i }}">
+<input name="fact_src_{{ i }}" value="{{ f.source }}" autocomplete="off" inputmode="numeric" placeholder="kaynak" aria-label="Olay {{ i }} kaynak no">
+<input class="note" name="fact_note_{{ i }}" value="{{ f.note }}" autocomplete="off" placeholder="sayfa ne diyor?" aria-label="Olay {{ i }}: sayfa ne diyor">
+</div>
+{% endfor %}
+</div>
+
+<details class="card"{% if form.calcs and form.calcs|selectattr('shown')|list %} open{% endif %}>
+<summary>Hesapli rakamlar (istege bagli)</summary>
+<p class="mut small">Ekranda gosterdigin bir sayi kaynaklardaki sayilardan hesapla cikiyorsa (ornek: 3000 / 4 = 750) burada goster: "Ekranda" alanina 750, "Hesap" alanina 3000 / 4 yaz.</p>
+{% for c in form.calcs %}{% set i = loop.index %}
+<div class="row">
+<input name="calc_shown_{{ i }}" value="{{ c.shown }}" size="10" placeholder="ekranda" autocomplete="off" aria-label="Hesap {{ i }}: ekrandaki sayi">
+<input name="calc_expr_{{ i }}" value="{{ c.expr }}" size="30" placeholder="hesap" autocomplete="off" aria-label="Hesap {{ i }}: hesap">
+</div>
+{% endfor %}
+</details>
+
+<div class="est card" id="est"><b data-secs>0</b> sn (tahmin) · <span data-beats>0</span> cumle · <span data-words>0</span> kelime
+<span class="mut small">· olmasi gereken: {{ lim.BEATS_MIN }}-{{ lim.BEATS_MAX }} cumle, en fazla {{ lim.MAX_SECONDS }} sn</span>
+<div class="mt8"><button class="pri" type="submit">Gonder</button> <span class="mut small">Depodaki kapidan gecerse kuyrugun sonuna eklenir.</span></div></div>
+</form>
+{% endblock %}

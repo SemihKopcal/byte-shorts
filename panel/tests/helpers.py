@@ -31,13 +31,17 @@ class FakeGitHub:
         self.arm_info: dict[str, dict] = {}
         self.legend: list[dict] = []
         self.fail_queue: Exception | None = None
+        self.workflows: list[str | None] = []      # her dispatch'in hedef workflow'u (None = yayin workflow'u)
+        self.titles: dict[str, dict] = {}          # script_titles icin: {id: {title, format, words, beats}}
+        self.fail_titles: Exception | None = None
 
-    def dispatch(self, inputs):
+    def dispatch(self, inputs, workflow=None):
         if self.on_dispatch:
             self.on_dispatch(inputs)
         if self.fail:
             raise self.fail
         self.calls.append(dict(inputs))
+        self.workflows.append(workflow)
 
     def ping(self):
         pass
@@ -56,6 +60,11 @@ class FakeGitHub:
 
     def experiments(self):
         return {"arm_info": dict(self.arm_info), "legend": list(self.legend)}
+
+    def script_titles(self, ids):
+        if self.fail_titles:
+            raise self.fail_titles
+        return {i: dict(self.titles[i]) for i in ids if i in self.titles}
 
 
 def test_config(**over):

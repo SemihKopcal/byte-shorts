@@ -153,6 +153,8 @@ def flow(d, t, t0, t1, data):
     bw = 780
     x0 = S.MIDX - bw / 2
     labels = data.get("arrows") if isinstance(data.get("arrows"), list) else []
+    icons = S.ICONS.pick_many([str(nd.get("label", "")) for nd in nodes])   # etiketten otomatik ikon
+    shift = 52 if any(icons) else 0                  # ikon varsa yazi biraz saga kayar (hepsinde ayni: hizali)
     for i, nd in enumerate(nodes):
         a = D.appear(t, t0 + 0.1 + i * 0.4)
         yy = y0 + i * (bh + gap)
@@ -161,13 +163,16 @@ def flow(d, t, t0, t1, data):
             yo = yy - (1 - a) * 20
             d.rounded_rectangle((x0, yo, x0 + bw, yo + bh), radius=28,
                                 fill=D.fade(col, 0.13 * a), outline=D.fade(col, a), width=4)
+            if icons[i]:
+                S.ICONS.paste(d, icons[i], x0 + 84, yo + bh / 2, 88, col, a, t)
             sub = nd.get("sub")
-            f = S._fit(d, str(nd.get("label", "")), D.F_DISP, 58, bw - 80)
-            d.text((S.MIDX, yo + bh / 2 - (24 if sub else 0)), str(nd.get("label", "")),
+            tx = S.MIDX + shift
+            f = S._fit(d, str(nd.get("label", "")), D.F_DISP, 58, bw - 80 - 2 * shift)
+            d.text((tx, yo + bh / 2 - (24 if sub else 0)), str(nd.get("label", "")),
                    font=f, fill=D.fade(D.INK, a), anchor="mm")
             if sub:
-                f2 = S._fit(d, str(sub), D.F_MED, 36, bw - 80)
-                d.text((S.MIDX, yo + bh / 2 + 36), str(sub), font=f2,
+                f2 = S._fit(d, str(sub), D.F_MED, 36, bw - 80 - 2 * shift)
+                d.text((tx, yo + bh / 2 + 36), str(sub), font=f2,
                        fill=D.fade(D.MUTE, a), anchor="mm")
         if i < n - 1:
             b = D.appear(t, t0 + 0.1 + (i + 0.55) * 0.4, dur=0.35)
@@ -812,7 +817,101 @@ def bits(d, t, t0, t1, data):
             d.text((x + cell / 2, y + cell / 2 - 2), "0", font=D.F_DISP(58), fill=D.fade(D.MUTE, a), anchor="mm")
 
 
+def guess_reveal(t0, t1):
+    """Cevabin acildigi an: sahnenin ~%62'si, en gec bitisten 0.35 sn once, en erken baslangictan 0.9 sn sonra.
+    (cartoon.Toon.sfx_events de ding'i buradan zamanlar.)"""
+    rv = min(t0 + max(1.6, (t1 - t0) * 0.62), t1 - 0.35)
+    return max(rv, t0 + 0.9)
+
+
+def guess(d, t, t0, t1, data):
+    """"Sen tahmin et": soru + 2-4 sik; sure dolunca dogru sik yesile doner, digerleri soner.
+    data: {q, options:[metin | {text}] (2-4), answer: dogru sikkin SIRASI (0'dan), note?}
+    Zamanlama: sikler sirayla gelir; sahnenin ~%62'sinde cevap acilir (en gec bitisten 0.35 sn once).
+    Cevap acilmadan once soru kartinin altinda azalan bir sure cubugu var: izleyici dusunur, sonra bilir."""
+    q = str(data.get("q", "")).strip()
+    raw = data.get("options") if isinstance(data.get("options"), list) else []
+    opts = []
+    for o in raw[:4]:
+        txt = o.get("text") if isinstance(o, dict) else o
+        if isinstance(txt, (str, int, float)) and not isinstance(txt, bool) and str(txt).strip():
+            opts.append(str(txt).strip())
+    n = len(opts)
+    if not q and not n:
+        return
+    av = data.get("answer")
+    ans = -1 if isinstance(av, bool) else _int(av, -1, -1, 99)   # True int sayilir: dogru sik sanilmasin
+    if ans >= n:
+        ans = -1                                           # gecersiz sira: cevap acilmaz, hicbir sik "dogru" olmaz
+    rv = guess_reveal(t0, t1)
+    revealed = ans >= 0 and t >= rv
+    a_q = D.appear(t, t0)
+    gap = 26.0
+    f, lines = _wrap_fit(d, q, D.F_DISP, 64, D.W - 2 * S.MARGIN, 3, 40) if q else (None, [])
+    q_h = (len(lines) * f.size * 1.16 + 26) if q else 0.0
+    h = max(96.0, min(150.0, (S.BOT - S.TOP - q_h - 44 - 150 - (max(n, 1) - 1) * gap) / max(n, 1)))
+    note_s = data.get("note") if isinstance(data.get("note"), str) and data.get("note").strip() else ""
+    block = q_h + 44 + (n * h + max(0, n - 1) * gap) + (110 if note_s else 0)
+    y = max(S.TOP + 10, S.MID - block / 2)                  # blok dikeyde sahne bandinin ortasinda (diger sahneler gibi)
+    if q:
+        for k, ln in enumerate(lines):
+            d.text((S.MIDX, y + k * f.size * 1.16 - (1 - a_q) * 18), ln, font=f,
+                   fill=D.fade(D.INK, a_q), anchor="mt")
+        y += q_h
+    if ans >= 0 and not revealed and a_q > 0.5:            # sure cubugu
+        frac = D.clamp01(1 - (t - (t0 + 0.6)) / max(0.4, rv - t0 - 0.6))
+        bw = D.W - 2 * S.MARGIN
+        d.rounded_rectangle((S.MARGIN, y, S.MARGIN + bw, y + 12), radius=6, fill=D.fade(_dim(), a_q))
+        if frac > 0.01:
+            d.rounded_rectangle((S.MARGIN, y, S.MARGIN + bw * frac, y + 12), radius=6, fill=D.fade(D.VIOLET, a_q))
+    y += 44
+    if not n:
+        return
+    letters = "ABCD"
+    for i, txt in enumerate(opts):
+        a = D.appear(t, t0 + 0.35 + i * 0.3)
+        if a <= 0.01:
+            continue
+        top = y + i * (h + gap) + (1 - a) * 24
+        right = revealed and i == ans
+        wrong = revealed and i != ans
+        k = 0.34 if wrong else 1.0
+        col = D.MINT if right else (D.MUTE if wrong else D.VIOLET)
+        pop = 1.0
+        if right:
+            pop = 1.0 + 0.035 * math.sin(D.clamp01((t - rv) / 0.5) * math.pi)
+        grow = (h * (pop - 1)) / 2
+        d.rounded_rectangle((S.MARGIN - grow, top - grow, D.W - S.MARGIN + grow, top + h + grow), radius=26,
+                            fill=D.fade(col, (0.22 if right else 0.10) * a * k), outline=D.fade(col, a * k), width=5 if right else 4)
+        cx, cy = S.MARGIN + 66, top + h / 2
+        d.ellipse((cx - 34, cy - 34, cx + 34, cy + 34), fill=D.fade(col, a * k * (1.0 if right else 0.22)))
+        d.text((cx, cy + 1), letters[i], font=D.F_DISP(40), anchor="mm",
+               fill=D.fade(D.BG0 if right else col, a * k))
+        tx = cx + 64
+        f2, ls = _wrap_fit(d, txt, D.F_DISP, 52, D.W - S.MARGIN - 70 - tx, 2, 32)
+        t_top = cy - len(ls) * f2.size * 1.12 / 2
+        for j, ln in enumerate(ls):
+            d.text((tx, t_top + j * f2.size * 1.12), ln, font=f2, fill=D.fade(D.INK, a * (0.5 if wrong else 1.0)), anchor="lt")
+        if right:                                           # cizilerek gelen tik
+            p = D.clamp01((t - rv - 0.1) / 0.35)
+            ex = D.W - S.MARGIN - 62
+            pts = [(ex - 22, cy + 2), (ex - 6, cy + 18), (ex + 24, cy - 16)]
+            s1, s2 = D.clamp01(p / 0.45), D.clamp01((p - 0.45) / 0.55)
+            if s1 > 0:
+                e = (pts[0][0] + (pts[1][0] - pts[0][0]) * s1, pts[0][1] + (pts[1][1] - pts[0][1]) * s1)
+                d.line([pts[0], e], fill=D.MINT, width=11, joint="curve")
+            if s2 > 0:
+                e = (pts[1][0] + (pts[2][0] - pts[1][0]) * s2, pts[1][1] + (pts[2][1] - pts[1][1]) * s2)
+                d.line([pts[1], e], fill=D.MINT, width=11, joint="curve")
+    if revealed and note_s:
+        b = D.appear(t, rv + 0.35)
+        f3, ls = _wrap_fit(d, note_s, D.F_MED, 42, D.W - 2 * S.MARGIN, 2, 30)
+        ny = y + n * (h + gap) + 8
+        for j, ln in enumerate(ls):
+            d.text((S.MIDX, ny + j * f3.size * 1.2 - (1 - b) * 14), ln, font=f3, fill=D.fade(D.MUTE, b), anchor="mt")
+
+
 NAMES_MORE = ("steps", "flow", "equation", "ring", "dots", "chat", "terminal", "tokens",
-              "probs", "layers", "checklist", "headline", "scale", "cycle", "bits")
+              "probs", "layers", "checklist", "headline", "scale", "cycle", "bits", "guess")
 
 CATALOG = {n: globals()[n] for n in NAMES_MORE}

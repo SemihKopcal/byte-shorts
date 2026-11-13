@@ -229,6 +229,102 @@ class DailyPanelMode(unittest.TestCase):
 
 
 @unittest.skipIf(yaml is None, "pyyaml yok")
+class PanelScripts(unittest.TestCase):
+    """Panelden senaryo ekle / one al / sil. Depoya YAZAN tek panel workflow'u: en siki kurallar burada."""
+
+    def setUp(self):
+        self.d = wf("panel-scripts.yml")
+        self.text = (ROOT / "ci" / "panel-scripts.yml").read_text()
+
+    def names(self):
+        return [s.get("name") or s.get("uses", "") for s in steps(self.d)]
+
+    def test_only_dispatch_with_exactly_the_inputs_the_panel_sends(self):
+        import panel_scripts as ps
+        self.assertEqual(list(triggers(self.d)), ["workflow_dispatch"])
+        ins = triggers(self.d)["workflow_dispatch"]["inputs"]
+        self.assertEqual(set(ins), {"action", "script_id", "request_id"})
+        self.assertEqual(tuple(ins["action"]["options"]), ps.ACTIONS)
+        self.assertTrue(ins["action"]["required"] and ins["request_id"]["required"])
+
+    def test_it_may_write_content_and_nothing_else(self):
+        self.assertEqual(self.d["permissions"], {"contents": "write"})
+        for job in self.d["jobs"].values():
+            self.assertNotIn("permissions", job)
+        run = " ".join(s.get("run", "") for s in steps(self.d))
+        self.assertIn("git add -A content", run)                       # yalniz content/
+        for bad in ("git add .", "git add -A\n", "git add --all", "git push --force", "git push -f", "gh release"):
+            self.assertNotIn(bad, run)
+
+    def test_runs_never_overlap_so_numbers_and_the_queue_cannot_collide(self):
+        c = self.d["concurrency"]
+        self.assertEqual(c["group"], "panel-scripts")
+        self.assertIs(c["cancel-in-progress"], False)
+
+    def test_only_the_two_r2_steps_see_secrets_and_only_r2_ones(self):
+        seen = {}
+        for s in steps(self.d):
+            used = {k for k, v in s.get("env", {}).items() if "secrets." in str(v)}
+            if used:
+                seen[s["name"]] = used
+        r2 = {"R2_ENDPOINT", "R2_BUCKET", "R2_ACCESS_KEY_ID", "R2_SECRET_ACCESS_KEY"}
+        self.assertEqual(seen, {"uygula": r2, "sonucu panele bildir": r2})
+        self.assertNotIn("secrets.", json.dumps([s for s in steps(self.d) if s.get("name") == "depoya yaz"]))
+        for bad in ("YOUTUBE_", "INSTAGRAM_", "TIKTOK_", "GH_PAT", "GEMINI"):
+            self.assertNotIn(bad, self.text)
+
+    def test_inputs_reach_the_script_only_through_env(self):
+        for s in steps(self.d):
+            self.assertNotIn("inputs.", s.get("run", ""), s.get("name"))
+        env = step(self.d, "uygula")["env"]
+        self.assertEqual({k: env[k] for k in ("ACTION", "SCRIPT_ID", "REQUEST_ID")},
+                         {"ACTION": "${{ inputs.action }}", "SCRIPT_ID": "${{ inputs.script_id }}",
+                          "REQUEST_ID": "${{ inputs.request_id }}"})
+
+    def test_the_result_is_reported_after_the_push_and_even_when_it_failed(self):
+        order = self.names()
+        self.assertLess(order.index("uygula"), order.index("depoya yaz"))
+        self.assertLess(order.index("depoya yaz"), order.index("sonucu panele bildir"))
+        push, rep = step(self.d, "depoya yaz"), step(self.d, "sonucu panele bildir")
+        self.assertEqual(push["id"], "push")
+        self.assertEqual(rep["if"], "always()")
+        self.assertEqual(rep["env"]["PUSH_OK"], "${{ steps.push.outcome == 'success' }}")   # 'eklendi' ancak push olunca
+
+    def test_push_retries_and_turns_the_run_red_when_it_cannot(self):
+        run = step(self.d, "depoya yaz")["run"]
+        self.assertIn("for i in 1 2 3 4 5", run)
+        self.assertIn("git pull --rebase", run)
+        self.assertIn("exit 1", run)
+        self.assertNotIn("set -x", run)
+
+    def test_the_apply_step_checks_drawing_and_the_tool_is_the_one_in_the_repo(self):
+        s = step(self.d, "uygula")
+        self.assertEqual(s["env"]["DRAW_CHECK"], "1")
+        self.assertEqual(s["run"], "python tools/panel_scripts.py apply")
+        self.assertEqual(step(self.d, "sonucu panele bildir")["run"], "python tools/panel_scripts.py report")
+        self.assertTrue((ROOT / "tools" / "panel_scripts.py").exists())
+
+    def test_the_font_step_may_fail_without_stopping_the_gate(self):
+        self.assertIs(step(self.d, "fontlar").get("continue-on-error"), True)
+
+    def test_only_first_party_actions_and_the_daily_cache_key(self):
+        used = {s["uses"].split("@")[0] for s in steps(self.d) if "uses" in s}
+        self.assertEqual(used, {"actions/checkout", "actions/cache", "actions/setup-python"})
+
+        def keys(name):
+            return {st["with"]["key"] for j in wf(name)["jobs"].values() for st in j["steps"]
+                    if str(st.get("uses", "")).startswith("actions/cache")}
+        self.assertTrue(keys("panel-scripts.yml"))
+        self.assertLessEqual(keys("panel-scripts.yml"), keys("daily.yml"))      # ayni anahtar: soguk indirme yok
+
+    def test_installed_pins_follow_requirements_txt(self):
+        req = dict(re.findall(r"^([A-Za-z0-9_.-]+)==(\S+)", (ROOT / "requirements.txt").read_text(), re.M))
+        install = " ".join(s.get("run", "") for s in steps(self.d) if s.get("run", "").startswith("pip install"))
+        for pkg in ("Pillow", "numpy", "boto3"):
+            self.assertIn(f"{pkg}=={req[pkg]}", install, pkg)
+
+
+@unittest.skipIf(yaml is None, "pyyaml yok")
 class CheckAndAudit(unittest.TestCase):
     def test_check_runs_the_panel_tests(self):
         d = wf("check.yml")

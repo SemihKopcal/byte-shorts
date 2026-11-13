@@ -76,7 +76,7 @@ counter    a number counting up.
 split      screen divides in two. data: {a:{label,sub?,tone?}, b:{label,sub?,tone?}}
 timeline   steps left to right (max 5). data: {steps:[{at, label, tone?}]}
 byte_says  BYTE large, one line. data: {line?, pose?, cursor?}
-           pose: idle|point_r|point_l|point_up|shrug|alert
+           pose: idle|point_r|point_l|point_up|shrug|alert|cheer|think|wave
            cursor: mint|amber|red|violet
 close      closing card. data: {lines:[1-2 short lines], accent?}
            (never put a handle in it; the pipeline adds the real one)
@@ -96,6 +96,10 @@ headline   news card. data: {source, date?, headline, kicker?}
 scale      log ruler. data: {items:[{label, exp | value, text?}] (max 4)}
 cycle      loop of 3-4 nodes. data: {nodes:[{label}] (3-4), center?}
 bits       0/1 grid with an overflow. data: {bits:"0111...", flip_to?:"1000...", label?, flip_label?}
+guess      "you guess" quiz card: the question and 2-4 options appear, a timer bar runs, then the right one turns
+           green. Use it ONCE, before a surprising number or fact is revealed. The answer must be true and
+           must match a claim. data: {q (max 90 chars), options:[text (max 40 chars)] (2-4), answer: 0-based
+           index of the right option, note?: short line shown after the reveal}
 
 tone values: base (neutral) | good (green) | mid (purple) | bad (amber/warning)
 """

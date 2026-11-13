@@ -24,6 +24,7 @@ from .byte import draw_byte_badge, MINT as B_MINT
 from . import cartoon as TOON
 from . import cta as CTA
 from . import fx as FX
+from . import sfx as SFX
 from . import style as STYLE
 from . import voiceover as CLONE
 from .qc import check
@@ -166,10 +167,16 @@ def render(spec, tl, series_mod, out_path: Path, parallel: bool = False) -> None
     grain = D.build_grain()
     nframes = int(duration * D.FPS)
 
+    audio = out_path.parent / "voice.wav"
+    if toon and spec["_cartoon"].get("sfx"):                   # karton ses efektleri (brand.json cartoon.sfx)
+        fx = SFX.mix(audio, toon.sfx_events(), out_path.parent / "voice_fx.wav", spec["_cartoon"].get("sfx_gain"))
+        print("  ses efektleri: " + (f"{len(toon.sfx_events())} adet" if fx else "eklenemedi, yalniz ses"))
+        audio = fx or audio
+
     enc = subprocess.Popen(
         ["ffmpeg", "-y", "-f", "rawvideo", "-pix_fmt", "rgb24",
          "-s", f"{D.W}x{D.H}", "-r", str(D.FPS), "-i", "pipe:0",
-         "-i", str(out_path.parent / "voice.wav"),
+         "-i", str(audio),
          "-c:v", "libx264", "-preset", "slow", "-crf", "23",
          "-x264-params", "aq-mode=3:psy-rd=1.0:deblock=-1,-1",
          "-profile:v", "high", "-pix_fmt", "yuv420p",

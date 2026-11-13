@@ -56,10 +56,12 @@
  },
 
  "cartoon": {
-  "_note": "Karton/cizgi film stili (worker/cartoon.py): kagit + lacivert zemin, kalin cizgili BYTE sunucu, fosforlu anahtar kelime, elle cizilen tik/X, iris gecisi, krem altyazi. Dikey Short, yalniz senaryodan okuyan seri (G). enabled=false -> eski koyu gorunum. share=0..1: videolarin ne kadari karton olsun (kimlikten turetilir, rastgele degil; 1 = hepsi). alternate=false -> sahneler hep kagit. Beat'e istege bagli alanlar: kw (fosforlu kelime, '' = bu sahnede yok), mark (check | x | none).",
+  "_note": "Karton/cizgi film stili (worker/cartoon.py): kagit + lacivert zemin, kalin cizgili BYTE sunucu, fosforlu anahtar kelime, elle cizilen tik/X, iris gecisi, krem altyazi. Dikey Short, yalniz senaryodan okuyan seri (G). enabled=false -> eski koyu gorunum. share=0..1: videolarin ne kadari karton olsun (kimlikten turetilir, rastgele degil; 1 = hepsi). alternate=false -> sahneler hep kagit. Beat'e istege bagli alanlar: kw (fosforlu kelime, '' = bu sahnede yok), mark (check | x | none). sfx=true: kucuk ses efektleri (worker/sfx.py: sahne gecisinde whoosh, fosforlu kelimede tik, dogru isaretinde ding, yanlis isaretinde thud); konusmanin tepe seviyesini asmaz, sfx_gain 0..1.5 (varsayilan 0.6). sfx=false -> yalniz ses.",
   "enabled": true,
   "alternate": true,
-  "share": 1.0
+  "share": 1.0,
+  "sfx": true,
+  "sfx_gain": 0.6
  },
 
  "voice_clone": {

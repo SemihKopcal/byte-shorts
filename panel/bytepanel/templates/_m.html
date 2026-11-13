@@ -5,5 +5,35 @@
 <button class="{{ cls }}" type="submit">{{ label }}</button>
 </form>
 {%- endmacro %}
-{% set STATUS = {'pending':'onay bekliyor','approved':'onayli','rejected':'reddedildi','planned':'planli','dispatched':'gonderildi','published':'yayinda','failed':'basarisiz','canceled':'iptal','ok':'tamam','warn':'dikkat','fail':'sorun'} %}
+{% set STATUS = {'pending':'onay bekliyor','approved':'onayli','rejected':'reddedildi','planned':'planli','dispatched':'gonderildi','published':'yayinda','failed':'basarisiz','canceled':'iptal','ok':'tamam','sent':'kontrol ediliyor','error':'hata','warn':'dikkat','fail':'sorun'} %}
 {% macro badge(s) -%}<span class="badge {{ s }}">{{ STATUS.get(s, s) }}</span>{%- endmacro %}
+{% set PLAIN = {'planned':'yayinlanacak','dispatched':'su an yukleniyor','published':'yayinlandi','failed':'basarisiz oldu','canceled':'iptal edildi'} %}
+{% macro tabs(active) -%}
+<nav class="tabs" aria-label="Takvim gorunumu">
+{% for k, label, href in [('today','Bugun','/calendar'),('tomorrow','Yarin','/calendar?view=tomorrow'),('week','Hafta','/calendar?view=week'),('month','Ay','/calendar?view=month'),('list','Liste','/calendar?view=list')] %}<a href="{{ href }}"{% if k == active %} class="on" aria-current="page"{% endif %}>{{ label }}</a>{% endfor %}
+</nav>
+{%- endmacro %}
+{# Bir olay satiri (bugun / yarin / hafta). fields: islemden sonra donulecek gorunum (view, w). #}
+{% macro evrow(e, csrf, fields, compact=False) -%}
+<div class="evrow">
+<span class="tm">{{ e.hhmm }}</span>
+{% if e.kind == 'pub' %}
+<span class="pfdot pf-{{ e.platform }}">{{ e.platform }}</span>
+<span class="grow"><a href="/videos/{{ e.script_id }}">{{ e.title }}</a>{% if e.arm %} <i class="arm arm-{{ e.arm_n }}" title="{{ e.arm_name }}">{{ e.arm }}</i>{% endif %}
+<div class="small {% if e.status == 'failed' %}bad{% else %}mut{% endif %}">{{ PLAIN.get(e.status, e.status) }}{% if e.error %}: {{ e.error }}{% endif %}</div></span>
+{% if not compact %}
+{% if e.status == 'planned' %}
+{{ post('/pubs/' ~ e.id ~ '/now', 'Simdi yayinla', csrf, 'Hemen yayinlansin mi?', fields=fields) }}
+{{ post('/pubs/' ~ e.id ~ '/cancel', 'Iptal', csrf, 'Bu yayin iptal edilsin mi?', cls='dng', fields=fields) }}
+{% elif e.status == 'failed' %}
+{{ post('/pubs/' ~ e.id ~ '/retry', 'Yeniden dene', csrf, 'Platformda zaten var mi diye baktin mi? Ayni video iki kez yuklenebilir.', fields=fields) }}
+{% elif e.status == 'published' and e.remote_url.startswith('https://') %}<a href="{{ e.remote_url }}" rel="noopener noreferrer" target="_blank">ac</a>
+{% endif %}
+{% endif %}
+{% elif e.kind == 'made' %}
+<span class="grow">Video uretildi: <a href="/videos/{{ e.script_id }}">{{ e.title }}</a> {{ badge(e.approval) }}</span>
+{% else %}
+<span class="grow mut">{% if e.empty %}Kuyruk bitti: uretim olmayacak{% else %}Uretim: {{ e.title }}{% endif %}{% if e.arm %} <i class="arm arm-{{ e.arm_n }}" title="{{ e.arm_name }}">{{ e.arm }}</i>{% endif %}</span>
+{% endif %}
+</div>
+{%- endmacro %}

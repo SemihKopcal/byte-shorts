@@ -19,7 +19,7 @@ import uuid
 from datetime import date, datetime, timedelta
 from urllib.parse import urlparse
 
-from . import plan
+from . import plan, scripts
 from .config import PLATFORMS, SLUG
 from .db import Db, iso, parse_iso, utcnow
 from .github import GitHubError
@@ -50,6 +50,12 @@ DEFAULTS = {
     "week_tr": "",                   # haftalik sablon (Turkiye saati); bos = slots_utc her gun
     "runs_utc": "04:15,16:15",       # daily workflow'un cron saatleri (takvimde uretim tahmini icin)
 }
+SCRIPT_ID = re.compile(r"^p\d{3}-[a-z0-9-]{1,72}\Z")        # tools/panel_scripts.py ve github.QUEUE_FILE ile ayni
+SCRIPT_TIMEOUT_MIN = 25                                    # workflow bu surede sonuc yazmazsa "sonuc gelmedi"
+SCRIPT_PENDING_MAX = 5                                     # ayni anda en fazla bu kadar bekleyen istek
+TIKTOK_DRAFT_LIMIT = 5                                     # TikTok gelen kutusu: 24 saatte en fazla bu kadar bekleyen taslak
+DELAY_LOOKBACK_DAYS = 21                                   # gercek uretim saati bu kadar gunluk videolardan ogrenilir
+SCRIPT_LIST_N = 15                                         # /scripts'te basligi gosterilen siradaki senaryo sayisi
 MAX_AHEAD = timedelta(days=400)
 AUTOFILL_MAX = 60
 WARN_DAYS = 6
@@ -92,6 +98,7 @@ class Service:
         self.db, self.storage, self.gh, self.cfg, self.now = db, storage, github, cfg, clock
         self.last_errors: dict[str, str] = {}
         self._extras = None               # (gecerlilik sonu, sonuc): GitHub'dan gelen takvim bilgisi
+        self._scripts = None              # (gecerlilik sonu, sonuc): kuyruktaki senaryolarin basliklari
 
     # ── ayarlar ──────────────────────────────────────────────────────
     def setting(self, key: str) -> str:
@@ -566,7 +573,9 @@ class Service:
         out = {}
         for name, fn in (("ice_alma", self.ingest_inbox), ("sonuc", self.ingest_results),
                          ("zaman_asimi", self.expire_dispatched), ("gonderim", self.dispatch_due),
-                         ("dongu", self.enforce_retention)):
+                         ("dongu", self.enforce_retention),
+                         ("senaryo_sonuc", self.ingest_script_results),
+                         ("senaryo_zaman_asimi", self.expire_script_requests)):
             try:
                 res = fn()
                 out[name] = len(res) if isinstance(res, list) else res
@@ -636,8 +645,22 @@ class Service:
         self._extras = (now + timedelta(seconds=60 if errs else 300), out)
         return out
 
+    def run_delays(self) -> dict[str, int]:
+        """Cron saati -> gercek gecikme (dk), son videolarin gercek uretim saatlerinden."""
+        since = iso(self.now() - timedelta(days=DELAY_LOOKBACK_DAYS))
+        rows = self.db.all("SELECT rendered_at FROM videos WHERE rendered_at>=? ORDER BY rendered_at", (since,))
+        try:
+            return plan.run_delays(parse_slots(self.setting("runs_utc")), [parse_iso(r["rendered_at"]) for r in rows])
+        except (Invalid, ValueError):
+            return {}
+
+    def runs_effective(self) -> list[str]:
+        """Takvimde uretimin konacagi saatler (UTC): cron saatleri + ogrenilen gecikme."""
+        slots = parse_slots(self.setting("runs_utc"))
+        return plan.effective_runs(slots, self.run_delays())
+
     def queue_summary(self, extras: dict) -> dict:
-        runs = parse_slots(self.setting("runs_utc"))
+        runs = self.runs_effective()
         left = len(extras["queue"])
         days = plan.queue_days(left, len(runs))
         now = self.now()
@@ -658,7 +681,7 @@ class Service:
             "SELECT script_id,title,rendered_at,approval FROM videos "
             "WHERE rendered_at>=? AND rendered_at<? ORDER BY rendered_at", (iso(lo), iso(hi)))]
         now = self.now()
-        runs = (plan.predict_runs(now, parse_slots(self.setting("runs_utc")), hi, extras["queue"])
+        runs = (plan.predict_runs(now, self.runs_effective(), hi, extras["queue"])
                 if hi > now else [])
         return pubs, made, runs
 
@@ -691,6 +714,246 @@ class Service:
                 "events": events, "canceled": canceled, "options": options[:300],
                 "times": plan.day_times_tr(day, self.week(), parse_slots(self.setting("slots_utc"))),
                 "prev": py.isoformat(), "next": nx.isoformat(), "month": f"{day:%Y-%m}"}
+
+    # ── takvim: sade gorunumler (bugun / yarin / hafta) ──────────────────
+    def agenda(self, day: date, extras: dict) -> dict:
+        """Bir gunun sade ozeti: olaylar + tek satir Turkce cumle."""
+        lo, hi = plan.day_bounds_utc(day)
+        pubs, made, runs = self._grid_events(lo, hi, extras)
+        events = plan.events_for(pubs, made, runs, extras["arm_info"]).get(day, [])
+        if not extras["ok"]:          # kuyruk okunamadi: "kuyruk bitti" demek yanlis olur, o satirlar gizlenir
+            events = [e for e in events if not (e["kind"] == "run" and e["empty"])]
+        today = plan.to_tr(self.now()).date()
+        past = day < today
+        rel = {0: "Bugun", 1: "Yarin", -1: "Dun"}.get((day - today).days, "")
+        return {"date": day, "iso": day.isoformat(), "past": past, "today": day == today, "rel": rel,
+                "title": f"{day.day} {plan.MONTHS[day.month - 1]} {day.year}, {plan.WEEKDAYS[day.weekday()]}",
+                "events": events, "sentence": plan.day_sentence(events, past=past)}
+
+    def week_model(self, anchor: date, extras: dict) -> dict:
+        """Pazartesiden pazara 7 gun, her biri sade ozetle."""
+        monday = plan.monday_of(anchor)
+        lo, hi = plan.tr_to_utc(monday, "00:00"), plan.tr_to_utc(monday + timedelta(days=7), "00:00")
+        pubs, made, runs = self._grid_events(lo, hi, extras)
+        by_day = plan.events_for(pubs, made, runs, extras["arm_info"])
+        if not extras["ok"]:
+            by_day = {k: [e for e in v if not (e["kind"] == "run" and e["empty"])] for k, v in by_day.items()}
+        today = plan.to_tr(self.now()).date()
+        days = []
+        for i in range(7):
+            d = monday + timedelta(days=i)
+            ev = by_day.get(d, [])
+            days.append({"iso": d.isoformat(), "name": plan.WEEKDAYS[i], "num": d.day,
+                         "month": plan.MONTHS[d.month - 1], "today": d == today, "past": d < today,
+                         "events": ev, "sentence": plan.day_sentence(ev, past=d < today)})
+        last = monday + timedelta(days=6)
+        title = (f"{monday.day} - {last.day} {plan.MONTHS[last.month - 1]} {last.year}" if monday.month == last.month
+                 else f"{monday.day} {plan.MONTHS[monday.month - 1]} - {last.day} {plan.MONTHS[last.month - 1]} {last.year}")
+        return {"title": title, "days": days, "monday": monday.isoformat(),
+                "prev": (monday - timedelta(days=7)).isoformat(), "next": (monday + timedelta(days=7)).isoformat(),
+                "is_this_week": monday == plan.monday_of(today)}
+
+    def tiktok_drafts(self) -> dict:
+        """TikTok gelen kutusu taslak sayaci: son 24 saatte gonderilenler (panel taslagin yayinlanip
+        yayinlanmadigini goremez; sayim gonderim zamanina gore, telefonda taslagi yayinlayinca azalir)."""
+        if "tiktok" not in self.enabled_platforms():
+            return {"enabled": False, "used": 0, "limit": TIKTOK_DRAFT_LIMIT, "free": TIKTOK_DRAFT_LIMIT,
+                    "planned": 0, "full": False, "over": False}
+        now = self.now()
+        used = self.db.one(
+            "SELECT COUNT(*) n FROM publications WHERE platform='tiktok' AND status IN ('dispatched','published') "
+            "AND COALESCE(finished_at,dispatched_at)>=?", (iso(now - timedelta(hours=24)),))["n"]
+        planned = self.db.one(
+            "SELECT COUNT(*) n FROM publications WHERE platform='tiktok' AND status='planned' "
+            "AND scheduled_at>=? AND scheduled_at<?", (iso(now), iso(now + timedelta(hours=24))))["n"]
+        lim = TIKTOK_DRAFT_LIMIT
+        return {"enabled": True, "used": used, "limit": lim, "free": max(0, lim - used), "planned": planned,
+                "full": used >= lim, "over": used + planned > lim}
+
+    def today_card(self, extras: dict) -> dict:
+        """'Bugun ne olacak' karti icin sayilar ve uyarilar."""
+        now = self.now()
+        c = self.counts()
+        failed = self.db.one("SELECT COUNT(*) n FROM publications WHERE status='failed' AND finished_at>=?",
+                             (iso(now - timedelta(days=7)),))["n"]
+        qs = self.queue_summary(extras)
+        runs = self.runs_effective()
+        nxt = plan.predict_runs(now, runs, now + timedelta(days=3), extras["queue"], limit=1)
+        run = {}
+        if nxt:
+            t = plan.to_tr(nxt[0]["at"])
+            today = plan.to_tr(now).date()
+            run = {"hhmm": f"{t:%H:%M}", "script_id": nxt[0]["script_id"] or "",
+                   "rel": {0: "bugun", 1: "yarin"}.get((t.date() - today).days, f"{t:%d.%m}")}
+        return {"pending": c["pending"], "failed": failed, "paused": self.flag("paused"),
+                "auto_approve": self.flag("auto_approve"), "queue": qs, "tiktok": self.tiktok_drafts(),
+                "next_run": run, "runs_tr": sorted(f"{plan.to_tr(datetime(2026, 1, 5, int(r[:2]), int(r[3:]), tzinfo=plan.UTC)):%H:%M}"
+                                                   for r in runs),
+                "delays": self.run_delays()}
+
+    # ── senaryolar (kolay form, kuyruk yonetimi) ─────────────────────────
+    # Panel depoya yazamaz: istek R2'ye (scripts-in/) konur, `panel-scripts` workflow'u tetiklenir,
+    # sonuc R2'den (scripts-out/) okunur. Kapi ve dosya yazma CI'da (tools/panel_scripts.py).
+    def _forget_scripts(self) -> None:
+        self._extras = None
+        self._scripts = None
+
+    def script_list(self) -> dict:
+        """Siradaki senaryolar + basliklari. AG ISTEGI: web tarafi thread havuzunda cagirir.
+        Hata sayfayi BOZMAZ (bos liste + 'error'); sonuc 2 dk onbellekte, hatada 30 sn."""
+        now = self.now()
+        hit = self._scripts
+        if hit and hit[0] > now:
+            return hit[1]
+        ex = self.extras()
+        out = {"items": [], "total": ex["total"], "left": len(ex["queue"]), "ok": ex["ok"],
+               "error": ex["error"], "experiment_waiting": False}
+        errs = []
+        ids = list(ex["queue"])[:SCRIPT_LIST_N]
+        info: dict[str, dict] = {}
+        if ids:
+            try:
+                info = self.gh.script_titles(ids)
+            except Exception as e:                       # noqa: BLE001
+                errs.append(f"basliklar: {type(e).__name__}: {str(e)[:120]}")
+        for n, sid in enumerate(ids, start=1):
+            i, arm = info.get(sid, {}), ex["arm_info"].get(sid)
+            words = int(i.get("words", 0))
+            out["items"].append({
+                "n": n, "id": sid, "title": i.get("title") or sid, "format": i.get("format", ""),
+                "seconds": round(words / scripts.WORDS_PER_SEC + scripts.GAP * max(int(i.get("beats", 1)) - 1, 0))
+                if words else 0,
+                "arm": arm["label"] if arm else "", "arm_n": arm["n"] if arm else 0,
+                "arm_name": arm["name"] if arm else "", "exp": arm["exp"] if arm else ""})
+        out["experiment_waiting"] = any(x["exp"] for x in out["items"])
+        out["error"] = clean("; ".join(filter(None, [out["error"], *errs])), 300)
+        self._scripts = (now + timedelta(seconds=30 if out["error"] else 120), out)
+        return out
+
+    def script_requests(self, limit: int = 20):
+        rows = [dict(r) for r in self.db.all(
+            "SELECT * FROM script_requests ORDER BY created_at DESC, rowid DESC LIMIT ?", (limit,))]
+        for r in rows:
+            try:
+                r["problems"] = [str(x) for x in json.loads(r["problems"])][:20]
+            except ValueError:
+                r["problems"] = []
+            r["can_fix"] = r["action"] == "ingest" and r["status"] in ("rejected", "error") and bool(r["form"])
+        return rows
+
+    def script_form(self, request_id: str) -> dict:
+        """"Duzelt": reddedilen istegin kayitli formu (formu sifirdan yazma)."""
+        if not REQ_ID.match(request_id):
+            raise Invalid("istek bulunamadi")
+        r = self.db.one("SELECT form FROM script_requests WHERE request_id=? AND action='ingest'", (request_id,))
+        if not r or not r["form"]:
+            raise Invalid("istek bulunamadi")
+        try:
+            f = json.loads(r["form"])
+        except ValueError:
+            raise Invalid("kayitli form okunamadi") from None
+        return f if isinstance(f, dict) else scripts.blank_form()
+
+    def _script_pending(self) -> int:
+        return self.db.one("SELECT COUNT(*) n FROM script_requests WHERE status='sent'")["n"]
+
+    def _send_script_request(self, rid: str, action: str, script_id: str, title: str, form: str,
+                             actor: str, ip: str, put: bytes | None = None) -> None:
+        """ONCE kayit, SONRA gonderim (yayin semantigiyle ayni): yarim kalan is otomatik tekrar denenmez."""
+        if self._script_pending() >= SCRIPT_PENDING_MAX:
+            raise Invalid("Bekleyen cok istek var; birkac dakika sonra tekrar dene")
+        if put is not None:
+            try:
+                self.storage.put_bytes(f"{scripts.IN_PREFIX}{rid}.json", put)
+            except StorageError as e:
+                raise Invalid(f"R2'ye yazilamadi: {str(e)[:100]}") from None
+        with self.db.tx() as c:
+            c.execute("INSERT INTO script_requests(request_id,action,script_id,title,status,form,actor,created_at) "
+                      "VALUES(?,?,?,?,'sent',?,?,?)",
+                      (rid, action, script_id, clean(title, 120), form, clean(actor, 120), iso(self.now())))
+        try:
+            self.gh.dispatch({"action": action, "script_id": script_id, "request_id": rid},
+                             workflow=self.cfg.gh_scripts_workflow)
+        except GitHubError as e:
+            self._finish_script(rid, "error", f"GitHub'a gonderilemedi: {e}", [])
+            if put is not None:
+                self.storage.delete(f"{scripts.IN_PREFIX}{rid}.json")
+            raise Invalid(f"GitHub'a gonderilemedi: {str(e)[:100]}") from None
+        self.audit(actor, ip, f"senaryo: {action}", script_id or clean(title, 80))
+
+    def _finish_script(self, rid: str, status: str, message: str, problems: list[str],
+                       script_id: str = "", title: str = "") -> bool:
+        with self.db.tx() as c:
+            r = c.execute("UPDATE script_requests SET status=?,message=?,problems=?,finished_at=?,"
+                          "script_id=CASE WHEN ?<>'' THEN ? ELSE script_id END,"
+                          "title=CASE WHEN ?<>'' THEN ? ELSE title END "
+                          "WHERE request_id=? AND status='sent'",
+                          (status, clean(message, 300), json.dumps(problems[:20]), iso(self.now()),
+                           script_id, script_id, clean(title, 120), clean(title, 120), rid))
+            return r.rowcount == 1
+
+    def submit_script(self, form: dict, actor: str, ip: str = "") -> str:
+        """Kolay formu gonderir; istek kimligini dondurur. Yerel on kontrolden gecmeyen form gitmez."""
+        probs = scripts.precheck(form)
+        if probs:
+            raise Invalid(" ".join(probs[:3]))
+        rid = uuid.uuid4().hex
+        rec = scripts.request_record(rid, form, iso(self.now()))
+        self._send_script_request(rid, "ingest", "", form["title"], json.dumps(form, ensure_ascii=False),
+                                  actor, ip, put=rec)
+        return rid
+
+    def queue_action(self, action: str, script_id: str, actor: str, ip: str = "") -> str:
+        """Kuyrukta one al / sil. Yalniz GitHub'daki guncel kuyrukta olan senaryo icin."""
+        if action not in ("move_first", "remove") or not SCRIPT_ID.match(script_id):
+            raise Invalid("gecersiz islem")
+        queue = list(self.extras()["queue"])
+        if script_id not in queue:
+            raise Invalid("Bu senaryo kuyrukta degil (uretilmis olabilir); sayfayi yenile")
+        if action == "move_first" and queue[0] == script_id:
+            raise Invalid("Zaten sirada birinci")
+        if self.db.one("SELECT 1 FROM script_requests WHERE status='sent' AND script_id=?", (script_id,)):
+            raise Invalid("Bu senaryo icin bir islem zaten bekliyor")
+        rid = uuid.uuid4().hex
+        self._send_script_request(rid, action, script_id, "", "", actor, ip)
+        return rid
+
+    def ingest_script_results(self) -> int:
+        n = 0
+        for key in self.storage.list_keys(scripts.OUT_PREFIX, 100):
+            if not key.endswith(".json"):
+                continue
+            try:
+                d = scripts.parse_result(self.storage.get_bytes(key, scripts.MAX_RECORD))
+            except (ValueError, TypeError, TooLarge) as e:
+                self._quarantine(key, "scripts-rejected/", f"gecersiz senaryo sonucu: {e}")
+                continue
+            msg = d["message"] or {"ok": "Tamam.", "rejected": "Reddedildi.", "error": "Hata."}[d["status"]]
+            if self._finish_script(d["request_id"], d["status"], msg, d["problems"], d["script_id"], d["title"]):
+                n += 1
+                self._forget_scripts()
+                self.audit("sistem", "", "senaryo sonucu", f"{d['script_id'] or d['request_id'][:8]}: {d['status']}")
+                self.storage.delete(key)
+            else:
+                self._quarantine(key, "scripts-orphan/", "eslesen bekleyen istek yok")
+        return n
+
+    def expire_script_requests(self) -> int:
+        cutoff = iso(self.now() - timedelta(minutes=SCRIPT_TIMEOUT_MIN))
+        rows = self.db.all("SELECT request_id,action FROM script_requests WHERE status='sent' AND created_at<=?",
+                           (cutoff,))
+        n = 0
+        for r in rows:
+            if self._finish_script(r["request_id"], "error",
+                                   "Sonuc gelmedi. GitHub'da 'panel-scripts' kosusuna bak; senaryo eklenmis "
+                                   "olabilir (kuyrugu yenile).", []):
+                n += 1
+                if r["action"] == "ingest":
+                    try:
+                        self.storage.delete(f"{scripts.IN_PREFIX}{r['request_id']}.json")
+                    except StorageError:
+                        pass
+        return n
 
     def audit_log(self, limit: int = 100):
         return self.db.all("SELECT * FROM audit ORDER BY id DESC LIMIT ?", (limit,))

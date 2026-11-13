@@ -1,0 +1,18 @@
+{% extends "base.html" %}{% import "_m.html" as m %}
+{% block body %}
+{{ m.tabs('week') }}
+<div class="calbar"><h1>Hafta</h1>
+<div class="calnav">
+<a class="btn" href="/calendar?view=week&amp;w={{ wk.prev }}" aria-label="Onceki hafta">&larr;</a><b>{{ wk.title }}</b><a class="btn" href="/calendar?view=week&amp;w={{ wk.next }}" aria-label="Sonraki hafta">&rarr;</a>
+{% if not wk.is_this_week %}<a class="btn" href="/calendar?view=week">Bu hafta</a>{% endif %}
+</div></div>
+{% if extras.error %}<p class="small mut">Kuyruk bilgisi alinamadi ({{ extras.error }}); planlar yine gorunur.</p>{% endif %}
+{% for d in wk.days %}
+<div class="card weekday{% if d.today %} today{% endif %}{% if d.past %} past{% endif %}">
+<div class="row between"><b><a href="/calendar?d={{ d.iso }}">{{ d.name }} {{ d.num }} {{ d.month }}</a>{% if d.today %} · bugun{% endif %}</b></div>
+<div class="small mut">{{ d.sentence }}</div>
+{% for e in d.events %}{{ m.evrow(e, csrf, {'view': 'week', 'w': wk.monday}, compact=True) }}{% endfor %}
+</div>
+{% endfor %}
+<p class="mut small">Saatler Turkiye saati. Bir gune tiklayinca o gunun ayrintisi ve video ekleme acilir.</p>
+{% endblock %}

@@ -19,7 +19,10 @@ Her sahne ayni imzaya sahip:
 Senaryo yazan (ben ya da Gemini) sadece sahnenin ADINI ve data'sini veriyor.
 Yeni sahne eklemek = bu dosyaya bir fonksiyon + CATALOG'a bir satir.
 """
+import math
+
 from . import draw as D
+from . import icons as ICONS
 from .byte import draw_byte, MINT as B_MINT, AMBER as B_AMBER, RED as B_RED, VIOLET as B_VIOLET
 
 # Guvenli icerik alani: ust ~300px chrome, alt 1430'dan sonrasi altyazi.
@@ -290,6 +293,12 @@ def timeline(d, t, t0, t1, data):
     d.rectangle((x0, y - 2, x1, y + 2), fill=D.fade(D.LINE, D.appear(t, t0)))
     d.rectangle((x0, y - 3, x0 + (x1 - x0) * prog, y + 3),
                 fill=D.fade(D.VIOLET, 1.0))
+    icons = ICONS.pick_many(labs)                    # etiketten otomatik ikon (>=2 eslesme yoksa hepsi None)
+    if 0.02 < prog < 0.995:                          # ilerleme isaretcisi: cizginin ucunda nabiz atan halka
+        tx = x0 + (x1 - x0) * prog
+        pr = 15 + 7 * (0.5 + 0.5 * math.sin((t - t0) * math.tau * 1.6))
+        d.ellipse((tx - pr, y - pr, tx + pr, y + pr), outline=D.fade(D.VIOLET, 0.55), width=4)
+        d.ellipse((tx - 8, y - 8, tx + 8, y + 8), fill=D.VIOLET)
     for i, s in enumerate(steps):
         at_i = i / max(1, n - 1)
         px = x0 + (x1 - x0) * at_i
@@ -305,6 +314,8 @@ def timeline(d, t, t0, t1, data):
         lx = min(max(px, MARGIN + half), D.W - MARGIN - half)   # ekran disina tasma
         D.tracked(d, (lx, y - 70), ats[i], f_at,
                   D.fade(D.MUTE, a), track=5, anchor="mb")
+        if icons[i]:                                 # ikon, tarih yazisinin ustunde; adim belirince "pop" yapar
+            ICONS.paste(d, icons[i], lx, y - 176 - 6 * math.sin((t - t0) * 2.0 + i), 104, col, a, t)
         for j, ln in enumerate(lines):
             d.text((lx, y + 46 + j * f.size * 1.16), ln, font=f,
                    fill=D.fade(D.INK, a), anchor="mt")

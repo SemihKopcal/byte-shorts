@@ -24,6 +24,7 @@ try:
     from PIL import Image, ImageDraw
     from worker import cartoon as TOON
     from worker import draw as D
+    from worker import themes as TH
     from worker import themes as T
     from worker import build as BUILD
     from worker import cta as CTA
@@ -88,6 +89,47 @@ class Settings(unittest.TestCase):
         self.assertTrue(70 < n < 130, n)                          # kabaca yarisi, hep ya da hic degil
         self.assertEqual(sum(TOON.apply(spec_g(f"v{i}"), {"cartoon": {"enabled": True, "share": 0}})
                              for i in range(20)), 0)
+
+    def test_palette_variants_are_assigned_from_the_id_and_never_random(self):
+        ids = [f"p{n:03d}-x" for n in range(300)]
+        paper = [TOON.pick_palette(i, "paper") for i in ids]
+        ink = [TOON.pick_palette(i, "ink") for i in ids]
+        self.assertEqual(paper, [TOON.pick_palette(i, "paper") for i in ids])      # ayni kimlik, ayni renk
+        self.assertEqual(set(paper), {"paper", *TH.PAPER_VARIANTS})
+        self.assertEqual(set(ink), {"ink", *TH.INK_VARIANTS})
+        share = paper.count("paper") / len(paper)
+        self.assertTrue(0.25 < share < 0.45, share)                                # klasik krem ~%34
+        self.assertTrue(0.40 < ink.count("ink") / len(ink) < 0.60)
+
+    def test_profile_carries_the_variants_and_stage_themes_use_them(self):
+        spec = spec_g("p077-x")
+        TOON.apply(spec, {"cartoon": {"enabled": True}})
+        prof = spec["_cartoon"]
+        self.assertIn(prof["paper"], ("paper", *TH.PAPER_VARIANTS))
+        self.assertIn(prof["ink"], ("ink", *TH.INK_VARIANTS))
+        forced = {"alternate": True, "start": 0, "paper": "mint", "ink": "burgundy"}
+        self.assertEqual(TOON.stage_themes(forced, 4), ["mint", "burgundy", "mint", "burgundy"])
+        self.assertEqual(TOON.stage_themes({**forced, "alternate": False}, 2), ["mint", "mint"])
+        # bilinmeyen / yanlis aileden gelen ad klasige duser (profil bozuksa video yine cizilir)
+        self.assertEqual(TOON.stage_themes({"alternate": True, "start": 0, "paper": "forest", "ink": "mint"}, 2),
+                         ["paper", "ink"])
+
+    def test_old_profiles_without_variants_keep_the_classic_faces(self):
+        self.assertEqual(TOON.stage_themes({"alternate": True, "start": 0}, 2), ["paper", "ink"])
+
+    def test_every_variant_paints_its_own_background(self):
+        seen = {}
+        for name in ("paper", *TH.PAPER_VARIANTS, "ink", *TH.INK_VARIANTS):
+            D.use_theme(name)
+            img = D.build_bg()
+            seen[name] = tuple(int(x) for x in np.asarray(img, np.float32)[200:1700].mean(axis=(0, 1)))
+            self.assertTrue(D.STICKER, name)
+        self.assertEqual(len(set(seen.values())), len(seen), seen)
+        for name in TH.PAPER_VARIANTS:
+            self.assertGreater(sum(seen[name]) / 3, 200, name)                       # kagit acik kalir
+        for name in TH.INK_VARIANTS:
+            self.assertLess(sum(seen[name]) / 3, 70, name)                            # koyu yuz koyu kalir
+        D.use_theme("midnight")
 
     def test_stage_themes_alternate_or_stay_paper(self):
         alt = TOON.stage_themes({"alternate": True, "start": 0}, 5)
@@ -220,7 +262,7 @@ class Themes(unittest.TestCase):
         """editorial'in sanat yonetmeni ve pick() yalniz koyu paletten secer; karton temalari ayri."""
         self.assertEqual(set(T.NAMES), set(T.THEMES))
         self.assertTrue(set(T.TOON_THEMES).isdisjoint(T.NAMES))
-        self.assertEqual(set(T.TOON_THEMES), {"paper", "ink"})
+        self.assertEqual(set(T.TOON_THEMES), {"paper", "ink", *T.PAPER_VARIANTS, *T.INK_VARIANTS})
         self.assertEqual(T.colors("paper"), T.TOON_THEMES["paper"])
         self.assertEqual(T.colors("midnight"), T.THEMES["midnight"])
         self.assertEqual(T.colors("nope"), {})
@@ -411,7 +453,7 @@ class Composition(unittest.TestCase):
 
     def test_both_faces_appear_when_alternating(self):
         tn = build_toon(json.loads(next(p for p in SCRIPTS if "p031" in p.name).read_text()))
-        self.assertEqual(set(tn.themes), {"paper", "ink"})
+        self.assertEqual({TOON.family(x) for x in tn.themes}, {"paper", "ink"})
         means = []
         for k in (0, 1):
             t = (tn.stages[k][0] + tn.stages[k][1]) / 2

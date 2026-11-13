@@ -29,7 +29,8 @@ GitHub Actions "panel-publish" ◄──workflow_dispatch── PANEL           
 |---|---|
 | Panel (ana sayfa) | Onay bekleyenler, yaklaşan yayınlar, **otomasyon** (onaysız yayın) anahtarı, **Duraklat** (acil durdurma) |
 | Videolar | Tüm videolar, önizleme, onayla/reddet/onayı geri al, platform bazında durum |
-| Takvim | **Ay ızgarası** (Türkiye saati): hangi video hangi gün/saatte yayınlanacak, geçmiş üretimler ve **sıradaki üretim tahmini**, A/B deney kolları (K/S renkli kenar), kuyruk kaç güne yeter. Güne tıkla → o günün sayfası. Yayını başka güne **sürükle**. **Liste** düğmesi eski tabloyu açar |
+| Takvim | Açılış sayfası **Bugün** (düz Türkçe: bugün neler yayınlanacak, hangi üretim ne zaman, sıradaki hikâye, TikTok taslak sayacı). Sekmeler: **Yarın**, **Hafta**, **Ay ızgarası** (Türkiye saati: hangi video hangi gün/saatte, geçmiş üretimler ve **sıradaki üretim tahmini**, A/B deney kolları, kuyruk kaç güne yeter), **Liste**. Güne tıkla → o günün sayfası. Yayını başka güne **sürükle** |
+| Hikâyeler | Hikâye kuyruğu: sıradaki 15 hikâye, **Yeni hikâye** (kolay form), **Başa al**, **Sil**, bekleyen isteklerin durumu |
 | Ayarlar | Platformları aç/kapat, YouTube gizliliği, yayın saatleri (UTC), saklanacak video sayısı (varsayılan 100) |
 | Servisler | "Her şey yolunda mı?" sayfası: R2, GitHub, son üretim ve yayın koşuları, senaryo kuyruğu, platform durumu |
 | Kayıt | Kim ne zaman ne yaptı (denetim kaydı) |
@@ -208,6 +209,13 @@ curl -sI https://byte.semihkopcal.com | head -5      # 302 ve cloudflareaccess.c
   - **Haftalık şablon:** her gün için ayrı saatler (örn. hafta içi `10:15, 22:15`, hafta sonu `12:00`). Tanımlıysa yeni onaylanan her video şablonun ilk boş saatine girer; yoksa Ayarlar'daki UTC saatleri her gün geçerlidir. Şablonu kapatınca eskisine dönülür.
   - **Üretim saatleri** (Ayarlar, varsayılan `04:15,16:15` UTC): yalnız takvimdeki "sıradaki üretim" tahmini içindir; `daily.yml`'deki cron'u değiştirirsen burayı da değiştir.
   - Kuyruk bilgisi GitHub'dan okunur (5 dk önbellek). GitHub'a ulaşılamazsa takvim yine açılır, yalnız kuyruk ve A/B renkleri görünmez.
+  - **Bugün/Yarın/Hafta:** sıradaki üretimin saati sabit varsayım değil; son 14 günün gerçek üretim gecikmelerinin ortancasından hesaplanır (cron 04:15 ise gerçekte ~12:15'te biter gibi). Veri azsa Ayarlar'daki saatler kullanılır. TikTok'ta 24 saatte en fazla 5 taslak hakkı vardır; sayaç bunu gösterir.
+- **Hikâyeler (kuyruk yönetimi):**
+  - **Yeni hikâye:** formu doldur (başlık, açıklama, 10-14 cümle, 2-6 kaynak, ekranda görünen her sayı için bir olay satırı, istersen kelime vurgusu ve hesap satırı). Sahneleri `editorial/formscript.py` seçer (ilk cümle başlık, son cümle kapanış, büyük sayılar sayaç, yıllar zaman çizelgesi...). Form gönderilince panel önce kendi kontrolünü yapar, isteği R2'ye koyar ve `panel-scripts` workflow'unu tetikler. Workflow senaryoyu kurar, `editorial.authored` kapısından geçirir (kapı reddederse sebep panelde görünür, hiçbir şey commit edilmez) ve geçerse `content/`'e commit eder. Genelde 1-2 dakika sürer; sayfa durumu kendiliğinden günceller.
+  - **Başa al:** kuyruktaki hikâyeyi `content/order.json`'un başına koyar; bir sonraki üretim onu alır. Zaten üretilmiş/yayınlanmış hikâyede reddedilir.
+  - **Sil:** hikâyenin dosyasını depodan siler ve sıradan çıkarır (git geçmişinde durur, oradan geri getirilebilir). Üretilmiş hikâye ya da bir A/B deneyinin kolu olan hikâye silinemez.
+  - Aynı anda en fazla 5 bekleyen istek olur; 25 dakika içinde sonuç gelmezse istek "zaman aşımı" sayılır ve gösterilir (workflow yine de bitmiş olabilir; kuyruk listesi GitHub'dan yenilenir).
+  - Panel bu iş için depoya **yazmaz**; token yine yalnız Actions: Read and write + Contents: Read-only. Yazan `panel-scripts` workflow'udur ve R2 secret'larını (§4) kullanır.
 - **Saatlik üst sınır:** saatte en fazla 12 yayın emri gönderilir (`PANEL_MAX_DISPATCH_PER_HOUR`).
 - **Bir yayın "başarısız" olursa:** Takvim'de sebebi yazar. **Yeniden dene** elle yapılır; panel kendiliğinden tekrar denemez. Önce platformda video var mı diye bak. Zaten yayınlanmış bir videoyu iki kez yüklememek için yayın workflow'u R2'deki `ledger/` kaydına bakar.
 

@@ -1,0 +1,42 @@
+{% extends "base.html" %}{% import "_m.html" as m %}
+{% block body %}
+<div class="calbar"><h1>Hikayeler</h1>
+<div class="calnav"><a class="btn pri" href="/scripts/new">Yeni hikaye ekle</a><a class="btn" href="/calendar">Takvim</a></div></div>
+
+<div class="card qstrip{% if qs.warn %} warn{% endif %}">
+{% if sl.ok %}
+<b>Kuyruk: {{ sl.left }} senaryo</b> · gunde {{ qs.per_day }} uretim ≈ <b>{{ qs.days }} gun</b>{% if qs.next_run %} · siradaki uretim {{ qs.next_run }} (TR){% endif %}
+{% if qs.warn %}<div class="small">Kuyruk yakinda bitiyor: "Yeni hikaye ekle" ile birkac senaryo daha yaz.</div>{% endif %}
+{% else %}<span class="mut">Kuyruk bilgisi alinamadi{% if sl.error %} ({{ sl.error }}){% endif %}.</span>{% endif %}
+</div>
+
+<h2>Siradaki hikayeler</h2>
+{% if sl.experiment_waiting %}<p class="small mut">A/B etiketli senaryolar bir deneyin parcasi: onlari silmek reddedilir, one almak deneyin sirasini bozar. Emin degilsen dokunma.</p>{% endif %}
+<div class="card tbl">
+{% if sl['items'] %}<table class="qtbl"><tr><th>#</th><th>Baslik</th><th>Sure</th><th>Islem</th></tr>
+{% for x in sl['items'] %}<tr>
+<td class="n">{{ x.n }}</td>
+<td>{{ x.title }}{% if x.format %} <span class="fmt">{{ x.format }}</span>{% endif %}{% if x.arm %} <i class="arm arm-{{ x.arm_n }}" title="{{ x.exp }}: {{ x.arm_name }}">{{ x.arm }}</i>{% endif %}<div class="small mut">{{ x.id }}</div></td>
+<td class="small">{% if x.seconds %}~{{ x.seconds }} sn{% else %}-{% endif %}</td>
+<td class="act">{% if x.n > 1 %}{{ m.post('/scripts/' ~ x.id ~ '/move', 'One al', csrf, 'Bu senaryo siranin basina alinsin mi? Siradaki uretimde bu cikar.') }}{% endif %}
+{{ m.post('/scripts/' ~ x.id ~ '/remove', 'Sil', csrf, 'Bu senaryo kuyruktan silinsin mi? Dosyasi depodan da kalkar (geri almak icin git gecmisi gerekir).', cls='dng') }}</td>
+</tr>{% endfor %}</table>
+{% if sl.left > sl['items']|length %}<p class="small mut">... ve {{ sl.left - sl['items']|length }} senaryo daha.</p>{% endif %}
+{% else %}<span class="mut">{% if sl.ok %}Kuyruk bos: yeni hikaye ekle.{% else %}Liste alinamadi.{% endif %}</span>{% endif %}
+</div>
+
+<h2>Gonderdiklerim</h2>
+<div class="card tbl">
+{% if reqs %}<table><tr><th>Zaman</th><th>Islem</th><th>Durum</th><th></th></tr>
+{% for r in reqs %}<tr>
+<td class="small">{{ r.created_at|ts }}</td>
+<td>{% if r.action == 'ingest' %}Yeni hikaye{% elif r.action == 'move_first' %}One al{% else %}Sil{% endif %}
+<div class="small">{{ r.title or r.script_id }}</div>{% if r.script_id and r.title %}<div class="small mut">{{ r.script_id }}</div>{% endif %}</td>
+<td>{{ m.badge(r.status) }}{% if r.message %}<div class="small mut">{{ r.message }}</div>{% endif %}
+{% if r.problems %}<ul class="probs">{% for p in r.problems %}<li>{{ p }}</li>{% endfor %}</ul>{% endif %}</td>
+<td>{% if r.can_fix %}<a class="btn" href="/scripts/new?fix={{ r.request_id }}">Duzelt</a>{% endif %}</td>
+</tr>{% endfor %}</table>
+{% else %}<span class="mut">Henuz bir sey gondermedin.</span>{% endif %}
+</div>
+<p class="mut small">Gonderilen hikaye once depodaki kapidan gecer (kaynaklar, rakamlar, sure, yasakli kaliplar). Gecerse kuyrugun sonuna eklenir; gecmezse nedenleri burada yazar, "Duzelt" ile formu geri acarsin.</p>
+{% endblock %}

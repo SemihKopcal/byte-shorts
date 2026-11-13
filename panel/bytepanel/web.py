@@ -11,6 +11,7 @@ import logging
 import re
 import threading
 from collections import namedtuple
+from datetime import timedelta
 from pathlib import Path
 
 from fastapi import FastAPI, Request
@@ -19,14 +20,14 @@ from fastapi.responses import HTMLResponse, JSONResponse, PlainTextResponse, Red
 from fastapi.templating import Jinja2Templates
 
 from . import config as cfgmod
-from . import plan
+from . import plan, scripts
 from .config import PLATFORMS, SLUG
 from .db import Db, iso, parse_iso
 from .github import GitHub
 from .health import HealthMonitor, overall
 from .security import (AccessError, CfAccess, RateLimiter, csrf_ok, csrf_token, origin_ok,
                        security_headers)
-from .service import DEFAULTS, Invalid, Service
+from .service import DEFAULTS, SCRIPT_ID, Invalid, Service
 from .storage import make_s3
 
 log = logging.getLogger("bytepanel")
@@ -228,7 +229,13 @@ def create_app(cfg=None, *, service=None, access=None, monitor=None, start_worke
         m = plan.DAY_RX.match(str(form.get("d", "")))
         if m:
             return f"/calendar?d={m[1]}-{m[2]}-{m[3]}"
-        return "/calendar?view=list" if form.get("view") == "list" else "/calendar"
+        view = form.get("view")
+        if view == "week":
+            w = plan.DAY_RX.match(str(form.get("w", "")))
+            return f"/calendar?view=week&w={w[1]}-{w[2]}-{w[3]}" if w else "/calendar?view=week"
+        if view in ("list", "tomorrow", "month"):               # beyaz liste: ham deger yonlendirmeye girmez
+            return f"/calendar?view={view}"
+        return "/calendar"
 
     async def act_cal(request, do, ok_msg):
         """do(actor, form) bir mesaj dondurebilir (yoksa ok_msg)."""
@@ -335,7 +342,8 @@ def create_app(cfg=None, *, service=None, access=None, monitor=None, start_worke
     async def calendar(request: Request):
         actor = authenticate(request)
         q = request.query_params
-        if q.get("view") == "list":
+        view = q.get("view", "")
+        if view == "list":
             return render(request, actor, "calendar_list.html", upcoming=svc.upcoming(200),
                           recent=svc.recent_results(30))
         today = plan.to_tr(svc.now()).date()
@@ -343,17 +351,28 @@ def create_app(cfg=None, *, service=None, access=None, monitor=None, start_worke
             if q.get("d"):
                 day = plan.parse_day(q["d"])
                 plan.parse_month(f"{day:%Y-%m}", today)
-            else:
+            elif q.get("m") or view == "month":
                 y, mo = plan.parse_month(q.get("m"), today)
+            elif view == "week" and q.get("w"):
+                anchor = plan.parse_day(q["w"])
+                plan.parse_month(f"{anchor:%Y-%m}", today)
         except ValueError as e:
             return go("/calendar", f"Hata: {e}")
         extras = await run_in_threadpool(svc.extras)          # GitHub istegi: olay dongusunu tutma
         if q.get("d"):
             return render(request, actor, "calendar_day.html", d=svc.day_model(day, extras),
                           extras=extras)
-        return render(request, actor, "calendar.html", mm=svc.month_model(y, mo, extras),
-                      qs=svc.queue_summary(extras), extras=extras, unplanned=svc.autofill_count(),
-                      week=svc.week_rows(), week_set=svc.week() is not None, today_iso=today.isoformat())
+        if q.get("m") or view == "month":
+            return render(request, actor, "calendar.html", mm=svc.month_model(y, mo, extras),
+                          qs=svc.queue_summary(extras), extras=extras, unplanned=svc.autofill_count(),
+                          week=svc.week_rows(), week_set=svc.week() is not None, today_iso=today.isoformat())
+        if view == "week":
+            wk = svc.week_model(anchor if q.get("w") else today, extras)
+            return render(request, actor, "calendar_week.html", wk=wk, extras=extras)
+        tomorrow = view == "tomorrow"
+        a = svc.agenda(today + timedelta(days=1) if tomorrow else today, extras)
+        return render(request, actor, "calendar_today.html", a=a, tc=svc.today_card(extras),
+                      extras=extras, tab="tomorrow" if tomorrow else "today")
 
     @app.post("/calendar/plan", include_in_schema=False)
     async def cal_plan(request: Request):
@@ -411,6 +430,61 @@ def create_app(cfg=None, *, service=None, access=None, monitor=None, start_worke
             raise Invalid(str(e)) from None
         svc.reschedule(pid, when, a.email, a.ip)
     pub_action("reschedule", _resched, "Zaman guncellendi.")
+
+    # ── senaryolar: hikaye ekle (kolay form), kuyrukta one al / sil ──────
+    def script_form_page(request, actor, form, problems=(), status=200):
+        resp = render(request, actor, "script_new.html", form=scripts.padded(form), problems=list(problems),
+                      est=scripts.estimate(form), formats=scripts.FORMATS, themes=scripts.THEMES,
+                      marks=scripts.MARKS, lim=scripts)
+        resp.status_code = status
+        return resp
+
+    @app.get("/scripts", response_class=HTMLResponse, include_in_schema=False)
+    async def script_queue(request: Request):
+        actor = authenticate(request)
+        sl = await run_in_threadpool(svc.script_list)         # GitHub istegi: olay dongusunu tutma
+        return render(request, actor, "scripts.html", sl=sl, reqs=svc.script_requests(20),
+                      qs=svc.queue_summary(svc.extras()))
+
+    @app.get("/scripts/new", response_class=HTMLResponse, include_in_schema=False)
+    async def script_new(request: Request):
+        actor = authenticate(request)
+        fix = request.query_params.get("fix", "")
+        form = scripts.blank_form()
+        if fix:
+            try:
+                form = svc.script_form(fix)                    # "Duzelt": reddedilen formu geri getir
+            except Invalid as e:
+                return go("/scripts", f"Hata: {e}")
+        return script_form_page(request, actor, form)
+
+    @app.post("/scripts/new", include_in_schema=False)
+    async def script_new_post(request: Request):
+        actor, post = await guarded_post(request)
+        form = scripts.form_from_post(post)
+        problems = scripts.precheck(form)
+        if problems:                                           # yazdiklarin kaybolmasin: formu geri goster
+            return script_form_page(request, actor, form, problems, 422)
+        try:
+            await run_in_threadpool(svc.submit_script, form, actor.email, actor.ip)
+        except Invalid as e:
+            return script_form_page(request, actor, form, [str(e)], 503)
+        return go("/scripts", "Gonderildi: depodaki kapi kontrol ediyor, 1-3 dakikada sonuc asagida gorunur.")
+
+    def script_op(path: str, action: str, msg: str):
+        @app.post(f"/scripts/{{sid}}/{path}", include_in_schema=False, name=f"script_{path}")
+        async def handler(request: Request, sid: str):
+            actor, _ = await guarded_post(request)
+            if not SCRIPT_ID.match(sid):                       # yonlendirmeye / is akisina girmeden once
+                return PlainTextResponse("not found", status_code=404)
+            try:
+                await run_in_threadpool(svc.queue_action, action, sid, actor.email, actor.ip)
+                return go("/scripts", msg)
+            except Invalid as e:
+                return go("/scripts", f"Hata: {e}")
+
+    script_op("move", "move_first", "Gonderildi: senaryo siranin basina alinacak (1-2 dakika).")
+    script_op("remove", "remove", "Gonderildi: senaryo kuyruktan silinecek (1-2 dakika).")
 
     @app.get("/settings", response_class=HTMLResponse, include_in_schema=False)
     async def settings(request: Request):

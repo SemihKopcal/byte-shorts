@@ -129,12 +129,19 @@ kanalin karakteri yok. Dikey Short, yalniz senaryodan okuyan seri (G); A/B seril
 | Elle cizilen isaret | beat'e `"mark": "check"` ya da `"x"` (yalniz `kw` ile birlikte; videoda en fazla 2) -> kelimenin yaninda kalemle cizilir |
 | Gecis | sahne degisiminde iris (daire acilir, kalin halka); eski FX gecisleri (flas/kayma/titresim) bu modda kullanilmaz, kamera hareketi kalir |
 | Altyazi | krem hap, kalin cizgi, sert golge; aktif kelime fosforlu. Font: Fredoka One (SIL OFL, `worker/assets/`) |
+| Renk varyantlari | kagit ve lacivert yuzun her biri birkac palette gelir (`mint, peach, sky, lilac, forest, burgundy`, `themes.PAPER_VARIANTS` / `INK_VARIANTS`); video basina secim senaryo kimliginden (`cartoon.pick_palette`) -> ardarda iki video ayni renkte cikmaz |
+| Hareketli zemin | zeminde yavasca suzulen, elle cizilmis gibi titreyen soluk isaretler (arti, halka, dalga, kivilcim, ucgen, tire; `worker/doodles.py`). Hep ARKADA, ust bant (y<330) bos, konum/tur/hiz kimlikten |
+| BYTE ifadeleri | yuz yok; poz + ekrandaki simge: `cheer` + kivilcim (iyi ton), `alert` + `!` (kotu ton), `think` + `?` (orta ton), videonun basinda ve sonunda `wave`. Kelime gosterirken `point_r` hepsinden once gelir (`cartoon.mood`). `byte_says` sahnesi ayni pozlari `pose` alaniyla kullanir |
+| Ikonlar | `timeline` ve `flow` sahnelerinde etiketteki kelimeden otomatik cizgi ikon (garaj, kutu, bina, para, grafik, roket, telefon, kilit; `worker/icons.py`). Eslesme yoksa ikon yok; bir sahnede en az IKI adim eslesmezse hic cizilmez, ayni ikon tekrarlanmaz. Zaman cizelgesinde cizginin ucunda nabiz atan isaretci var |
+| `guess` sahnesi | "sen tahmin et": soru + 2-4 sik, azalan sure cubugu, sonra dogru sik yesile doner (`data`: `q`, `options`, `answer` = 0'dan sira, `note?`). Videoda en fazla bir kez, ONCE surpriz bir sayi/bilgi acilirken kullan; cevap dogru olmali ve kaynakli olmali |
+| Ses efektleri | sahne gecisinde whoosh, fosforlu kelimede tik, dogru isaretinde ding, yanlis isaretinde thud, `guess` cevabinda ding (`worker/sfx.py`, numpy ile sentez, ornek dosya yok). Konusmanin tepe seviyesini ASLA asmaz (efekt, konusmadan kalan bosluga sigdirilir), tepesi ~ -18 dBFS; ses okunamazsa efektsiz devam eder |
 
 Hepsi senaryo kimliginden turetilir (sha256), rastgele DEGIL: `publish.yml` videoyu yeniden uretse de iki
 render birebir ayni.
 
 **Acma/kapama** (`brand.json` > `cartoon`): `enabled` (true/false), `share` (0-1: videolarin ne kadari karton
-olsun, geri kalani eski koyu gorunum; kimlikten turetilir), `alternate` (false = sahneler hep kagit).
+olsun, geri kalani eski koyu gorunum; kimlikten turetilir), `alternate` (false = sahneler hep kagit),
+`sfx` (true = ses efektleri; false = yalniz konusma) ve `sfx_gain` (0-1,5; varsayilan 0,6 -- sesi kisar/acar).
 Kapatinca bir sonraki render eski gorunumle cikar; gecmis videolar etkilenmez.
 
 **Bilmen gerekenler:** (1) render ~7x gercek zaman (29 sn'lik video ~3,5 dk, 2 cekirdekli runner) -- eski
@@ -305,12 +312,15 @@ tutmuyorsa yayinlanmaz.
 editorial/   Gemini: llm.py (istemci) roles.py (istemler) rules.py (kurallar)
              pipeline.py (akis) signals.py (HN/GitHub/YouTube canli sinyal)
              authored.py (yazilmis senaryolarin kapisi, Gemini yok)
-worker/      cizim: synth, draw, scenes, themes, byte, series_*, qc, build, cartoon (karton stili), voiceover (klon ses), assets/ (font)
+             formscript.py (panelin kolay hikaye formu -> senaryo; ayni kapidan gecer)
+worker/      cizim: synth, draw, scenes, themes, byte, series_*, qc, build, cartoon (karton stili), doodles (hareketli zemin),
+             icons (etiketten ikon), sfx (ses efektleri), voiceover (klon ses), assets/ (font)
 publish/     youtube.py (yukleme) manifest.py (platform metinleri)
              instagram.py tiktok.py net.py ledger.py (content/social.json)
 tools/       setup_runner.sh, fetch_voice.sh, pick_script.py, release.sh,
              check_token.py, get_refresh_token.py, gemini_check.py,
-             host_video.sh (mp4'u media dalina koyar), tiktok_login.py
+             host_video.sh (mp4'u media dalina koyar), tiktok_login.py,
+             panel_scripts.py (panel-scripts workflow'unun motoru: hikaye ekle / one al / sil)
 tests/       agsiz testler (sahte Gemini)
 content/     scripts/ rejected/ plan.md backlog.json built.json published.json
 ci/          .github/workflows'un kopyasi (asagiya bak)
@@ -490,7 +500,13 @@ panel var. Kod `panel/`, kurulum ve işletme rehberi `panel/deploy/README.md`. V
 yine GitHub Actions'ta; `PANEL_MODE=on` değişkeniyle `daily` videoyu yayınlamak yerine R2'ye
 koyar, yayını panel `panel-publish` workflow'uyla yönetir.
 
-**Takvim:** panelde ay ızgarası (Türkiye saati) hangi videonun ne zaman yayınlanacağını,
-geçmiş/tahmini üretimleri, A/B deney kollarını ve kuyruğun kaç güne yettiğini gösterir.
-Güne tıklayıp video+saat seçerek ya da yayını başka güne sürükleyerek planlanır; ayrıca
-otomatik doldurma ve haftalık saat şablonu var. Ayrıntı: `panel/deploy/README.md` §10.
+**Takvim:** `/calendar` artık **Bugün** sayfasıyla açılır (bugünün yayınları, üretimleri, sıradaki hikâye ve
+TikTok taslak sayacı, hepsi düz Türkçe cümleyle); **Yarın**, **Hafta**, **Ay** ızgarası ve **Liste** sekmeleri var.
+Üretim saatleri sabit varsayılmaz, gerçek üretimlerin gecikmesinden öğrenilir. Güne tıklayıp video+saat seçerek ya da
+yayını başka güne sürükleyerek planlanır; ayrıca otomatik doldurma ve haftalık saat şablonu var.
+Ayrıntı: `panel/deploy/README.md` §10.
+
+**Hikâyeler:** panelden kolay formla yeni hikâye eklenir (10-14 cümle, 2-6 kaynak, ekranda görünen her sayı için bir
+olay satırı; sahneleri `editorial/formscript.py` seçer), kuyruk listelenir, bir hikâye **başa alınır** ya da **silinir**. Panel depoya yazmaz: istek R2'ye
+(`scripts-in/`) konur, `panel-scripts` workflow'u senaryoyu kurar, **aynı kapıdan** (`editorial.authored`) geçirir ve
+`main`'e commit eder, sonuç R2'ye (`scripts-out/`) yazılır ve panel okur. Ayrıntı: `panel/deploy/README.md` §10.

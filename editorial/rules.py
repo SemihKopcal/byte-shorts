@@ -24,7 +24,7 @@ MARKS = ("check", "x", "none")
 FORMATS = ("measured", "story", "explain", "trend")
 NEEDS_FACTS = {"story": 2, "trend": 2}        # bicim -> en az listelenen olay iddiasi
 MAX_FACTS = 8
-POSES = ("idle", "point_r", "point_l", "point_up", "shrug", "alert")
+POSES = ("idle", "point_r", "point_l", "point_up", "shrug", "alert", "cheer", "think", "wave")
 CURSORS = ("mint", "amber", "red", "violet")
 SCORE_KEYS = ("hook", "story", "clarity", "audience", "voice")
 
@@ -172,6 +172,20 @@ def _shape(scene: str, data: dict, who: str) -> list[str]:
         for r in lst("nodes", 3, 4):
             if not isinstance(r, dict) or not r.get("label"):
                 p.append(f"{who} (cycle): dugumde label yok")
+    elif scene == "guess":
+        q = data.get("q")
+        if not isinstance(q, str) or not q.strip() or len(q) > 90:
+            p.append(f"{who} (guess): q (soru) 1..90 karakter olmali")
+        opts = lst("options", 2, 4)
+        for o in opts:
+            txt = o.get("text") if isinstance(o, dict) else o
+            if not isinstance(txt, str) or not txt.strip() or len(txt) > 40:
+                p.append(f"{who} (guess): sik metni 1..40 karakter olmali")
+        a = data.get("answer")
+        if isinstance(a, bool) or not isinstance(a, int) or not (isinstance(opts, list) and 0 <= a < max(len(opts), 1)):
+            p.append(f"{who} (guess): answer dogru sikkin sirasi (0'dan) olmali")
+        if "note" in data and not (isinstance(data["note"], str) and len(data["note"]) <= 90):
+            p.append(f"{who} (guess): note metin ve en fazla 90 karakter olmali")
     elif scene == "bits":
         b = re.sub(r"\s", "", str(data.get("bits", "")))
         if not b or set(b) - set("01") or len(b) > 32:

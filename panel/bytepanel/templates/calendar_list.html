@@ -1,6 +1,7 @@
 {% extends "base.html" %}{% import "_m.html" as m %}
 {% block body %}
-<div class="calbar"><h1>Takvim · liste</h1><div class="calnav"><a class="btn" href="/calendar">Ay gorunumu</a></div></div>
+{{ m.tabs('list') }}
+<div class="calbar"><h1>Takvim · liste</h1></div>
 <p class="mut small">Saatler UTC; yaninda Turkiye saati. "Tasi" kutusuna Turkiye saati yaz (YYYY-AA-GG SS:DD).</p>
 <div class="card tbl">
 {% if upcoming %}<table><tr><th>Video</th><th>Platform</th><th>Zaman</th><th>Islem</th></tr>

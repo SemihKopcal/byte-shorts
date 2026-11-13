@@ -229,8 +229,11 @@ class Plan(unittest.TestCase):
 
     def test_every_queued_script_is_listed_in_the_plan(self):
         plan = (authored.ROOT / "content" / "plan.md").read_text()
+        # Panelden (kolay form) eklenen hikayeler plan.md'ye yazilmaz: planda olmasi onlari dogrulamaz,
+        # kapi zaten editorial.authored'dan gecti. Elle yazilanlar planda listelenir.
         missing = [f.stem for f in self.authored_files()
-                   if f"`{f.stem}`" not in plan]
+                   if f"`{f.stem}`" not in plan
+                   and json.loads(f.read_text())["authored"].get("by") != "panel"]
         self.assertEqual(missing, [], "content/plan.md 'Yazildi' tablosunda yok")
 
 

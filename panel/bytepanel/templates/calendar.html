@@ -9,11 +9,12 @@
 {%- endif -%}
 {%- endmacro %}
 {% block body %}
+{{ m.tabs('month') }}
 <div class="calbar">
 <h1>Takvim</h1>
 <div class="calnav">
 <a class="btn" href="/calendar?m={{ mm.prev }}" aria-label="Onceki ay">&larr;</a><b>{{ mm.title }}</b><a class="btn" href="/calendar?m={{ mm.next }}" aria-label="Sonraki ay">&rarr;</a>
-<a class="btn" href="/calendar">Bugun</a><a class="btn" href="/calendar?view=list">Liste</a>
+<a class="btn" href="/calendar?view=month">Bu ay</a><a class="btn" href="/calendar?view=list">Liste</a>
 </div>
 </div>
 
@@ -22,7 +23,8 @@
 <b>Kuyruk: {{ qs.left }} senaryo</b> · gunde {{ qs.per_day }} uretim ≈ <b>{{ qs.days }} gun</b>{% if qs.last_run %} · son uretim {{ qs.last_run }} (TR){% endif %}
 <progress class="q" max="{{ extras.total or 1 }}" value="{{ qs.left }}"></progress>
 {% if qs.next_id %}<div class="small mut">Siradaki uretim: {{ qs.next_run }} (TR) · {{ qs.next_id }}</div>{% endif %}
-{% if qs.warn %}<div class="small">Kuyruk yakinda bitiyor: yeni senaryo grubu gerekli.</div>{% endif %}
+{% if qs.warn %}<div class="small">Kuyruk yakinda bitiyor: yeni senaryo grubu gerekli. <a href="/scripts/new">Yeni hikaye ekle</a></div>{% endif %}
+<div class="small"><a href="/scripts">Hikayeleri yonet</a></div>
 {% else %}<span class="mut">Kuyruk bilgisi alinamadi{% if extras.error %} ({{ extras.error }}){% endif %}. Planlar yine gorunur.</span>{% endif %}
 </div>
 

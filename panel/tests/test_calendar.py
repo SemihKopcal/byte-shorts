@@ -486,7 +486,7 @@ class Pages(Base):
         self.add(A)
         self.add(B)
         self.svc.approve(A, ME)
-        r = self.get("/calendar")
+        r = self.get("/calendar?view=month")
         self.assertEqual(r.status_code, 200)
         for want in ("Kasim 2026", "Kuyruk: 9 senaryo", 'href="/calendar?m=2026-12"', 'href="/calendar?m=2026-10"',
                      'data-day="2026-11-08"', 'action="/calendar/move"', "Planlama araclari",
@@ -496,14 +496,14 @@ class Pages(Base):
     def test_planned_chips_are_draggable_and_other_states_are_not(self):
         self.add(A)
         self.svc.approve(A, ME)
-        body = self.get("/calendar").text
+        body = self.get("/calendar?view=month").text
         self.assertRegex(body, r'draggable="true" data-pub="\d+"')
         pid = self.svc.publications(A)[0]["id"]
         self.svc.db.run("UPDATE publications SET status='published' WHERE id=?", (pid,))
-        self.assertNotIn("draggable", self.get("/calendar").text)
+        self.assertNotIn("draggable", self.get("/calendar?view=month").text)
 
     def test_past_days_are_not_drop_targets(self):
-        body = self.get("/calendar").text
+        body = self.get("/calendar?view=month").text
         self.assertRegex(body, r'class="cell[^"]*\bpast\b[^"]*" data-day="2026-11-07">')
         self.assertNotRegex(body, r'\bpast\b[^>]*data-day="2026-11-07"[^>]*data-drop')
         self.assertRegex(body, r'data-day="2026-11-09" data-drop="1"')
@@ -532,7 +532,7 @@ class Pages(Base):
         self.svc.gh.fail_queue = GitHubError("HTTP 500 /x")
         self.add(A)
         self.svc.approve(A, ME)
-        r = self.get("/calendar")
+        r = self.get("/calendar?view=month")
         self.assertEqual(r.status_code, 200)
         self.assertIn("Kuyruk bilgisi alinamadi", r.text)
         self.assertIn("data-pub=", r.text)                            # planlar yine orada
@@ -641,9 +641,9 @@ class Actions(Base):
         self.assertEqual(flash_of(self.post("/calendar/autofill", {"m": "2026-11"})), "Dizilecek video yok.")
 
     def test_autofill_button_shows_the_count_only_when_there_is_work(self):
-        self.assertIn("Takvimde yeri olmayan onayli video yok", self.get("/calendar").text)
+        self.assertIn("Takvimde yeri olmayan onayli video yok", self.get("/calendar?view=month").text)
         self.svc.set_setting("platform_instagram", "1", ME)
-        body = self.get("/calendar").text
+        body = self.get("/calendar?view=month").text
         self.assertIn("Otomatik doldur (2)", body)
         self.assertIn('data-confirm="Takvimde yeri olmayan 2 yayin', body)
 
@@ -652,7 +652,7 @@ class Actions(Base):
         r = self.post("/calendar/template", {**data, "m": "2026-11"})
         self.assertEqual(flash_of(r), "Haftalik sablon kaydedildi.")
         self.assertEqual(self.svc.setting("week_tr"), WEEK_ALL)
-        body = self.get("/calendar").text
+        body = self.get("/calendar?view=month").text
         self.assertIn('name="d0" value="10:15, 22:15"', body)
         self.assertIn("Sablonu kapat", body)
         r = self.post("/calendar/template", {"clear": "1", "m": "2026-11"})

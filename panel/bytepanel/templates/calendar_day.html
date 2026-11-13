@@ -1,5 +1,6 @@
 {% extends "base.html" %}{% import "_m.html" as m %}
 {% block body %}
+{{ m.tabs('') }}
 <div class="calbar">
 <h1>{{ d.title }}{% if d.today %} · bugun{% endif %}</h1>
 <div class="calnav">

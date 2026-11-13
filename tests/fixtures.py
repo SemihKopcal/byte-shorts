@@ -5,7 +5,7 @@ import itertools
 SCENES = ("title", "contrast", "table", "bars", "counter", "split",
           "timeline", "byte_says", "close",
           "steps", "flow", "equation", "ring", "dots", "chat", "terminal", "tokens",
-          "probs", "layers", "checklist", "headline", "scale", "cycle", "bits")
+          "probs", "layers", "checklist", "headline", "scale", "cycle", "bits", "guess")
 THEMES = ("midnight", "ember", "deep", "moss", "slate", "plum", "rust", "ice")
 
 
@@ -124,3 +124,52 @@ class FakeLLM:
 def counter():
     c = itertools.count()
     return lambda: float(next(c))
+
+
+def story_form() -> dict:
+    """Panelin kolay formunun GECERLI bir ornegi (12 cumle, 2 kaynak, 5 olay). Rakamlar olay
+    satirlarinda da yazili: ekrandaki her anlamli sayi bir olay satirina baglanir."""
+    beats = [
+        ("YouTube started as a video dating site.", "YouTube began as a dating site", "", ""),
+        ("Its tagline was tune in, hook up.", "Tagline: Tune in, hook up", "Tune in, hook up", ""),
+        ("The domain was registered on Valentine's Day, two thousand five.",
+         "Domain registered: Feb 14, 2005", "Feb 14, 2005", ""),
+        ("The first video went up in April two thousand five.", "First video: Apr 2005", "Apr 2005", ""),
+        ("Users quickly began posting videos on any subject.", "Videos on any subject", "any subject", ""),
+        ("By December two thousand five, it reported eight million views a day.",
+         "Dec 2005: 8M views a day", "8M views", ""),
+        ("By October two thousand six, it reported over one hundred million views a day.",
+         "Oct 2006: 100M+ views a day", "100M+", ""),
+        ("Google agreed to acquire it that month.", "Google agrees to acquire it", "", ""),
+        ("The price was one billion, six hundred fifty million dollars.",
+         "$1.65 billion deal", "$1.65 billion", "check"),
+        ("That was about twenty months after the company was founded.",
+         "About 20 months after founding", "20 months", ""),
+        ("A dating site idea became a video platform.", "Dating idea. Video platform.", "", ""),
+        ("Google bought that platform.", "Bought by Google", "", ""),
+    ]
+    return {
+        "title": "YouTube started as a video dating site", "format": "story", "theme": "",
+        "tags": "youtube, startup story, google",
+        "description": ("YouTube began in 2005 as a video dating site with the tagline 'Tune in, hook up'. "
+                        "Google agreed to buy it in October 2006 for $1.65 billion."),
+        "beats": [{"say": a, "cap": b, "kw": c, "mark": d} for a, b, c, d in beats],
+        "sources": ["https://www.mediavillage.com/article/historys-moment-in-media-youtubes-origin-story/",
+                    "https://www.sec.gov/Archives/edgar/data/1288776/000119312506206884/dex991.htm"],
+        "facts": [
+            {"text": "YouTube began as a dating site where users uploaded videos about themselves; "
+                     "its tagline was 'Tune in, hook up'",
+             "source": 1, "note": "MediaVillage: began as a dating site; tagline 'Tune in, hook up'"},
+            {"text": "The YouTube domain was registered on February 14, 2005 and the first video was posted in "
+                     "April 2005", "source": 1,
+             "note": "MediaVillage: registered on Valentine's Day 2005; first video April 2005"},
+            {"text": "In December 2005 YouTube reported 8 million views a day", "source": 1,
+             "note": "MediaVillage: came out of beta in December 2005 with 8 million views a day"},
+            {"text": "On October 9, 2006 Google agreed to buy YouTube for $1.65 billion in stock; YouTube had "
+                     "more than 100 million views a day", "source": 2,
+             "note": "Google press release, October 9, 2006: $1.65 billion; more than 100 million views"},
+            {"text": "Google bought YouTube about 20 months after it was founded", "source": 2,
+             "note": "Google press release: founded February 2005, deal October 2006"},
+        ],
+        "calcs": [],
+    }

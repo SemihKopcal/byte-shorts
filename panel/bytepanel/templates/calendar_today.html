@@ -1,0 +1,50 @@
+{% extends "base.html" %}{% import "_m.html" as m %}
+{% block body %}
+{{ m.tabs(tab) }}
+<div class="calbar"><h1>{{ a.rel or 'Gun' }} ne olacak?</h1><span class="mut">{{ a.title }}</span></div>
+
+{% if tab == 'today' %}
+{% if tc.paused %}<div class="banner fail">Yayin DURAKLATILDI: hicbir sey platformlara gonderilmiyor. <a href="/">Panel'den surdur</a></div>{% endif %}
+{% if tc.pending or tc.failed %}
+<div class="card attn">
+{% if tc.pending %}<div><b>{{ tc.pending }} video onayini bekliyor.</b> <a class="btn pri" href="/videos">Bak ve onayla</a></div>{% endif %}
+{% if tc.failed %}<div><b>Son 7 gunde {{ tc.failed }} yayin basarisiz oldu.</b> <a class="btn" href="/calendar?view=list">Ayrintiya bak</a></div>{% endif %}
+</div>
+{% endif %}
+{% endif %}
+
+<div class="card">
+<p class="lead">{{ a.sentence }}</p>
+{% for e in a.events %}{{ m.evrow(e, csrf, {'view': tab if tab == 'tomorrow' else ''}) }}{% endfor %}
+{% if extras.error %}<div class="small mut">Kuyruk bilgisi alinamadi ({{ extras.error }}); planlar yine gorunur.</div>{% endif %}
+</div>
+
+{% if tab == 'today' %}
+<div class="grid">
+<div class="card">
+<b>Uretim</b>
+<div class="small mut">Siradaki video{% if tc.next_run %}: <b>{{ tc.next_run.rel }} {{ tc.next_run.hhmm }}</b> (TR){% endif %}</div>
+{% if tc.next_run and tc.next_run.script_id %}<div class="small">{{ tc.next_run.script_id }}</div>{% elif tc.next_run and tc.queue.known %}<div class="small bad">Kuyruk bitti: uretim olmayacak</div>{% elif tc.next_run %}<div class="small mut">Hangi hikaye oldugu bilinmiyor (kuyruk okunamadi)</div>{% endif %}
+<div class="small mut">Gunluk uretim saatleri (TR): {{ tc.runs_tr|join(', ') }}{% if tc.delays %} · gercek calisma saatlerine gore{% endif %}</div>
+</div>
+<div class="card{% if tc.queue.warn %} warn{% endif %}">
+<b>Kuyruk</b>
+{% if tc.queue.known %}<div>{{ tc.queue.left }} hikaye ≈ <b>{{ tc.queue.days }} gun</b></div>
+{% if tc.queue.warn %}<div class="small">Yakinda bitiyor: yeni hikaye yaz.</div>{% endif %}
+{% else %}<div class="small mut">Kuyruk bilgisi alinamadi.</div>{% endif %}
+<a class="btn" href="/scripts">Hikayeler</a> <a class="btn" href="/scripts/new">Yeni hikaye</a>
+</div>
+{% if tc.tiktok.enabled %}
+<div class="card{% if tc.tiktok.full or tc.tiktok.over %} warn{% endif %}">
+<b>TikTok taslak kutusu</b>
+<div><b>{{ tc.tiktok.used }}</b> / {{ tc.tiktok.limit }} <span class="mut small">son 24 saatte gonderilen</span></div>
+<progress class="q" max="{{ tc.tiktok.limit }}" value="{{ tc.tiktok.used }}"></progress>
+{% if tc.tiktok.full %}<div class="small">Dolu: yeni yukleme reddedilebilir. Telefonda TikTok'u acip taslaklari yayinla.</div>
+{% elif tc.tiktok.over %}<div class="small">Onumuzdeki 24 saatte {{ tc.tiktok.planned }} TikTok yayini daha planli: sinir asilabilir.</div>
+{% else %}<div class="small mut">{{ tc.tiktok.free }} bos yer. Taslaklari telefonda TikTok'tan sen yayinlarsin.</div>{% endif %}
+</div>
+{% endif %}
+</div>
+{% endif %}
+<p class="mut small">Saatler Turkiye saati. Planli bir yayini baska gune tasimak icin <a href="/calendar?view=month">Ay</a> gorunumune bak.</p>
+{% endblock %}

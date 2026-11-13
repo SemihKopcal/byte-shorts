@@ -102,6 +102,37 @@ TOON_THEMES = {
         "track": (44, 54, 84), "shadow": (11, 15, 30), "outline": (244, 240, 226),
     },
 }
+
+
+def _toon_variant(base: str, **over) -> dict:
+    t = dict(TOON_THEMES[base])
+    t.update(over)
+    return t
+
+
+# Karton stilinin renk varyantlari: her videoya kimliginden SABIT atanir (worker/cartoon.py pick_palette).
+# Ayni iki yuz (acik kagit / koyu zemin) ama zemin rengi degisiyor: 30 video sonra hep "krem + lacivert"
+# gorunmesin. Yazi/ton renkleri ayni kalir, yalniz yuzeyler (zemin, cizgi, golge, hap) tonlanir.
+PAPER_VARIANTS = ("mint", "peach", "sky", "lilac")
+INK_VARIANTS = ("forest", "burgundy")
+TOON_THEMES.update({
+    "mint": _toon_variant("paper", bg0=(222, 238, 222), bg1=(210, 229, 212), glow=(240, 252, 240),
+                          line=(170, 198, 176), track=(188, 212, 194), shadow=(172, 198, 178)),
+    "peach": _toon_variant("paper", bg0=(250, 227, 209), bg1=(243, 214, 194), glow=(255, 244, 234),
+                           line=(216, 184, 160), track=(230, 200, 176), shadow=(216, 186, 162)),
+    "sky": _toon_variant("paper", bg0=(214, 232, 248), bg1=(200, 221, 242), glow=(238, 247, 255),
+                         line=(160, 186, 214), track=(184, 206, 230), shadow=(164, 190, 218)),
+    "lilac": _toon_variant("paper", bg0=(233, 223, 247), bg1=(222, 210, 241), glow=(246, 240, 255),
+                           line=(190, 174, 214), track=(208, 194, 230), shadow=(194, 178, 218)),
+    "forest": _toon_variant("ink", bg0=(20, 40, 34), bg1=(15, 32, 27), glow=(80, 150, 120),
+                            line=(44, 78, 66), track=(34, 62, 52), panel=(30, 56, 47), panel2=(30, 56, 47),
+                            shadow=(8, 20, 16), mute=(160, 184, 172)),
+    "burgundy": _toon_variant("ink", bg0=(46, 22, 34), bg1=(38, 17, 28), glow=(170, 90, 120),
+                              line=(86, 48, 66), track=(64, 34, 48), panel=(64, 34, 50), panel2=(64, 34, 50),
+                              shadow=(20, 8, 14), mute=(190, 164, 176)),
+})
+TOON_FAMILY = {"paper": "paper", "ink": "ink", **{n: "paper" for n in PAPER_VARIANTS},
+               **{n: "ink" for n in INK_VARIANTS}}
 ALL_THEMES = {**THEMES, **TOON_THEMES}
 
 

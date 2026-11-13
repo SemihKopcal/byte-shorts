@@ -160,6 +160,12 @@ düşürüyor. Çeşitlilik **renkten** gelecek, parlaklıktan değil.
 > kontrastı test ediliyor (`tests/test_cartoon.py`). İzleme süresi/ayrılma ölçümleri kötüleşirse ilk ayar:
 > `share` düşür ya da `alternate` ile lacivert payını artır.
 
+> **Güncelleme (13 Kasım 2026, Paket 3):** karton stile renk varyantları (nane/şeftali/gök/lila · orman/bordo), hareketli
+> karalama zemin, BYTE ifadeleri (selam + sahne tonuna göre poz/simge), otomatik el çizimi ikonlar, `guess` ("tahmin et")
+> sahnesi ve düşük seviyeli ses efektleri (`brand.json > cartoon.sfx`) eklendi. Hepsi senaryo kimliğinden deterministik;
+> ses efektleri konuşmanın tepe seviyesini aşmaz ve tek anahtarla kapanır. Paket 4 (panel takvimi: Bugün/Yarın/Hafta) ve
+> Paket 5 (panelden hikâye ekleme/öne alma/silme, `panel-scripts` workflow'u) aynı patch'te.
+
 ---
 
 ## 3. Güncel konu motoru  ·  ⬜

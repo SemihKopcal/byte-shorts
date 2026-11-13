@@ -257,3 +257,75 @@ def day_times_tr(day: date, week: list[list[str]] | None, slots_utc: list[str]) 
         t = datetime(day.year, day.month, day.day, int(s[:2]), int(s[3:]), tzinfo=UTC)
         out.add(f"{to_tr(t):%H:%M}")
     return sorted(out)
+
+
+# ── sade ozet: "bugun ne olacak" ─────────────────────────────────────
+PLAIN = {"planned": "yayinlanacak", "dispatched": "su an yukleniyor", "published": "yayinlandi",
+         "failed": "basarisiz oldu", "canceled": "iptal edildi"}
+DELAY_MAX_MIN = 14 * 60               # bundan gec bitenler "bu kosunun urunu" sayilmaz
+DELAY_MIN_SAMPLES, DELAY_MIN_DAYS = 6, 3
+
+
+def monday_of(day: date) -> date:
+    return day - timedelta(days=day.weekday())
+
+
+def day_sentence(events: list[dict], *, past: bool = False) -> str:
+    """Bir gunun olaylari -> tek satir Turkce ozet ('2 yayin planli · 1 uretim bekleniyor')."""
+    pub = [e for e in events if e["kind"] == "pub"]
+    n = lambda st: sum(1 for e in pub if e["status"] == st)          # noqa: E731
+    parts = []
+    if n("published"):
+        parts.append(f"{n('published')} yayin yayinlandi")
+    if n("dispatched"):
+        parts.append(f"{n('dispatched')} yayin yukleniyor")
+    if n("planned"):
+        parts.append(f"{n('planned')} yayin planli" if not past else f"{n('planned')} yayin yapilmadi")
+    if n("failed"):
+        parts.append(f"{n('failed')} yayin basarisiz")
+    made = sum(1 for e in events if e["kind"] == "made")
+    runs = [e for e in events if e["kind"] == "run" and not e["empty"]]
+    if made:
+        parts.append(f"{made} video uretildi")
+    if runs:
+        parts.append(f"{len(runs)} uretim bekleniyor")
+    if any(e["kind"] == "run" and e["empty"] for e in events):
+        parts.append("kuyruk bitti: uretim olmayacak")
+    return " · ".join(parts) or "Bu gun icin bir sey yok."
+
+
+def run_delays(slots_utc: list[str], rendered_utc: list[datetime]) -> dict[str, int]:
+    """Gercek uretim saatleri: her daily kosusunun (cron saati) ORTANCA gecikmesi, dakika.
+    GitHub zamanlanmis kosulari gec baslatabiliyor; takvimde 'uretim' cron saatine degil gercek saate konsun.
+    Her video, kendinden ONCEKI en yakin cron saatine atanir (gece yarisini asan dahil). Yetersiz veri
+    (az ornek ya da az gun) -> bos sozluk: ayarlardaki saatler aynen kullanilir."""
+    if not slots_utc:
+        return {}
+    mins = sorted(int(s[:2]) * 60 + int(s[3:]) for s in slots_utc)
+    by_slot: dict[int, list[int]] = defaultdict(list)
+    days = set()
+    for r in rendered_utc:
+        r = r.astimezone(UTC)
+        t = r.hour * 60 + r.minute
+        before = [m for m in mins if m <= t]
+        slot, delay = (before[-1], t - before[-1]) if before else (mins[-1], t + 1440 - mins[-1])
+        if delay <= DELAY_MAX_MIN:
+            by_slot[slot].append(delay)
+            days.add(r.date())
+    if sum(len(v) for v in by_slot.values()) < DELAY_MIN_SAMPLES or len(days) < DELAY_MIN_DAYS:
+        return {}
+    out = {}
+    for slot, ds in by_slot.items():
+        if len(ds) >= 3:
+            ds = sorted(ds)
+            out[f"{slot // 60:02d}:{slot % 60:02d}"] = round(ds[len(ds) // 2] / 5) * 5
+    return out
+
+
+def effective_runs(slots_utc: list[str], delays: dict[str, int]) -> list[str]:
+    """Cron saatleri + ogrenilen gecikme (ayni gunun icinde kalir: en gec 23:59)."""
+    out = []
+    for s in slots_utc:
+        t = min(int(s[:2]) * 60 + int(s[3:]) + int(delays.get(s, 0)), 23 * 60 + 59)
+        out.append(f"{t // 60:02d}:{t % 60:02d}")
+    return sorted(set(out))

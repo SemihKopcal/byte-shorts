@@ -50,3 +50,28 @@ document.querySelectorAll('[data-preview]').forEach(function (btn) {
     });
   });
 })();
+
+// Hikaye formu: okunacak cumlelerdeki kelimelerden tahmini sureyi canli hesaplar (kurallar
+// editorial/rules.py ile ayni: dakikada 2.6 kelime + cumle arasi 0.18 sn, en fazla 52 sn). Yalniz bilgi
+// icindir; kesin karar sunucuda ve depodaki kapida.
+(function () {
+  var box = document.getElementById('est');
+  if (!box) return;
+  var form = box.closest('form');
+  function calc() {
+    var words = 0, beats = 0;
+    form.querySelectorAll('input[name^="say_"]').forEach(function (el) {
+      var t = el.value.trim();
+      if (!t) return;
+      beats += 1;
+      words += t.split(/\s+/).length;
+    });
+    var secs = Math.round(words / 2.6 + 0.18 * Math.max(beats - 1, 0));
+    box.querySelector('[data-beats]').textContent = beats;
+    box.querySelector('[data-words]').textContent = words;
+    box.querySelector('[data-secs]').textContent = secs;
+    box.classList.toggle('over', secs > 52 || beats > 14 || (beats > 0 && beats < 10));
+  }
+  form.addEventListener('input', calc);
+  calc();
+})();

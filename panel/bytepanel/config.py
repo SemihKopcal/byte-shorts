@@ -41,6 +41,7 @@ class Config:
     dev_user: str
     max_dispatch_per_hour: int
     dispatch_timeout_min: int
+    gh_scripts_workflow: str = "panel-scripts.yml"      # senaryo ekle / one al / sil (tools/panel_scripts.py)
 
     @property
     def media_host(self) -> str:
@@ -141,4 +142,5 @@ def load(env=None) -> Config:
         dev_user=dev_user,
         max_dispatch_per_hour=_int(env, "PANEL_MAX_DISPATCH_PER_HOUR", 12, 1, 100),
         dispatch_timeout_min=_int(env, "PANEL_DISPATCH_TIMEOUT_MIN", 45, 5, 360),
+        gh_scripts_workflow=env.get("GITHUB_SCRIPTS_WORKFLOW", "panel-scripts.yml").strip(),
     )

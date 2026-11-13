@@ -87,11 +87,12 @@ class Base(unittest.TestCase):
 
 class Auth(Base):
     GETS = ["/", "/videos", f"/videos/{A}", f"/videos/{A}/preview", "/calendar", "/settings",
-            "/health", "/audit", "/static/app.css", "/static/app.js"]
+            "/health", "/audit", "/static/app.css", "/static/app.js", "/scripts", "/scripts/new"]
     POSTS = [f"/videos/{A}/approve", f"/videos/{A}/reject", f"/videos/{A}/unapprove",
              f"/videos/{A}/plan", "/approve-all", "/pubs/1/now", "/pubs/1/cancel",
              "/pubs/1/retry", "/pubs/1/reschedule", "/settings", "/calendar/plan",
-             "/calendar/move", "/calendar/autofill", "/calendar/template"]
+             "/calendar/move", "/calendar/autofill", "/calendar/template",
+             "/scripts/new", f"/scripts/{A}/move", f"/scripts/{A}/remove"]
 
     def test_every_route_refuses_requests_without_a_token(self):
         self.add()

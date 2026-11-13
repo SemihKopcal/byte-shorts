@@ -14,6 +14,10 @@ NE DEGISIYOR (sahne kodu degismiyor -- 26 sahne turu temanin renklerini zaten ok
   * isaretler: beat'te "mark": "check" | "x" ise elle cizilir; her anahtar kelimede kucuk "vurgu" cizgileri
   * gecis: sahne degisimlerinde iris (daire acilir, kalin cizgili halka); eski FX gecisleri yerine
   * altyazi: krem hap + kalin cizgi + sert golge, aktif kelime fosforlu
+  * renk varyantlari (themes.PAPER_VARIANTS / INK_VARIANTS): iki yuzun her biri birkac palette; secim kimlikten
+  * hareketli zemin (worker/doodles.py): arkada suzulen soluk karalamalar
+  * BYTE ifadeleri (mood): selam/veda, sahne tonuna gore cheer/alert/think + '!'/'?'/kivilcim simgesi
+  * ses efektleri (worker/sfx.py, brand.json cartoon.sfx): whoosh / tik / ding / thud, konusmanin altinda
 
 HEPSI SENARYO KIMLIGINDEN (sha256) turetilir, rastgele DEGIL: publish.yml videoyu yeniden uretebiliyor,
 iki render birebir ayni cikmali.
@@ -35,9 +39,12 @@ import numpy as np
 from PIL import Image, ImageChops, ImageDraw, ImageFilter, ImageFont
 
 from . import byte as B
+from . import doodles as DOODLES
 from . import draw as D
 from . import fx as FX
+from . import sfx as SFX
 from . import style as STYLE
+from . import themes as TH
 
 VERSION = 1
 K = 2                          # sprite/maske asiri ornekleme (kenar yumusatma)
@@ -46,6 +53,9 @@ IRIS_SECONDS = 0.55
 KW_DELAY = 0.30                # sahne basladiktan sonra fosforlu kelime
 KW_WIPE = 0.38
 POINT_SECONDS = 1.15           # kelime belirirken BYTE bu sure kolunu uzatir
+WAVE_OPEN = 1.5                # videonun ilk bu kadar saniyesi: el sallar (selam)
+WAVE_CLOSE = 1.6               # son bu kadar saniye: el sallar (veda)
+MOOD_SECONDS = 1.25            # her sahnenin ilk bu kadar saniyesi: sahnenin tonuna gore ifade
 KW_MAX_CHARS = 18
 INTRO_LEAD = 0.55              # ilk karede sahne bu kadar "ilerlemis" gelir: kapak karesi/ilk saniye bos olmasin
 INTRO_END = 0.90               # ... ve bu ana kadar gercek zamana yetisir (turev > 0: geri/ziplama yok)
@@ -60,7 +70,7 @@ GREEN, RED = (46, 184, 104), (214, 48, 48)
 HOST_X, HOST_Y, HOST_SCALE = 124, 244, 0.50      # BYTE'in govde merkezi (cy) ve olcegi; ust bant (sahneler 330'dan basliyor)
 STRIP_X0, STRIP_X1, STRIP_CY = 256, 1030, 250
 
-DEFAULTS = {"enabled": False, "alternate": True, "share": 1.0}
+DEFAULTS = {"enabled": False, "alternate": True, "share": 1.0, "sfx": False}
 _SAFE = re.compile(r"^[A-Za-z0-9 .,%$€£#&@+=<>/\\:;?!()\[\]{}~^*_|'\"\-–—·×÷…°]+$")
 
 
@@ -78,7 +88,9 @@ def settings(brand: dict) -> dict:
         share = 1.0
     return {"enabled": raw.get("enabled", False) is True,
             "alternate": raw.get("alternate", True) is not False,
-            "share": share}
+            "share": share,
+            "sfx": raw.get("sfx", False) is True,                # ses efektleri: yalniz acikca true ise
+            "sfx_gain": SFX.gain_of(raw.get("sfx_gain", SFX.GAIN_DEFAULT))}
 
 
 def apply(spec: dict, brand: dict) -> bool:
@@ -91,8 +103,24 @@ def apply(spec: dict, brand: dict) -> bool:
     sid = STYLE.sid_of(spec)
     if _u(sid, "share") >= st["share"]:
         return False
-    spec["_cartoon"] = {"v": VERSION, "alternate": st["alternate"], "start": int(_u(sid, "start") * 2)}
+    spec["_cartoon"] = {"v": VERSION, "alternate": st["alternate"], "start": int(_u(sid, "start") * 2),
+                        "paper": pick_palette(sid, PAPER), "ink": pick_palette(sid, INK),
+                        "sfx": st["sfx"], "sfx_gain": st["sfx_gain"]}
     return True
+
+
+def pick_palette(sid: str, family: str) -> str:
+    """Videonun kagit / koyu yuzunun RENK varyanti: kimlikten sabit, rastgele degil. Kagitta ~%34 klasik krem,
+    kalani nane/seftali/gok/leylak; koyuda ~%50 klasik lacivert, kalani orman yesili/bordo."""
+    if family == INK:
+        u = _u(sid, "pal_ink")
+        return INK if u < 0.5 else TH.INK_VARIANTS[int((u - 0.5) * 2 * len(TH.INK_VARIANTS)) % len(TH.INK_VARIANTS)]
+    u = _u(sid, "pal_paper")
+    return PAPER if u < 0.34 else TH.PAPER_VARIANTS[int((u - 0.34) / 0.66 * len(TH.PAPER_VARIANTS)) % len(TH.PAPER_VARIANTS)]
+
+
+def family(theme: str) -> str:
+    return TH.TOON_FAMILY.get(theme, PAPER)
 
 
 def active(spec: dict) -> bool:
@@ -100,11 +128,14 @@ def active(spec: dict) -> bool:
 
 
 def stage_themes(prof: dict, n: int) -> list[str]:
-    """Sahne basina tema: kagit / lacivert sirayla (ya da hep kagit)."""
+    """Sahne basina tema: kagit / koyu yuz sirayla (ya da hep kagit). Yuzlerin renk varyanti profilden
+    gelir (yoksa klasik krem / lacivert)."""
+    paper = prof.get("paper") if prof.get("paper") in TH.PAPER_VARIANTS else PAPER
+    ink = prof.get("ink") if prof.get("ink") in TH.INK_VARIANTS else INK
     if not prof.get("alternate", True):
-        return [PAPER] * n
+        return [paper] * n
     s = int(prof.get("start", 0))
-    return [PAPER if (i + s) % 2 == 0 else INK for i in range(n)]
+    return [paper if (i + s) % 2 == 0 else ink for i in range(n)]
 
 
 # ── sahne verisinden fosforlu kelime / ton ─────────────────────────────────────────────
@@ -175,6 +206,21 @@ def plan(spec: dict, groups) -> list[dict]:
         out.append({"name": name, "tone": tone_of(data), "items": items,
                     "kw": items[0]["kw"] if items else None, "mark": items[0]["mark"] if items else None})
     return out
+
+
+def mood(t: float, tone: str, stage_t0: float, duration: float, pointing: bool):
+    """BYTE'in o andaki (poz, simge). Oncelik: kelimeyi gosterme > selam/veda > sahne ifadesi > bos.
+
+    Yuz cizmiyoruz; ifade poz + ekrandaki simgeyle: kotu ton -> kollar acik + '!', iyi ton -> kollar havada +
+    kivilcim, orta ton -> el cenede + '?'. 'base' (ton yok) sahnelerde ifade yok: ayni sey tekrar tekrar olmasin."""
+    if pointing:
+        return "point_r", ""
+    if t < WAVE_OPEN or t > duration - WAVE_CLOSE:
+        return "wave", ""
+    t0 = max(stage_t0, WAVE_OPEN)                     # ilk sahnenin ifadesi selamdan SONRA baslar
+    if 0 <= t - t0 < MOOD_SECONDS:
+        return {"bad": ("alert", "!"), "good": ("cheer", "star"), "mid": ("think", "?")}.get(tone, ("idle", ""))
+    return "idle", ""
 
 
 # ── ses zarfi: BYTE'in imleci sesle oynar (dudak senkronunun karsiligi) ─────────────────
@@ -392,6 +438,27 @@ class Toon:
         self._xx, self._yy = xx, yy
         self.badge_font = D.F_SEMI(26)
 
+    # ── ses efektleri: ekrandaki olaylarin zamanlari ──────────────────────────────
+    def sfx_events(self) -> list:
+        """[(saniye, tur)] sirali: sahne gecisinde whoosh, fosforlu kelimede tik, dogru isaretinde ding,
+        yanlis isaretinde thud, 'guess' sahnesinde cevap acilirken ding. Hepsi cizimle AYNI formullerden."""
+        from . import scenes as SC                      # gec ice aktarim: scenes -> scenes_more dairesel
+        ev = []
+        for k in range(1, len(self.stages)):
+            ev.append((self.stages[k][0] - IRIS_LEAD, "whoosh"))
+        for si, pl in enumerate(self.plan):
+            t0, t1 = self.stages[si][0], self.stages[si][1]
+            for it in pl["items"]:
+                ts = self.S.get(it["id"], (t0, t1))[0] + KW_DELAY
+                ev.append((ts, "tik"))
+                if it["mark"] == "check":
+                    ev.append((ts + KW_WIPE + 0.1 + 0.16, "ding"))
+                elif it["mark"] == "x":
+                    ev.append((ts + KW_WIPE + 0.1 + 0.16, "thud"))
+            if pl["name"] == "guess":
+                ev.append((SC._more.guess_reveal(t0, t1), "ding"))
+        return sorted(ev)
+
     # ── sahne katmani ─────────────────────────────────────────────────────────────
     def stage_at(self, t: float) -> int:
         si = 0
@@ -404,6 +471,7 @@ class Toon:
         name = self.themes[k]
         D.use_theme(name)
         img = self.bgs[name].copy()
+        DOODLES.draw(img, t, self.sid, k, D.LINE, D.MUTE)            # zeminde suzulen karalamalar (icerigin ARKASINDA)
         t0, _t1, fn = self.stages[k]
         if t >= t0 - 0.25:
             fn(ImageDraw.Draw(img), t, self.S, self.spec)
@@ -422,7 +490,7 @@ class Toon:
         dist = np.hypot(self._xx - cx, self._yy - cy)
         a = np.clip(r - dist + 0.5, 0, 1)[..., None]
         out = np.asarray(new, np.float32) * a + np.asarray(old, np.float32) * (1 - a)
-        both_paper = self.themes[k - 1] == PAPER and self.themes[k] == PAPER
+        both_paper = family(self.themes[k - 1]) == PAPER and family(self.themes[k]) == PAPER
         ring_col = np.array(PEN if both_paper else CREAM, np.float32)
         w = 9.0 * (1 - 0.5 * u)
         ring = np.clip(w - np.abs(dist - r) + 0.5, 0, 1)[..., None] * (1 - _smooth((u - 0.8) / 0.2))
@@ -455,14 +523,14 @@ class Toon:
         tone = self.plan[si]["tone"]
         cursor = B.AMBER if tone == "bad" else B.MINT
         pointing = kw_start is not None and 0 <= t - kw_start < POINT_SECONDS
-        pose = "point_r" if pointing else "idle"
+        pose, glyph = mood(t, tone, self.stages[si][0], self.duration, pointing)
         blink = True if (speaking or t > self.duration - 1.2) else D.blink_on(t, 1.4, 0.22)
         cw = 0.85 + 1.35 * env
         ta = t if t_anim is None else t_anim
         pop = max(0.05, _ease_back((ta - 0.15) / 0.45)) if ta < 0.7 else 1.0
         bob = 3.0 * math.sin(2 * math.pi * t / 1.7) if t > 0.8 else 0.0
         B.draw_byte_sticker(ImageDraw.Draw(img), HOST_X, HOST_Y + bob, HOST_SCALE * pop, pose, cursor, blink,
-                            cw, pen=pen, shadow=shadow)
+                            cw, pen=pen, shadow=shadow, glyph=glyph, anim=t)
 
     def _item_at(self, si, t):
         """(j, ogе, ts, te): t'de en son baslamis fosforlu kelime. ts = beat basi + KW_DELAY; te = cumle bitisi + 0.25
