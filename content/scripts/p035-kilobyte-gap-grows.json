@@ -20,7 +20,7 @@
   {
    "id": "b1",
    "role": "hook",
-   "say": "A kilobyte can mean one thousand or one thousand twenty four.",
+   "say": "A kilobyte is two different sizes, and the gap keeps growing.",
    "cap": "1,000 vs 1,024",
    "scene": "contrast",
    "data": {

@@ -46,12 +46,16 @@ def stages(spec, S, duration):
 
         def fn(d, t, S_, spec_, _f=CATALOG[name], _d=data, _a=t0, _b=t1, _n=name):
             dd = _d
-            if _n == "close" and "cta" in S_ and isinstance(_d.get("cta"), dict):
-                dd = {**_d, "cta_t0": S_["cta"][0]}     # CTA cumlesi baslayinca chip'ler cikar
+            if _n == "close" and isinstance(_d.get("cta"), dict):
+                # Konusulan CTA cumlesi varsa o baslayinca, yoksa (brand.json cta.spoken=false)
+                # kapanis son cumlesi konusulurken chip'ler cikar.
+                dd = {**_d, "cta_t0": S_["cta"][0] if "cta" in S_ else _a + SILENT_CTA_DELAY}
             _f(d, t, _a, _b, dd)
 
         out.append((t0, t1, fn))
     return out
 
+
+SILENT_CTA_DELAY = 0.35    # sessiz CTA: kapanis sahnesi basladiktan sonra chip'ler cikar
 
 STAGES = []          # build.py geriye donuk uyumluluk icin ariyor

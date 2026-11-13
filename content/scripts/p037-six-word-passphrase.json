@@ -20,7 +20,7 @@
   {
    "id": "b1",
    "role": "hook",
-   "say": "Six random words give about seventy seven bits.",
+   "say": "Roll five dice, six times, and you hold a strong passphrase.",
    "cap": "6 words ≈ 77 bits",
    "scene": "contrast",
    "data": {

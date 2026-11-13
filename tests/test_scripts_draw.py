@@ -107,7 +107,10 @@ class EveryScriptDraws(unittest.TestCase):
             plain_dur = fake_timeline(spec)[1]
             if CTA.apply(spec, brand, ROOT):
                 dur = fake_timeline(spec)[1]
-                self.assertGreater(dur, plain_dur, path.name)
+                if CTA.settings(brand)["spoken"]:
+                    self.assertGreater(dur, plain_dur, path.name)     # sesli cumle ~3 sn ekler
+                else:
+                    self.assertEqual(dur, plain_dur, f"{path.name}: sessiz CTA sure eklememeli")
                 self.assertLess(dur - plain_dur, 4.5, f"{path.name}: CTA cok uzun")
                 longest = max(longest, dur)
         self.assertLess(longest, 57.0, "CTA'li tahmini sure QC'ye cok yakin")

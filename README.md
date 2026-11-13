@@ -180,9 +180,14 @@ Videolarin sonunda sakin ve kisa bir "begen, takip et" cagrisi var; hepsini hat 
 senaryoya yazilmaz (`editorial/rules.py` senaryo metnindeki "subscribe / like and / follow
 us" kaliplarini hala yasaklar, yoksa iki kez soylenirdi). Dort yerde gorunur:
 
-1. **Kapanis karti + ses:** son sesli cumle ("Like it, and follow Byte for more.") ve
-   `LIKE` / `FOLLOW BYTE` chip'leri; chip'ler cumle baslayinca cikar, sirayla "basilir"
+1. **Kapanis karti (+ ses, istege bagli):** `LIKE` / `FOLLOW BYTE` chip'leri; sirayla "basilir"
    (dolar), BYTE sagi gosterir (Shorts'un dugmeleri sagda). Kapanista altyazi zaten kapali.
+   `brand.json > cta.spoken`: `true` iken son bir sesli cumle ("Like it, and follow Byte for
+   more.") eklenir ve chip'ler o cumle baslayinca cikar. **`false` (13 Kasim karari, simdiki
+   deger):** sonda konusulan cumle YOK; chip'ler kapanis sahnesinin son cumlesi konusulurken
+   cikar (`series_g.SILENT_CTA_DELAY`). Sebep: konusulan CTA son ~3 saniyeyi olu zamana ceviriyor,
+   izleyici tam orada kaydiriyor ve video basa donerken (dongu) ses sonuna kadar akmiyor. Video
+   ~3 sn kisalir. `true`'ya donmek icin tek satir.
 2. **Kose etiketi:** videonun ~%42'sinde 2.6 sn sol ustte kucuk `LIKE · FOLLOW`. Kapanis
    kartiyla ya da ilk 3 sn ile cakisacaksa hic cikmaz.
 3. **Aciklama:** platforma ozel satir (YouTube "Subscribe", Instagram/TikTok "Follow
@@ -200,6 +205,12 @@ Kol uzunluklari buna gore ~28 sn / ~39 sn olur. Deney videolarini CTA'siz tutmak
 istersen `skip_experiment_scripts: true` yap. Kapatmak icin `"enabled": false`; metinler ve
 zamanlama ayni blokta. Uyari: sesli cumlede "Byte" yaz (Piper "BYTE"i harf harf okur).
 CTA'li video ~3 sn uzar; `editorial.authored` kapisi 52 sn'de durur, QC 59 sn'de.
+
+**Ilk kare (13 Kasim):** Instagram/TikTok kapagi ve kaydirma karari ilk kareye bagli; eskiden t=0 karesi
+neredeyse bostu (sayi ve BYTE 0,2-0,5 sn'de beliriyordu). `worker/cartoon.py > intro_time`: sahne
+animasyonlari t=0'da 0,55 sn "ilerlemis" baslar ve 0,9 sn'de gercek zamana yetisir (tek yonlu, surekli);
+ses, altyazi ve fosforlu kelime gercek zamanda kalir. `tests/test_cartoon.py > FirstFrame` ilk karenin
+bos olmadigini ve eski davranisin bu testi kiracagini dogrular.
 
 **Video sonu:** video, son kelimeden 0,45 sn sonra biter (`worker/synth.py` `END_PAD`);
 eskiden 0,18 sn once bitiyor ve son kelimenin sonu kesiliyordu.

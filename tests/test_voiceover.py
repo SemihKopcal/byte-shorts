@@ -135,10 +135,13 @@ class WithTheRealScript(unittest.TestCase):
     def test_lines_are_what_the_renderer_will_speak_cta_included(self):
         d = voice_lines.describe(voice_lines.spec_for("p031"))
         ids = [b["id"] for b in d["beats"]]
-        self.assertEqual(ids[-1], "cta")
         self.assertEqual(list(d["manifest"]["beats"]), ids)
         brand = json.loads((ROOT / "brand.json").read_text())
-        self.assertEqual(d["beats"][-1]["say"], " ".join(brand["cta"]["voice"].split()))
+        if brand["cta"].get("spoken") is False:
+            self.assertNotIn("cta", ids, "sessiz CTA: Colab'in okuyacagi listede CTA cumlesi olmamali")
+        else:
+            self.assertEqual(ids[-1], "cta")
+            self.assertEqual(d["beats"][-1]["say"], " ".join(brand["cta"]["voice"].split()))
 
     def test_next_lists_queued_script_ids(self):
         buf = io.StringIO()

@@ -325,6 +325,66 @@ def build_toon(spec, with_cta=True):
 
 
 @unittest.skipUnless(_OK or REQUIRED, f"render bagimliliklari yok: {_WHY}")
+class FirstFrame(unittest.TestCase):
+    """Instagram/TikTok kapagi ve kaydirma karari ilk kareye bagli: t=0 karesi bos gelmemeli."""
+
+    def test_intro_time_is_continuous_monotonic_and_ends_on_real_time(self):
+        self.assertAlmostEqual(TOON.intro_time(0.0), TOON.INTRO_LEAD)
+        self.assertAlmostEqual(TOON.intro_time(TOON.INTRO_END), TOON.INTRO_END)
+        for t in (0.9, 1.0, 5.0, 40.0):
+            self.assertEqual(TOON.intro_time(t), t)
+        self.assertLess(TOON.INTRO_LEAD, TOON.INTRO_END, "turev pozitif kalmali: animasyon geri sarmaz")
+        prev = -1.0
+        for k in range(0, 121):
+            v = TOON.intro_time(k / 120 * 1.2)
+            self.assertGreater(v, prev, k)
+            prev = v
+
+    @staticmethod
+    def _build(spec):
+        """Gercek synth ilk beat'i t=0'da baslatir; testlerdeki sahte zaman cizelgesi 0,4 sn'de baslatiyor."""
+        keep = globals()["fake_timeline"]
+
+        def from_zero(sp):
+            S, t = {}, 0.0
+            for b in sp["beats"]:
+                dur = len(b["say"].split()) / 2.6 * 0.86 + 0.18
+                S[b["id"]] = (t, t + dur)
+                t += dur + 0.18
+            return S, t + 0.45
+        globals()["fake_timeline"] = from_zero
+        try:
+            return build_toon(spec)
+        finally:
+            globals()["fake_timeline"] = keep
+
+    @staticmethod
+    def _ink(tn, img):
+        """Orta bantta (sahne alani) ilk sahnenin ZEMININDEN belirgin farkli piksel sayisi (kagit de lacivert de olur)."""
+        bg = np.asarray(tn.bgs[tn.themes[0]].convert("L"), np.int16)[600:1300]
+        a = np.asarray(img.convert("L"), np.int16)[600:1300]
+        return int((np.abs(a - bg) > 50).sum())
+
+    def test_first_frame_already_shows_the_hook_scene(self):
+        for p in G_SCRIPTS[:6]:
+            tn = self._build(json.loads(p.read_text()))
+            first, settled = self._ink(tn, tn.frame(0)), self._ink(tn, tn.frame(int(1.0 * D.FPS)))
+            self.assertGreater(settled, 0, p.name)
+            self.assertGreaterEqual(first, 0.5 * settled, f"{p.name}: t=0 karesi bos ({first} vs {settled})")
+
+    def test_the_old_behaviour_would_have_failed_this(self):
+        """Gercekten bir seyi olctugumuzu kanitla: ilk-kare kaymasi kapaliyken t=0 karesi bos."""
+        tn = self._build(json.loads(G_SCRIPTS[0].read_text()))
+        keep = TOON.intro_time
+        try:
+            TOON.intro_time = lambda t: t
+            blank, settled = self._ink(tn, tn.frame(0)), self._ink(tn, tn.frame(int(1.0 * D.FPS)))
+        finally:
+            TOON.intro_time = keep
+        self.assertLess(blank, 0.5 * settled)
+
+
+@unittest.skipUnless(_OK or REQUIRED, f"render bagimliliklari yok: {_WHY}")
 class Composition(unittest.TestCase):
     def test_iris_starts_on_the_old_scene_and_ends_on_the_new_one(self):
         tn = build_toon(json.loads(G_SCRIPTS[0].read_text()))

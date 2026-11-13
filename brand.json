@@ -27,9 +27,10 @@
  },
 
  "cta": {
-  "_note": "Begen/takip CTA'si. enabled=false -> hic eklenmez. skip_experiment_scripts=true -> content/experiments.json'daki kollarin senaryolari CTA'siz (temiz kol); false (varsayilan) -> deney videolari da CTA'li, iki kola da ayni. voice = videonun sonunda okunan TEK cumle (Piper icin 'Byte' yaz). Senaryolara CTA yazma: editorial/rules.py yasak, hat ekliyor.",
+  "_note": "Begen/takip CTA'si. enabled=false -> hic eklenmez. skip_experiment_scripts=true -> content/experiments.json'daki kollarin senaryolari CTA'siz (temiz kol); false (varsayilan) -> deney videolari da CTA'li, iki kola da ayni. spoken=false (13 Kasim karari): sonda konusulan cumle YOK, kapanis karti chip'leri ve kose etiketi son cumle konusulurken cikar; true yaparsan voice = videonun sonunda okunan TEK cumle (Piper icin 'Byte' yaz). Senaryolara CTA yazma: editorial/rules.py yasak, hat ekliyor.",
   "enabled": true,
   "skip_experiment_scripts": false,
+  "spoken": false,
   "voice": "Like it, and follow Byte for more.",
   "card": {
    "like": "LIKE",

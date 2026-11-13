@@ -20,7 +20,7 @@
   {
    "id": "b1",
    "role": "hook",
-   "say": "A chatbot's working memory is a window of fixed size.",
+   "say": "A chatbot does not forget. Old text falls out of its window.",
    "cap": "A fixed-size working memory",
    "scene": "title",
    "data": {

@@ -47,6 +47,8 @@ KW_DELAY = 0.30                # sahne basladiktan sonra fosforlu kelime
 KW_WIPE = 0.38
 POINT_SECONDS = 1.15           # kelime belirirken BYTE bu sure kolunu uzatir
 KW_MAX_CHARS = 18
+INTRO_LEAD = 0.55              # ilk karede sahne bu kadar "ilerlemis" gelir: kapak karesi/ilk saniye bos olmasin
+INTRO_END = 0.90               # ... ve bu ana kadar gercek zamana yetisir (turev > 0: geri/ziplama yok)
 FONT_FILE = Path(__file__).parent / "assets" / "FredokaOne-Regular.ttf"   # SIL OFL (assets/OFL-*.txt)
 
 PAPER, INK = "paper", "ink"
@@ -208,6 +210,15 @@ def voice_env(path, nframes: int, fps: int, beats) -> np.ndarray:
 
 
 # ── cizim yardimcilari ─────────────────────────────────────────────────────────────────
+def intro_time(t: float) -> float:
+    """Sahne animasyonlarinin gordugu zaman. t=0'da INTRO_LEAD, INTRO_END'de t'ye esit; arada tek yonlu
+    ve surekli. Sebep: Instagram/TikTok kapagi ve kaydirma karari ilk kareye bagli; eskiden t=0 karesi
+    neredeyse bostu (sayi ve BYTE 0,2-0,5 sn'de beliriyordu). Ses/altyazi/anahtar kelime gercek zamanda."""
+    if t >= INTRO_END:
+        return t
+    return t + INTRO_LEAD * (1.0 - t / INTRO_END)
+
+
 def _clamp(x, a=0.0, b=1.0):
     return max(a, min(b, x))
 
@@ -436,7 +447,7 @@ class Toon:
         return FX.apply_camera(img, s, dx, dy)
 
     # ── ust katman: BYTE, kelime, altyazi, chrome ─────────────────────────────────
-    def _host(self, img, t, i, si, kw_start):
+    def _host(self, img, t, i, si, kw_start, t_anim=None):
         D.use_theme(self.themes[si])
         pen, shadow = D.OUTLINE, D.SHADOW
         env = float(self.env[min(i, len(self.env) - 1)])
@@ -447,7 +458,8 @@ class Toon:
         pose = "point_r" if pointing else "idle"
         blink = True if (speaking or t > self.duration - 1.2) else D.blink_on(t, 1.4, 0.22)
         cw = 0.85 + 1.35 * env
-        pop = max(0.05, _ease_back((t - 0.15) / 0.45)) if t < 0.7 else 1.0
+        ta = t if t_anim is None else t_anim
+        pop = max(0.05, _ease_back((ta - 0.15) / 0.45)) if ta < 0.7 else 1.0
         bob = 3.0 * math.sin(2 * math.pi * t / 1.7) if t > 0.8 else 0.0
         B.draw_byte_sticker(ImageDraw.Draw(img), HOST_X, HOST_Y + bob, HOST_SCALE * pop, pose, cursor, blink,
                             cw, pen=pen, shadow=shadow)
@@ -575,11 +587,12 @@ class Toon:
 
     def frame(self, i: int) -> Image.Image:
         t = i / D.FPS
-        img, si, u = self.scene_layer(t)
+        te = intro_time(t)
+        img, si, u = self.scene_layer(te)
         img = self._camera(img, t, si)
         a_corner = self._corner(img, t, si)
         kw_start = self._keyword(img, t, si, a_corner)
-        self._host(img, t, i, si, kw_start)
+        self._host(img, t, i, si, kw_start, t_anim=te)
         if t < self.close_t0 - 0.1:
             self._caption(img, t)
         self._chrome(img, t, si)
