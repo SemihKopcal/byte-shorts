@@ -1,6 +1,8 @@
 name: tokens
 
-# Instagram token'i 60 gun yasiyor; haftada bir yenileyip secret'a geri yazar.
+# Instagram kullanici token'i (IGAA...) 60 gun yasiyor; haftada bir yenileyip secret'a geri
+# yazar. Facebook-tarzi token (EAA..., yeni uygulamalarda "Unified login") yenilenmez: yalniz
+# --check calisir, yenileme adimi "yapilacak is yok" der.
 # Secret yazmak icin GH_PAT gerekir (GitHub'in kendi token'i secret yazamaz):
 #   Settings > Developer settings > Fine-grained tokens > bu depo, izin:
 #   "Secrets: Read and write"  ->  depoya GH_PAT adiyla secret olarak ekle.
@@ -33,10 +35,16 @@ jobs:
         if: env.HAS_IG == 'true'
         env:
           INSTAGRAM_TOKEN: ${{ secrets.INSTAGRAM_TOKEN }}
+          INSTAGRAM_USER_ID: ${{ secrets.INSTAGRAM_USER_ID }}
           GH_PAT: ${{ secrets.GH_PAT }}
         run: |
           python publish/instagram.py --check
-          if python publish/instagram.py --refresh --out "$RUNNER_TEMP/ig-token"; then
+          rc=0
+          python publish/instagram.py --refresh --out "$RUNNER_TEMP/ig-token" || rc=$?
+          if [ "$rc" = "3" ]; then
+            # Facebook-tarzi (EAA...) token yenilenmez; --check gecti, yapilacak is yok
+            echo "bu token turu yenilenmez; kontrol tamam"
+          elif [ "$rc" = "0" ]; then
             if [ -n "$GH_PAT" ]; then
               GH_TOKEN="$GH_PAT" gh secret set INSTAGRAM_TOKEN \
                 --repo "$GITHUB_REPOSITORY" < "$RUNNER_TEMP/ig-token"

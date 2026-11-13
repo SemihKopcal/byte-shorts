@@ -1,17 +1,24 @@
 """
-Instagram Reels'e otomatik yayin ("Instagram API with Instagram Login").
+Instagram Reels'e otomatik yayin. Iki token turu desteklenir:
+
+  * Instagram kullanici token'i ("IGAA...", Instagram Login, 60 gun): graph.instagram.com
+  * Facebook-tarzi token ("EAA...", Meta'nin yeni uygulamalarda verdigi "Unified login" /
+    sistem-kullanici token'i): graph.facebook.com. Sureli olmayabilir; yenilenmez.
+
+Tur token'in basindan anlasilir (IG_HOST=instagram|facebook ile zorlanir).
 
     python publish/instagram.py out/<id>/manifest.json --video-url https://...
     python publish/instagram.py --check              # token calisiyor mu
-    python publish/instagram.py --refresh --out f    # token'i 60 gun daha uzat
+    python publish/instagram.py --refresh --out f    # IGAA token'i 60 gun daha uzat
+                                                     # (EAA token: cikis kodu 3, yapilacak is yok)
 
 Akis (resmi dokuman): 1) REELS container olustur (video_url PUBLIC olmali,
 Meta videoyu oradan ceker) 2) status_code FINISHED olana kadar bekle
 3) media_publish. Kendi hesabin icin uygulama incelemesi gerekmiyor
 (Standard Access yeterli); hesap PROFESYONEL (Creator/Business) olmali.
 
-Gerekli ortam: INSTAGRAM_USER_ID, INSTAGRAM_TOKEN (uzun omurlu, 60 gun).
-Token'i haftalik `tokens` workflow'u yeniliyor. API surumu bos birakilirsa
+Gerekli ortam: INSTAGRAM_USER_ID, INSTAGRAM_TOKEN. IGAA token'ini haftalik `tokens`
+workflow'u yeniliyor. API surumu bos birakilirsa
 Meta'nin en eski desteklenen surumu kullanilir (IG_API_VERSION ile sabitlenir).
 """
 import argparse
@@ -28,6 +35,7 @@ if str(ROOT) not in sys.path:
 from publish import ledger, net            # noqa: E402
 
 HOST = "https://graph.instagram.com"
+HOST_FB = "https://graph.facebook.com"
 VERSION = os.environ.get("IG_API_VERSION", "").strip().strip("/")
 MAX_CAPTION = 2200
 
@@ -36,16 +44,45 @@ class IGError(Exception):
     pass
 
 
-def _url(path: str) -> str:
-    return f"{HOST}/{VERSION + '/' if VERSION else ''}{path}"
+class NoRefresh(IGError):
+    """Bu token turu yenilenmez (Facebook-tarzi / sistem-kullanici token'i)."""
 
 
-def check(token: str, http=net.request) -> dict:
-    """{'user_id','username'} ya da IGError."""
-    st, out = http("GET", _url("me") + f"?fields=user_id,username&access_token={token}")
-    if st != 200 or "username" not in out:
+def is_fb_token(token: str) -> bool:
+    """Facebook-tarzi token ("EAA...") graph.facebook.com ister; Instagram kullanici
+    token'i ("IGAA...") graph.instagram.com. IG_HOST=facebook|instagram ile zorlanir."""
+    forced = os.environ.get("IG_HOST", "").strip().lower()
+    if forced in ("facebook", "instagram"):
+        return forced == "facebook"
+    return str(token).startswith("EAA")
+
+
+def _url(path: str, token: str = "") -> str:
+    host = HOST_FB if is_fb_token(token) else HOST
+    return f"{host}/{VERSION + '/' if VERSION else ''}{path}"
+
+
+def check(token: str, http=net.request, *, user_id: str = "") -> dict:
+    """{'user_id','username'} ya da IGError. Facebook-tarzi token'da INSTAGRAM_USER_ID gerekir
+    (orada /me Instagram hesabini degil token sahibini dondurur); ayrica yayin izni okunarak
+    sinanir (hicbir sey yayinlanmaz). Izin sorgusu cevap vermezse 'publish_note' doner."""
+    if not is_fb_token(token):
+        st, out = http("GET", _url("me", token) + f"?fields=user_id,username&access_token={token}")
+        if st != 200 or "username" not in out:
+            raise IGError(f"token gecersiz (HTTP {st}): {net.err_text(out)}")
+        return out
+    if not user_id:
+        raise IGError("Facebook-tarzi token icin INSTAGRAM_USER_ID gerekli")
+    st, out = http("GET", _url(user_id, token) + f"?fields=username&access_token={token}")
+    if st != 200 or not isinstance(out, dict) or "username" not in out:
         raise IGError(f"token gecersiz (HTTP {st}): {net.err_text(out)}")
-    return out
+    res = {"user_id": out.get("id", user_id), "username": out["username"]}
+    st, out = http("GET", _url(f"{user_id}/content_publishing_limit", token)
+                   + f"?fields=quota_usage,config&access_token={token}")
+    if st != 200:
+        res["publish_note"] = (f"yayin izni dogrulanamadi (HTTP {st}): {net.err_text(out)}; "
+                               "token'da instagram_content_publish var mi?")
+    return res
 
 
 def publish_reel(video_url: str, caption: str, *, user_id: str, token: str,
@@ -54,7 +91,7 @@ def publish_reel(video_url: str, caption: str, *, user_id: str, token: str,
     """Reels'i yayinlar. {'media_id','permalink'} doner; sorunda IGError."""
     if len(caption) > MAX_CAPTION:
         raise IGError(f"aciklama {len(caption)} karakter; en fazla {MAX_CAPTION}")
-    st, out = http("POST", _url(f"{user_id}/media"), form={
+    st, out = http("POST", _url(f"{user_id}/media", token), form={
         "media_type": "REELS", "video_url": video_url, "caption": caption,
         "share_to_feed": "true", "access_token": token})
     cid = out.get("id") if isinstance(out, dict) else None
@@ -64,7 +101,7 @@ def publish_reel(video_url: str, caption: str, *, user_id: str, token: str,
 
     waited = 0.0
     while True:
-        st, out = http("GET", _url(cid) + f"?fields=status_code,status&access_token={token}")
+        st, out = http("GET", _url(cid, token) + f"?fields=status_code,status&access_token={token}")
         code = out.get("status_code") if isinstance(out, dict) else None
         if code == "FINISHED":
             break
@@ -79,20 +116,23 @@ def publish_reel(video_url: str, caption: str, *, user_id: str, token: str,
         sleep(poll_every)
         waited += poll_every
 
-    st, out = http("POST", _url(f"{user_id}/media_publish"),
+    st, out = http("POST", _url(f"{user_id}/media_publish", token),
                    form={"creation_id": cid, "access_token": token})
     mid = out.get("id") if isinstance(out, dict) else None
     if st != 200 or not mid:
         raise IGError(f"yayinlanamadi (HTTP {st}): {net.err_text(out)}")
     permalink = ""
-    st, out = http("GET", _url(mid) + f"?fields=permalink&access_token={token}")
+    st, out = http("GET", _url(mid, token) + f"?fields=permalink&access_token={token}")
     if st == 200 and isinstance(out, dict):
         permalink = out.get("permalink", "")
     return {"media_id": mid, "permalink": permalink}
 
 
 def refresh(token: str, http=net.request) -> tuple[str, int]:
-    """(yeni_token, saniye). Token en az 24 saat eski ve suresi dolmamis olmali."""
+    """(yeni_token, saniye). Token en az 24 saat eski ve suresi dolmamis olmali.
+    Facebook-tarzi token yenilenmez: NoRefresh."""
+    if is_fb_token(token):
+        raise NoRefresh("bu token turu (EAA...) yenilenmez; sureli degilse yapilacak is yok")
     st, out = http("GET", f"{HOST}/refresh_access_token?grant_type=ig_refresh_token"
                           f"&access_token={token}")
     new = out.get("access_token") if isinstance(out, dict) else None
@@ -118,11 +158,17 @@ def main(argv=None) -> int:
         return 2
     try:
         if a.check:
-            me = check(token)
+            me = check(token, user_id=user_id)
             print(f"instagram tamam: @{me['username']} (id {me.get('user_id')})")
+            if me.get("publish_note"):
+                print(f"UYARI: {me['publish_note']}", file=sys.stderr)
             return 0
         if a.refresh:
-            new, secs = refresh(token)
+            try:
+                new, secs = refresh(token)
+            except NoRefresh as e:
+                print(f"instagram: {e}")
+                return 3
             if a.out:
                 p = Path(a.out)
                 p.write_text(new)

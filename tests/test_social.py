@@ -160,6 +160,68 @@ class Instagram(unittest.TestCase):
         with self.assertRaises(IG.IGError):
             IG.check("T", Http((400, {"error": {"message": "bad"}})))
 
+    # -- Facebook-tarzi token ("EAA...", Meta'nin yeni uygulamalarda verdigi Unified login) --
+    FB = "EAAeTESTTOKEN"
+
+    def test_token_kind_picks_the_host(self):
+        self.assertTrue(IG.is_fb_token(self.FB))
+        self.assertFalse(IG.is_fb_token("IGAAxyz"))
+        self.assertTrue(IG._url("17/media", self.FB).startswith("https://graph.facebook.com/"))
+        self.assertTrue(IG._url("17/media", "IGAAxyz").startswith("https://graph.instagram.com/"))
+        self.assertTrue(IG._url("me").startswith("https://graph.instagram.com/"))   # eski cagri bicimi
+        with mock.patch.dict(os.environ, {"IG_HOST": "facebook"}):
+            self.assertTrue(IG.is_fb_token("IGAAxyz"))
+        with mock.patch.dict(os.environ, {"IG_HOST": "instagram"}):
+            self.assertFalse(IG.is_fb_token(self.FB))
+
+    def test_fb_token_publishes_through_the_facebook_host(self):
+        http = Http((200, {"id": "C1"}), (200, {"status_code": "FINISHED"}),
+                    (200, {"id": "M1"}), (200, {"permalink": "https://instagram.com/reel/x"}))
+        res = IG.publish_reel("https://v/m.mp4", "cap", user_id="17", token=self.FB, http=http,
+                              sleep=lambda s: None, log=lambda m: None)
+        self.assertEqual(res["media_id"], "M1")
+        self.assertEqual(len(http.calls), 4)
+        for _, url, _kw in http.calls:                     # dort cagrinin dordu de facebook adresine
+            self.assertTrue(url.startswith("https://graph.facebook.com/"), url)
+        self.assertTrue(http.calls[0][1].endswith("/17/media"))
+        self.assertTrue(http.calls[2][1].endswith("/17/media_publish"))
+
+    def test_fb_check_reads_the_account_by_id_and_probes_publish_permission(self):
+        http = Http((200, {"id": "17", "username": "byte_knows"}),
+                    (200, {"data": [{"quota_usage": 0}]}))
+        me = IG.check(self.FB, http, user_id="17")
+        self.assertEqual(me, {"user_id": "17", "username": "byte_knows"})
+        self.assertEqual(len(http.calls), 2)
+        self.assertEqual(http.calls[0][0], "GET")                    # okuma: hicbir sey yayinlanmaz
+        self.assertEqual(http.calls[1][0], "GET")
+        self.assertTrue(http.calls[0][1].startswith("https://graph.facebook.com/17?"))
+        self.assertIn("/17/content_publishing_limit", http.calls[1][1])
+        self.assertNotIn("/me", http.calls[0][1])
+
+    def test_fb_check_needs_the_user_id_and_a_good_token(self):
+        with self.assertRaises(IG.IGError) as cm:
+            IG.check(self.FB, Http())
+        self.assertIn("INSTAGRAM_USER_ID", str(cm.exception))
+        with self.assertRaises(IG.IGError) as cm:
+            IG.check(self.FB, Http((400, {"error": {"message": "Invalid OAuth"}})), user_id="17")
+        self.assertIn("Invalid OAuth", str(cm.exception))
+
+    def test_fb_check_warns_but_passes_when_the_publish_probe_fails(self):
+        http = Http((200, {"id": "17", "username": "byte_knows"}),
+                    (400, {"error": {"message": "(#10) permission"}}))
+        me = IG.check(self.FB, http, user_id="17")
+        self.assertEqual(me["username"], "byte_knows")
+        self.assertIn("instagram_content_publish", me["publish_note"])
+
+    def test_fb_token_is_never_refreshed_and_main_says_so_with_exit_3(self):
+        http = Http()
+        with self.assertRaises(IG.NoRefresh):
+            IG.refresh(self.FB, http)
+        self.assertEqual(http.calls, [])                              # aga hic gitmedi
+        rc, out, _ = run_main(IG, ["--refresh"], {"INSTAGRAM_TOKEN": self.FB})
+        self.assertEqual(rc, 3)
+        self.assertIn("yenilenmez", out)
+
     def test_main_dry_run_and_double_send_guard(self):
         with tempfile.TemporaryDirectory() as tmp:
             man = Path(tmp) / "manifest.json"

@@ -383,7 +383,7 @@ GEMINI_API_KEY=... python -m editorial --dry-run
 | `GEMINI_MODEL` | **variable** | bos = otomatik en yeni kararli flash; gemini-check tablosunda **evet** diyen ilk modeli sabitle (ornek: `gemini-3.6-flash`); her kosunun basinda asiri yuklu yeni modelleri yoklayip vakit kaybetmez. Bozulursa yine otomatik listeye duser. Not: `gemini-2.5-*` ve `2.0-*` yeni hesaplarda 404, onlari sabitleme |
 | `ALLOW_UNVERIFIED` | **variable** | aramayla dogrulanamayan en fazla kac iddia kabul, 0-5, varsayilan 1 |
 | `INSTAGRAM_USER_ID` | secret | Instagram Reels yukleme (hesap numarasi) |
-| `INSTAGRAM_TOKEN` | secret | uzun omurlu Instagram token'i (60 gun; haftalik otomatik yenilenir) |
+| `INSTAGRAM_TOKEN` | secret | Instagram token'i. `IGAA...` ise 60 gun yasar, haftalik otomatik yenilenir; `EAA...` (yeni uygulamalarda Meta'nin verdigi "Unified login" / sistem-kullanici token'i) ise graph.facebook.com kullanilir ve yenilenmez (kod turu token'in basindan anlar) |
 | `TIKTOK_CLIENT_KEY` | secret | TikTok uygulamasi |
 | `TIKTOK_CLIENT_SECRET` | secret | TikTok uygulamasi |
 | `TIKTOK_REFRESH_TOKEN` | secret | `python tools/tiktok_login.py` verir (365 gun; her kullanimda yenilenir) |
@@ -410,10 +410,12 @@ olur, dosya gercekten inene kadar bekler. Sonra konteyner olusur, Meta isleyene
 kadar durum sorgulanir, `media_publish` ile yayinlanir.
 
 Kurulum (bir kerelik): 1) hesabi Professional'a cevir, 2) developers.facebook.com'da
-uygulama > Instagram urunu > hesabini ekle > uzun omurlu token uret,
+uygulama > Instagram urunu > hesabini ekle (hesaba once Roles'ten Instagram Test
+Kullanicisi rolu ver ve daveti Instagram'dan kabul et) > Generate token,
 3) `INSTAGRAM_USER_ID` ve `INSTAGRAM_TOKEN` secret'lari, 4) Actions >
 **media-init** calistir (bos `media` dalini kurar), 5) Settings > Pages >
-Source: `media` dali, kok klasor. Kontrol: `python -m publish.instagram --check`.
+Source: `media` dali, kok klasor. Kontrol: `INSTAGRAM_TOKEN=... INSTAGRAM_USER_ID=... python publish/instagram.py --check`
+(`EAA` token'da `INSTAGRAM_USER_ID` zorunlu; yayin izni de okunarak sinanir, hicbir sey yayinlanmaz).
 
 **TikTok** (resmi Content Posting API, *inbox upload*). Denetimsiz uygulamalar
 dogrudan yayinlayamiyor; video hesabinin **gelen kutusuna taslak** olarak
@@ -456,7 +458,7 @@ yaparken ikisini de guncelle ya da `cp ci/*.yml .github/workflows/`.
 | "konu uret" uzun suruyor | Gemini modelleri 503 (asiri yuklu) ya da zaman asimi veriyor | saglikli kosu 2-4 dk. Bozuk model: hic cevap vermemis modele ilk istek 45 sn, zaman asiminda hemen sonrakine; 503'te 2 tekrar; 5 dk dinlenir (sonraki roller ona gitmez); tum Gemini asamasi 10 dk (`GEMINI_DEADLINE`), adim 12 dk. Dolunca "BUGUN VIDEO YOK" ile kirmizi biter. Hizli cozum: gemini-check'in saglikli dedigi bir modeli `GEMINI_MODEL` olarak sabitle |
 | Gemini 429 | kota/hiz siniri | log nedenini yazar: "bu anahtarda kotasi yok" ve "gunluk kota" modeli hemen eler, "hiz siniri" Google'in istedigi sure kadar bekler (en fazla 65 sn, toplam `GEMINI_WAIT_BUDGET` = 240 sn). Hicbir model cevap vermezse log sonunda her modelin nedeni tek satirda |
 | Instagram adimi uyari verdi, "hazir olmadi / ERROR" | Meta videoyu isleyemedi ya da Pages adresi henuz acik degil | `media-init` calisti mi, Pages `media` dalinda mi; video 1080x1920 H.264 mp4. Elle: `python -m publish.instagram out/<id>/manifest.json --video-url <adres>` |
-| Instagram "Invalid OAuth / token" | token suresi doldu ya da yenilenemedi | Meta panelinden yeni uzun omurlu token uret, `INSTAGRAM_TOKEN` guncelle; `GH_PAT` kur ki bir daha olmasin |
+| Instagram "Invalid OAuth / token" | token suresi doldu ya da yenilenemedi (`EAA` token'da: bozuk kopyalama ya da yanlis adres) | Meta panelinden yeni token uret, `INSTAGRAM_TOKEN` guncelle; `IGAA` token'da `GH_PAT` kur ki bir daha olmasin. "Cannot parse access token" = token bozuk ya da farkli turde (`IG_HOST=facebook` ile zorlanir) |
 | TikTok "scope_not_authorized" | uygulamada `video.upload` yok | portalda Content Posting API'yi ekle, `tiktok_login.py`'yi tekrar calistir |
 | TikTok "invalid_grant" | refresh token iptal / degismis | `tiktok_login.py`'yi tekrar calistir, secret'i guncelle |
 | Actions uyarisi "Klon ses yok" | bu senaryonun sesi R2'de yok | Colab defterini calistir (`HOW_MANY`'yi artir); ses yokken Piper ile uretildi. Hep klon istiyorsan `voice_clone.require=true` |
