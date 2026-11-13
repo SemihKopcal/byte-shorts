@@ -308,8 +308,15 @@ jobs:
           git config user.email "byte-bot@users.noreply.github.com"
           git add -A content
           git diff --cached --quiet || git commit -m "daily: $(basename "${SCRIPT:-rejected}")"
-          git pull --rebase --autostash
-          git push
+          # GitHub ara sira "Internal Server Error" (500) donuyor; tek denemede pes etme.
+          # Her denemede once rebase: bu arada baska bir push olmus olabilir.
+          ok=0
+          for i in 1 2 3 4 5; do
+            if git pull --rebase --autostash && git push; then ok=1; break; fi
+            echo "::warning title=git push::deneme $i/5 olmadi, ${i}0 sn sonra tekrar"
+            sleep $((i * 10))
+          done
+          if [ "$ok" != "1" ]; then echo "::error title=git push::5 denemede de push edilemedi"; exit 1; fi
 
       # retention-days: ucretsiz hesapta artifact kotasi 500 MB. Video ~39 MB,
       # gunde 2 tane, 2 gun saklaniyor (~156 MB). Kalici kopya zaten release'te.

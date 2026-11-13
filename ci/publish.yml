@@ -127,5 +127,12 @@ jobs:
           git diff --cached --quiet || git commit -m "publish: $SCRIPT_INPUT"
           # Kosu surerken baska bir push olmus olabilir; rebase etmeden
           # push reddediliyor ve video yuklendigi halde adim kirmizi yaniyor.
-          git pull --rebase --autostash
-          git push
+          # GitHub ara sira "Internal Server Error" (500) donuyor; tek denemede pes etme.
+          # Her denemede once rebase: bu arada baska bir push olmus olabilir.
+          ok=0
+          for i in 1 2 3 4 5; do
+            if git pull --rebase --autostash && git push; then ok=1; break; fi
+            echo "::warning title=git push::deneme $i/5 olmadi, ${i}0 sn sonra tekrar"
+            sleep $((i * 10))
+          done
+          if [ "$ok" != "1" ]; then echo "::error title=git push::5 denemede de push edilemedi"; exit 1; fi
