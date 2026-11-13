@@ -5,12 +5,14 @@ dosya karistirma, olay zamanlari ve brand anahtari.
     python -m unittest tests.test_sfx -v
 """
 import json
+import os
 import tempfile
 import unittest
 import wave
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
+REQUIRED = os.environ.get("REQUIRE_RENDER_DEPS") == "1"
 
 try:
     import numpy as np
@@ -20,6 +22,13 @@ try:
     _OK, _WHY = True, ""
 except Exception as e:                 # noqa: BLE001
     _OK, _WHY = False, str(e)
+
+try:                                   # Toon (olay zamanlari) fontsuz kurulamaz: check.yml runner'inda font yok
+    from worker import draw as D
+    D.F_DISP(20)
+    _FONTS = True
+except Exception:                      # noqa: BLE001
+    _FONTS = False
 
 
 def write_wav(path, x, sr=48000, ch=2):
@@ -164,7 +173,7 @@ class Settings(unittest.TestCase):
         self.assertTrue(0.0 <= raw["sfx_gain"] <= SFX.GAIN_MAX)
 
 
-@unittest.skipUnless(_OK, f"bagimliliklar yok: {_WHY if not _OK else ''}")
+@unittest.skipUnless((_OK and _FONTS) or REQUIRED, "render bagimliliklari ya da font yok")
 class Events(unittest.TestCase):
     def toon(self):
         paths = sorted((ROOT / "content" / "scripts").glob("p04*.json"))
