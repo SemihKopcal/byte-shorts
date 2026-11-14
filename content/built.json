@@ -14,5 +14,6 @@
  "p012-one-token-four-characters",
  "p016-seven-billion-parameters-memory",
  "p034-ascii-128",
- "p035-kilobyte-gap-grows"
+ "p035-kilobyte-gap-grows",
+ "p020-4k-is-four-1080p"
 ]
